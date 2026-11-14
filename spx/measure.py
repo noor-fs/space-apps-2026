@@ -330,6 +330,27 @@ def position_floor(measurements):
     return robust_sigma(residuals[:, 0]), robust_sigma(residuals[:, 1])
 
 
+# Positions within one visit share part of their error: reference stars' mean residual shifts by
+# ~0.02 px from visit to visit (Eps Indi B 0.017/0.016, Barnard's Star 0.021/0.031, RW Aur 0.025/0.007).
+# Used when fewer than MIN_FLOOR_VISITS visits have reference stars to measure it.
+DEFAULT_VISIT_FLOOR_PX = (0.02, 0.02)
+MIN_FLOOR_VISITS = 3
+
+
+def visit_shared_floor(measurements, visit_numbers):
+    """(x, y) px error shared by all positions in one visit, which averaging frames can't reduce:
+    scatter between visits of the reference stars' mean residual (DEFAULT_VISIT_FLOOR_PX if too
+    few visits to measure it)."""
+    means = []
+    for n in np.unique(visit_numbers):
+        residuals = [r for m, v in zip(measurements, visit_numbers) if v == n for r in m.reference_residuals]
+        if residuals:
+            means.append(np.mean(residuals, axis=0))
+    if len(means) < MIN_FLOOR_VISITS:
+        return DEFAULT_VISIT_FLOOR_PX
+    return tuple(float(s) for s in np.std(means, axis=0, ddof=1))
+
+
 def frame_position_error(measurement, floor):
     """Fit error and field-star floor added in quadrature, per axis."""
     return tuple(float(np.hypot(e, f)) for e, f in zip(measurement.measured_fit_err, floor))

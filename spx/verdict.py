@@ -2,7 +2,9 @@
 
 Motion: a straight line through the measured positions over time, in RA and Dec separately,
 after removing the parallax wobble the catalog predicts. Errors per frame are the fit error plus
-the field-star floor (measure.position_floor).
+the field-star floor (measure.position_floor). Frames of one visit also share an error
+(measure.visit_shared_floor), so the fit treats them as correlated: more frames per visit don't
+make the motion more certain than the number of visits allows.
 
 Brightness: frames are at different wavelengths, so raw fluxes mix color with change. The model
 is log(flux) = wavelength-bin effect + visit effect. The bin effects absorb the spectrum; the
@@ -17,7 +19,7 @@ from astropy.time import Time
 from scipy import stats
 
 from spx.field import CENTER_DATE, PIXEL_SCALE_ARCSEC
-from spx.measure import apparent_positions, frame_position_error, position_floor, robust_sigma
+from spx.measure import apparent_positions, frame_position_error, position_floor, robust_sigma, visit_shared_floor
 from spx.visits import visit_of
 
 THREE_SIGMA_P = 0.0027  # two-sided p-value of a 3-sigma result
@@ -66,22 +68,23 @@ class MotionFit:
         return self.catalog_chi2 is not None and stats.chi2.sf(self.catalog_chi2, 2) >= THREE_SIGMA_P
 
 
-def measure_motion(frame_measurements, stack_measurements, field, target):
+def measure_motion(frame_measurements, stack_measurements, field, target, ranges):
     """Motion from single frames; from visit stacks when frames can't constrain it.
 
     Returns (MotionFit or None, "frames" or "stacks"). Each set uses its own position floor
     (reference stars measured the same way). stack_measurements may be None (not built yet).
+    ranges: visits.visit_ranges of all frames found.
     """
-    from_frames = fit_motion(frame_measurements, field, target, position_floor(frame_measurements))
+    from_frames = fit_motion(frame_measurements, field, target, position_floor(frame_measurements), ranges)
     if (from_frames is not None and from_frames.constrained) or not stack_measurements:
         return from_frames, "frames"
-    from_stacks = fit_motion(stack_measurements, field, target, position_floor(stack_measurements))
+    from_stacks = fit_motion(stack_measurements, field, target, position_floor(stack_measurements), ranges)
     if from_stacks is not None and (from_frames is None or from_stacks.constrained):
         return from_stacks, "stacks"
     return from_frames, "frames"
 
 
-def fit_motion(measurements, field, target, floor):
+def fit_motion(measurements, field, target, floor, ranges):
     """Proper motion from the measured positions; None if fewer than MIN_FRAMES are measured."""
     used = [m for m in measurements if m.measured is not None]
     if len(used) < MIN_FRAMES or floor is None:
@@ -95,11 +98,13 @@ def fit_motion(measurements, field, target, floor):
         offsets -= _parallax_shift(field, target.parallax, when)
     # Grid x runs along -RA and y along Dec, and grid pixels are PIXEL_SCALE_ARCSEC wide
     errors = np.array([frame_position_error(m, floor) for m in used]) * PIXEL_SCALE_ARCSEC
+    visits = visit_of([m.mjd for m in used], ranges)
+    shared = np.array(visit_shared_floor(used, visits)) * PIXEL_SCALE_ARCSEC
     years = (when - Time(CENTER_DATE)).to_value(u.yr)
 
     keep = np.ones(len(used), bool)
     for _ in range(5):
-        fits = [_line(years[keep], offsets[keep, a], errors[keep, a]) for a in (0, 1)]
+        fits = [_line(years[keep], offsets[keep, a], errors[keep, a], visits[keep], shared[a]) for a in (0, 1)]
         outliers = np.zeros(len(used), bool)
         for axis, (beta, cov, scale) in enumerate(fits):
             predicted = beta[0] + beta[1] * years
@@ -119,15 +124,19 @@ def fit_motion(measurements, field, target, floor):
                      float(np.sum((pm / pm_err) ** 2)), catalog_chi2)
 
 
-def _line(t, y, sigma):
-    """Weighted straight-line fit. Errors are scaled up when the scatter exceeds them
-    (reduced chi-square > 1): the line is then a worse description than the errors claim."""
+def _line(t, y, sigma, groups, shared):
+    """Straight-line fit by generalized least squares: each point has its own error sigma, and
+    points in the same group (visit) also share an error `shared`, so their errors are correlated.
+    Errors are scaled up when the scatter exceeds them (reduced chi-square > 1): the line is then
+    a worse description than the errors claim."""
     design = np.column_stack([np.ones_like(t), t])
-    w = 1 / sigma ** 2
-    cov = np.linalg.inv(design.T @ (design * w[:, None]))
-    beta = cov @ design.T @ (w * y)
+    same_group = groups[:, None] == groups[None, :]
+    inverse = np.linalg.inv(np.diag(sigma ** 2) + shared ** 2 * same_group)
+    cov = np.linalg.inv(design.T @ inverse @ design)
+    beta = cov @ design.T @ inverse @ y
+    residual = y - design @ beta
     dof = max(len(y) - 2, 1)
-    scale = max(1.0, np.sqrt(np.sum(w * (y - design @ beta) ** 2) / dof))
+    scale = max(1.0, np.sqrt(residual @ inverse @ residual / dof))
     return beta, cov * scale ** 2, scale
 
 
