@@ -30,7 +30,8 @@ space-apps-2026/
 ├── results/                Yara T   measurements and checks behind the numbers
 │
 ├── catalogs/               Amna     code that queries Gaia, SIMBAD, VSX, JPL, spectra (proposed)
-├── site/                   Yara K   the website (proposed)
+├── site/                   Yara K   the website (HTML, JS, CSS) and the fake-data script
+├── fake_data/              Yara K   fake test files; the site uses them only where data/ has no real file yet
 │
 └── data/                   everyone  the files the website reads (each file has one owner, below)
 ```
@@ -47,6 +48,7 @@ space-apps-2026/
 | `results/<target_key>/` | Yara T | Measurement tables (positions, brightness, saturation checks), run logs, diagnostic plots. Lets anyone check where a number in the manifest came from | Files the website reads |
 | `catalogs/` | Amna | Code and notes for the overlay, explanation, credits and spectra files | The output files themselves (they go in `data/`) |
 | `site/` | Yara K | HTML, JS, CSS, the fake-data script | Real data files |
+| `fake_data/` | Yara K | Fake test files in exactly the `data/` layout and format, made by `site/script.py` | Real data files |
 | `data/` | per file, see next table | Only the files listed in [[saturday_plan]], in exactly that format | Code, notes, intermediate files, anything not in the format |
 
 ## Who writes each file in `data/`
@@ -66,7 +68,7 @@ space-apps-2026/
 
 ### Fake files
 
-Yara K's fake files go in `data/` under the real names, so the site never needs a code change. When the owner commits the real file, it replaces the fake one, and from then on only the owner edits it. Fake-only test targets (e.g. a saturated test case) use a key starting with `fake_`, e.g. `data/fake_saturated/`, so they can never be confused with a real target.
+Yara K's fake files live in `fake_data/`, in exactly the same layout and format as `data/`. The site reads `data/` first and falls back to `fake_data/` only where no real file exists, so `data/` holds real files only and the site never needs a code change: when the owner commits the real file to `data/`, it takes over automatically. Image files (`fields.json` and the `fov<S>/` folders) are taken per target from one folder, so a real manifest is never mixed with fake images; the site labels fake images "FAKE TEST IMAGES". Fake-only test targets (e.g. a saturated test case) use a key starting with `fake_`, e.g. `fake_data/fake_saturated/`, so they can never be confused with a real target.
 
 ## Still open
 

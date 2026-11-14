@@ -1,0 +1,952 @@
+{
+  "target_key": "fake_saturated",
+  "name": "Fake: saturated star",
+  "grid": {
+    "center_ra": 269.446268,
+    "center_dec": 4.768204,
+    "center_date": "2026-01-01",
+    "pixel_scale_arcsec": 6.15,
+    "size_px": 51
+  },
+  "visits": [
+    {
+      "n": 1,
+      "image": "visit_1.png",
+      "image_rgb": "visit_1_rgb.png",
+      "data": "visit_1.f32",
+      "date_start": "2025-04-19",
+      "date_end": "2025-04-23",
+      "date_mid": "2025-04-21",
+      "n_images": 10,
+      "wavelength_um": [
+        0.75,
+        5.0
+      ],
+      "target_expected_px": [
+        24.91,
+        26.17
+      ],
+      "target_measured_px": null,
+      "target_measured_err_px": null,
+      "saturated": true,
+      "frames": [
+        {
+          "i": 1,
+          "image": "frames/v1_1.png",
+          "time": "2025-04-19T00:00:04Z",
+          "detector": 3,
+          "wavelength_um": 1.701,
+          "target_expected_px": [
+            24.91,
+            26.18
+          ],
+          "target_measured_px": null,
+          "target_measured_err_px": null,
+          "saturated": true,
+          "bad_pixel_fraction": 0.011,
+          "target_flux_mjy": null,
+          "target_flux_err_mjy": null,
+          "data": "frames/v1_1.f32",
+          "flags": "frames/v1_1_flags.png",
+          "archive_url": "https://irsa.ipac.caltech.edu/FAKE/fake_saturated/v1_1.fits"
+        },
+        {
+          "i": 2,
+          "image": "frames/v1_2.png",
+          "time": "2025-04-19T09:40:50Z",
+          "detector": 1,
+          "wavelength_um": 0.835,
+          "target_expected_px": [
+            24.91,
+            26.18
+          ],
+          "target_measured_px": null,
+          "target_measured_err_px": null,
+          "saturated": true,
+          "bad_pixel_fraction": 0.013,
+          "target_flux_mjy": null,
+          "target_flux_err_mjy": null,
+          "data": "frames/v1_2.f32",
+          "flags": "frames/v1_2_flags.png",
+          "archive_url": "https://irsa.ipac.caltech.edu/FAKE/fake_saturated/v1_2.fits"
+        },
+        {
+          "i": 3,
+          "image": "frames/v1_3.png",
+          "time": "2025-04-19T20:07:28Z",
+          "detector": 4,
+          "wavelength_um": 3.405,
+          "target_expected_px": [
+            24.91,
+            26.18
+          ],
+          "target_measured_px": null,
+          "target_measured_err_px": null,
+          "saturated": true,
+          "bad_pixel_fraction": 0.01,
+          "target_flux_mjy": null,
+          "target_flux_err_mjy": null,
+          "data": "frames/v1_3.f32",
+          "flags": "frames/v1_3_flags.png",
+          "archive_url": "https://irsa.ipac.caltech.edu/FAKE/fake_saturated/v1_3.fits"
+        },
+        {
+          "i": 4,
+          "image": "frames/v1_4.png",
+          "time": "2025-04-20T06:46:02Z",
+          "detector": 3,
+          "wavelength_um": 2.348,
+          "target_expected_px": [
+            24.91,
+            26.18
+          ],
+          "target_measured_px": null,
+          "target_measured_err_px": null,
+          "saturated": true,
+          "bad_pixel_fraction": 0.011,
+          "target_flux_mjy": null,
+          "target_flux_err_mjy": null,
+          "data": "frames/v1_4.f32",
+          "flags": "frames/v1_4_flags.png",
+          "archive_url": "https://irsa.ipac.caltech.edu/FAKE/fake_saturated/v1_4.fits"
+        },
+        {
+          "i": 5,
+          "image": "frames/v1_5.png",
+          "time": "2025-04-20T12:50:04Z",
+          "detector": 5,
+          "wavelength_um": 3.982,
+          "target_expected_px": [
+            24.91,
+            26.18
+          ],
+          "target_measured_px": null,
+          "target_measured_err_px": null,
+          "saturated": true,
+          "bad_pixel_fraction": 0.008,
+          "target_flux_mjy": null,
+          "target_flux_err_mjy": null,
+          "data": "frames/v1_5.f32",
+          "flags": "frames/v1_5_flags.png",
+          "archive_url": "https://irsa.ipac.caltech.edu/FAKE/fake_saturated/v1_5.fits"
+        },
+        {
+          "i": 6,
+          "image": "frames/v1_6.png",
+          "time": "2025-04-20T19:23:27Z",
+          "detector": 2,
+          "wavelength_um": 1.408,
+          "target_expected_px": [
+            24.91,
+            26.17
+          ],
+          "target_measured_px": null,
+          "target_measured_err_px": null,
+          "saturated": true,
+          "bad_pixel_fraction": 0.011,
+          "target_flux_mjy": null,
+          "target_flux_err_mjy": null,
+          "data": "frames/v1_6.f32",
+          "flags": "frames/v1_6_flags.png",
+          "archive_url": "https://irsa.ipac.caltech.edu/FAKE/fake_saturated/v1_6.fits"
+        },
+        {
+          "i": 7,
+          "image": "frames/v1_7.png",
+          "time": "2025-04-20T20:03:42Z",
+          "detector": 4,
+          "wavelength_um": 3.015,
+          "target_expected_px": [
+            24.91,
+            26.17
+          ],
+          "target_measured_px": null,
+          "target_measured_err_px": null,
+          "saturated": true,
+          "bad_pixel_fraction": 0.012,
+          "target_flux_mjy": null,
+          "target_flux_err_mjy": null,
+          "data": "frames/v1_7.f32",
+          "flags": "frames/v1_7_flags.png",
+          "archive_url": "https://irsa.ipac.caltech.edu/FAKE/fake_saturated/v1_7.fits"
+        },
+        {
+          "i": 8,
+          "image": "frames/v1_8.png",
+          "time": "2025-04-21T17:31:25Z",
+          "detector": 5,
+          "wavelength_um": 4.256,
+          "target_expected_px": [
+            24.91,
+            26.17
+          ],
+          "target_measured_px": null,
+          "target_measured_err_px": null,
+          "saturated": true,
+          "bad_pixel_fraction": 0.012,
+          "target_flux_mjy": null,
+          "target_flux_err_mjy": null,
+          "data": "frames/v1_8.f32",
+          "flags": "frames/v1_8_flags.png",
+          "archive_url": "https://irsa.ipac.caltech.edu/FAKE/fake_saturated/v1_8.fits"
+        },
+        {
+          "i": 9,
+          "image": "frames/v1_9.png",
+          "time": "2025-04-22T13:58:35Z",
+          "detector": 6,
+          "wavelength_um": 4.788,
+          "target_expected_px": [
+            24.91,
+            26.17
+          ],
+          "target_measured_px": null,
+          "target_measured_err_px": null,
+          "saturated": true,
+          "bad_pixel_fraction": 0.012,
+          "target_flux_mjy": null,
+          "target_flux_err_mjy": null,
+          "data": "frames/v1_9.f32",
+          "flags": "frames/v1_9_flags.png",
+          "archive_url": "https://irsa.ipac.caltech.edu/FAKE/fake_saturated/v1_9.fits"
+        },
+        {
+          "i": 10,
+          "image": "frames/v1_10.png",
+          "time": "2025-04-23T11:18:52Z",
+          "detector": 3,
+          "wavelength_um": 2.036,
+          "target_expected_px": [
+            24.91,
+            26.16
+          ],
+          "target_measured_px": null,
+          "target_measured_err_px": null,
+          "saturated": true,
+          "bad_pixel_fraction": 0.01,
+          "target_flux_mjy": null,
+          "target_flux_err_mjy": null,
+          "data": "frames/v1_10.f32",
+          "flags": "frames/v1_10_flags.png",
+          "archive_url": "https://irsa.ipac.caltech.edu/FAKE/fake_saturated/v1_10.fits"
+        }
+      ]
+    },
+    {
+      "n": 2,
+      "image": "visit_2.png",
+      "image_rgb": "visit_2_rgb.png",
+      "data": "visit_2.f32",
+      "date_start": "2025-10-17",
+      "date_end": "2025-10-22",
+      "date_mid": "2025-10-20",
+      "n_images": 11,
+      "wavelength_um": [
+        0.75,
+        5.0
+      ],
+      "target_expected_px": [
+        24.97,
+        25.33
+      ],
+      "target_measured_px": null,
+      "target_measured_err_px": null,
+      "saturated": true,
+      "frames": [
+        {
+          "i": 1,
+          "image": "frames/v2_1.png",
+          "time": "2025-10-17T17:34:59Z",
+          "detector": 6,
+          "wavelength_um": 4.591,
+          "target_expected_px": [
+            24.97,
+            25.34
+          ],
+          "target_measured_px": null,
+          "target_measured_err_px": null,
+          "saturated": true,
+          "bad_pixel_fraction": 0.012,
+          "target_flux_mjy": null,
+          "target_flux_err_mjy": null,
+          "data": "frames/v2_1.f32",
+          "flags": "frames/v2_1_flags.png",
+          "archive_url": "https://irsa.ipac.caltech.edu/FAKE/fake_saturated/v2_1.fits"
+        },
+        {
+          "i": 2,
+          "image": "frames/v2_2.png",
+          "time": "2025-10-18T19:28:31Z",
+          "detector": 1,
+          "wavelength_um": 0.965,
+          "target_expected_px": [
+            24.97,
+            25.34
+          ],
+          "target_measured_px": null,
+          "target_measured_err_px": null,
+          "saturated": true,
+          "bad_pixel_fraction": 0.013,
+          "target_flux_mjy": null,
+          "target_flux_err_mjy": null,
+          "data": "frames/v2_2.f32",
+          "flags": "frames/v2_2_flags.png",
+          "archive_url": "https://irsa.ipac.caltech.edu/FAKE/fake_saturated/v2_2.fits"
+        },
+        {
+          "i": 3,
+          "image": "frames/v2_3.png",
+          "time": "2025-10-19T01:44:29Z",
+          "detector": 4,
+          "wavelength_um": 3.011,
+          "target_expected_px": [
+            24.97,
+            25.34
+          ],
+          "target_measured_px": null,
+          "target_measured_err_px": null,
+          "saturated": true,
+          "bad_pixel_fraction": 0.009,
+          "target_flux_mjy": null,
+          "target_flux_err_mjy": null,
+          "data": "frames/v2_3.f32",
+          "flags": "frames/v2_3_flags.png",
+          "archive_url": "https://irsa.ipac.caltech.edu/FAKE/fake_saturated/v2_3.fits"
+        },
+        {
+          "i": 4,
+          "image": "frames/v2_4.png",
+          "time": "2025-10-20T07:50:01Z",
+          "detector": 2,
+          "wavelength_um": 1.214,
+          "target_expected_px": [
+            24.97,
+            25.33
+          ],
+          "target_measured_px": null,
+          "target_measured_err_px": null,
+          "saturated": true,
+          "bad_pixel_fraction": 0.012,
+          "target_flux_mjy": null,
+          "target_flux_err_mjy": null,
+          "data": "frames/v2_4.f32",
+          "flags": "frames/v2_4_flags.png",
+          "archive_url": "https://irsa.ipac.caltech.edu/FAKE/fake_saturated/v2_4.fits"
+        },
+        {
+          "i": 5,
+          "image": "frames/v2_5.png",
+          "time": "2025-10-20T08:41:31Z",
+          "detector": 3,
+          "wavelength_um": 2.272,
+          "target_expected_px": [
+            24.97,
+            25.33
+          ],
+          "target_measured_px": null,
+          "target_measured_err_px": null,
+          "saturated": true,
+          "bad_pixel_fraction": 0.012,
+          "target_flux_mjy": null,
+          "target_flux_err_mjy": null,
+          "data": "frames/v2_5.f32",
+          "flags": "frames/v2_5_flags.png",
+          "archive_url": "https://irsa.ipac.caltech.edu/FAKE/fake_saturated/v2_5.fits"
+        },
+        {
+          "i": 6,
+          "image": "frames/v2_6.png",
+          "time": "2025-10-20T21:48:43Z",
+          "detector": 4,
+          "wavelength_um": 3.396,
+          "target_expected_px": [
+            24.97,
+            25.33
+          ],
+          "target_measured_px": null,
+          "target_measured_err_px": null,
+          "saturated": true,
+          "bad_pixel_fraction": 0.012,
+          "target_flux_mjy": null,
+          "target_flux_err_mjy": null,
+          "data": "frames/v2_6.f32",
+          "flags": "frames/v2_6_flags.png",
+          "archive_url": "https://irsa.ipac.caltech.edu/FAKE/fake_saturated/v2_6.fits"
+        },
+        {
+          "i": 7,
+          "image": "frames/v2_7.png",
+          "time": "2025-10-21T03:27:27Z",
+          "detector": 3,
+          "wavelength_um": 2.015,
+          "target_expected_px": [
+            24.97,
+            25.33
+          ],
+          "target_measured_px": null,
+          "target_measured_err_px": null,
+          "saturated": true,
+          "bad_pixel_fraction": 0.01,
+          "target_flux_mjy": null,
+          "target_flux_err_mjy": null,
+          "data": "frames/v2_7.f32",
+          "flags": "frames/v2_7_flags.png",
+          "archive_url": "https://irsa.ipac.caltech.edu/FAKE/fake_saturated/v2_7.fits"
+        },
+        {
+          "i": 8,
+          "image": "frames/v2_8.png",
+          "time": "2025-10-21T03:28:44Z",
+          "detector": 1,
+          "wavelength_um": 0.832,
+          "target_expected_px": [
+            24.97,
+            25.33
+          ],
+          "target_measured_px": null,
+          "target_measured_err_px": null,
+          "saturated": true,
+          "bad_pixel_fraction": 0.013,
+          "target_flux_mjy": null,
+          "target_flux_err_mjy": null,
+          "data": "frames/v2_8.f32",
+          "flags": "frames/v2_8_flags.png",
+          "archive_url": "https://irsa.ipac.caltech.edu/FAKE/fake_saturated/v2_8.fits"
+        },
+        {
+          "i": 9,
+          "image": "frames/v2_9.png",
+          "time": "2025-10-21T06:27:12Z",
+          "detector": 5,
+          "wavelength_um": 3.922,
+          "target_expected_px": [
+            24.97,
+            25.33
+          ],
+          "target_measured_px": null,
+          "target_measured_err_px": null,
+          "saturated": true,
+          "bad_pixel_fraction": 0.013,
+          "target_flux_mjy": null,
+          "target_flux_err_mjy": null,
+          "data": "frames/v2_9.f32",
+          "flags": "frames/v2_9_flags.png",
+          "archive_url": "https://irsa.ipac.caltech.edu/FAKE/fake_saturated/v2_9.fits"
+        },
+        {
+          "i": 10,
+          "image": "frames/v2_10.png",
+          "time": "2025-10-22T01:47:44Z",
+          "detector": 6,
+          "wavelength_um": 4.785,
+          "target_expected_px": [
+            24.97,
+            25.32
+          ],
+          "target_measured_px": null,
+          "target_measured_err_px": null,
+          "saturated": true,
+          "bad_pixel_fraction": 0.011,
+          "target_flux_mjy": null,
+          "target_flux_err_mjy": null,
+          "data": "frames/v2_10.f32",
+          "flags": "frames/v2_10_flags.png",
+          "archive_url": "https://irsa.ipac.caltech.edu/FAKE/fake_saturated/v2_10.fits"
+        },
+        {
+          "i": 11,
+          "image": "frames/v2_11.png",
+          "time": "2025-10-22T11:52:08Z",
+          "detector": 1,
+          "wavelength_um": 0.996,
+          "target_expected_px": [
+            24.97,
+            25.32
+          ],
+          "target_measured_px": null,
+          "target_measured_err_px": null,
+          "saturated": true,
+          "bad_pixel_fraction": 0.011,
+          "target_flux_mjy": null,
+          "target_flux_err_mjy": null,
+          "data": "frames/v2_11.f32",
+          "flags": "frames/v2_11_flags.png",
+          "archive_url": "https://irsa.ipac.caltech.edu/FAKE/fake_saturated/v2_11.fits"
+        }
+      ]
+    },
+    {
+      "n": 3,
+      "image": "visit_3.png",
+      "image_rgb": "visit_3_rgb.png",
+      "data": "visit_3.f32",
+      "date_start": "2026-04-19",
+      "date_end": "2026-04-24",
+      "date_mid": "2026-04-22",
+      "n_images": 11,
+      "wavelength_um": [
+        0.75,
+        5.0
+      ],
+      "target_expected_px": [
+        25.04,
+        24.48
+      ],
+      "target_measured_px": null,
+      "target_measured_err_px": null,
+      "saturated": true,
+      "frames": [
+        {
+          "i": 1,
+          "image": "frames/v3_1.png",
+          "time": "2026-04-19T11:41:59Z",
+          "detector": 3,
+          "wavelength_um": 2.287,
+          "target_expected_px": [
+            25.04,
+            24.5
+          ],
+          "target_measured_px": null,
+          "target_measured_err_px": null,
+          "saturated": true,
+          "bad_pixel_fraction": 0.011,
+          "target_flux_mjy": null,
+          "target_flux_err_mjy": null,
+          "data": "frames/v3_1.f32",
+          "flags": "frames/v3_1_flags.png",
+          "archive_url": "https://irsa.ipac.caltech.edu/FAKE/fake_saturated/v3_1.fits"
+        },
+        {
+          "i": 2,
+          "image": "frames/v3_2.png",
+          "time": "2026-04-20T02:21:23Z",
+          "detector": 1,
+          "wavelength_um": 0.95,
+          "target_expected_px": [
+            25.04,
+            24.49
+          ],
+          "target_measured_px": null,
+          "target_measured_err_px": null,
+          "saturated": true,
+          "bad_pixel_fraction": 0.012,
+          "target_flux_mjy": null,
+          "target_flux_err_mjy": null,
+          "data": "frames/v3_2.f32",
+          "flags": "frames/v3_2_flags.png",
+          "archive_url": "https://irsa.ipac.caltech.edu/FAKE/fake_saturated/v3_2.fits"
+        },
+        {
+          "i": 3,
+          "image": "frames/v3_3.png",
+          "time": "2026-04-20T19:03:08Z",
+          "detector": 5,
+          "wavelength_um": 4.237,
+          "target_expected_px": [
+            25.04,
+            24.49
+          ],
+          "target_measured_px": null,
+          "target_measured_err_px": null,
+          "saturated": true,
+          "bad_pixel_fraction": 0.01,
+          "target_flux_mjy": null,
+          "target_flux_err_mjy": null,
+          "data": "frames/v3_3.f32",
+          "flags": "frames/v3_3_flags.png",
+          "archive_url": "https://irsa.ipac.caltech.edu/FAKE/fake_saturated/v3_3.fits"
+        },
+        {
+          "i": 4,
+          "image": "frames/v3_4.png",
+          "time": "2026-04-21T01:24:06Z",
+          "detector": 3,
+          "wavelength_um": 1.711,
+          "target_expected_px": [
+            25.04,
+            24.49
+          ],
+          "target_measured_px": null,
+          "target_measured_err_px": null,
+          "saturated": true,
+          "bad_pixel_fraction": 0.012,
+          "target_flux_mjy": null,
+          "target_flux_err_mjy": null,
+          "data": "frames/v3_4.f32",
+          "flags": "frames/v3_4_flags.png",
+          "archive_url": "https://irsa.ipac.caltech.edu/FAKE/fake_saturated/v3_4.fits"
+        },
+        {
+          "i": 5,
+          "image": "frames/v3_5.png",
+          "time": "2026-04-21T05:06:43Z",
+          "detector": 6,
+          "wavelength_um": 4.566,
+          "target_expected_px": [
+            25.04,
+            24.49
+          ],
+          "target_measured_px": null,
+          "target_measured_err_px": null,
+          "saturated": true,
+          "bad_pixel_fraction": 0.011,
+          "target_flux_mjy": null,
+          "target_flux_err_mjy": null,
+          "data": "frames/v3_5.f32",
+          "flags": "frames/v3_5_flags.png",
+          "archive_url": "https://irsa.ipac.caltech.edu/FAKE/fake_saturated/v3_5.fits"
+        },
+        {
+          "i": 6,
+          "image": "frames/v3_6.png",
+          "time": "2026-04-21T06:01:30Z",
+          "detector": 4,
+          "wavelength_um": 2.888,
+          "target_expected_px": [
+            25.04,
+            24.49
+          ],
+          "target_measured_px": null,
+          "target_measured_err_px": null,
+          "saturated": true,
+          "bad_pixel_fraction": 0.012,
+          "target_flux_mjy": null,
+          "target_flux_err_mjy": null,
+          "data": "frames/v3_6.f32",
+          "flags": "frames/v3_6_flags.png",
+          "archive_url": "https://irsa.ipac.caltech.edu/FAKE/fake_saturated/v3_6.fits"
+        },
+        {
+          "i": 7,
+          "image": "frames/v3_7.png",
+          "time": "2026-04-22T08:23:28Z",
+          "detector": 2,
+          "wavelength_um": 1.435,
+          "target_expected_px": [
+            25.04,
+            24.48
+          ],
+          "target_measured_px": null,
+          "target_measured_err_px": null,
+          "saturated": true,
+          "bad_pixel_fraction": 0.012,
+          "target_flux_mjy": null,
+          "target_flux_err_mjy": null,
+          "data": "frames/v3_7.f32",
+          "flags": "frames/v3_7_flags.png",
+          "archive_url": "https://irsa.ipac.caltech.edu/FAKE/fake_saturated/v3_7.fits"
+        },
+        {
+          "i": 8,
+          "image": "frames/v3_8.png",
+          "time": "2026-04-23T06:47:32Z",
+          "detector": 1,
+          "wavelength_um": 1.006,
+          "target_expected_px": [
+            25.04,
+            24.48
+          ],
+          "target_measured_px": null,
+          "target_measured_err_px": null,
+          "saturated": true,
+          "bad_pixel_fraction": 0.013,
+          "target_flux_mjy": null,
+          "target_flux_err_mjy": null,
+          "data": "frames/v3_8.f32",
+          "flags": "frames/v3_8_flags.png",
+          "archive_url": "https://irsa.ipac.caltech.edu/FAKE/fake_saturated/v3_8.fits"
+        },
+        {
+          "i": 9,
+          "image": "frames/v3_9.png",
+          "time": "2026-04-23T15:39:34Z",
+          "detector": 4,
+          "wavelength_um": 2.986,
+          "target_expected_px": [
+            25.04,
+            24.48
+          ],
+          "target_measured_px": null,
+          "target_measured_err_px": null,
+          "saturated": true,
+          "bad_pixel_fraction": 0.014,
+          "target_flux_mjy": null,
+          "target_flux_err_mjy": null,
+          "data": "frames/v3_9.f32",
+          "flags": "frames/v3_9_flags.png",
+          "archive_url": "https://irsa.ipac.caltech.edu/FAKE/fake_saturated/v3_9.fits"
+        },
+        {
+          "i": 10,
+          "image": "frames/v3_10.png",
+          "time": "2026-04-23T18:26:25Z",
+          "detector": 5,
+          "wavelength_um": 3.93,
+          "target_expected_px": [
+            25.04,
+            24.48
+          ],
+          "target_measured_px": null,
+          "target_measured_err_px": null,
+          "saturated": true,
+          "bad_pixel_fraction": 0.012,
+          "target_flux_mjy": null,
+          "target_flux_err_mjy": null,
+          "data": "frames/v3_10.f32",
+          "flags": "frames/v3_10_flags.png",
+          "archive_url": "https://irsa.ipac.caltech.edu/FAKE/fake_saturated/v3_10.fits"
+        },
+        {
+          "i": 11,
+          "image": "frames/v3_11.png",
+          "time": "2026-04-24T23:18:48Z",
+          "detector": 2,
+          "wavelength_um": 1.196,
+          "target_expected_px": [
+            25.04,
+            24.47
+          ],
+          "target_measured_px": null,
+          "target_measured_err_px": null,
+          "saturated": true,
+          "bad_pixel_fraction": 0.015,
+          "target_flux_mjy": null,
+          "target_flux_err_mjy": null,
+          "data": "frames/v3_11.f32",
+          "flags": "frames/v3_11_flags.png",
+          "archive_url": "https://irsa.ipac.caltech.edu/FAKE/fake_saturated/v3_11.fits"
+        }
+      ]
+    },
+    {
+      "n": 4,
+      "image": "visit_4.png",
+      "image_rgb": "visit_4_rgb.png",
+      "data": "visit_4.f32",
+      "date_start": "2026-10-16",
+      "date_end": "2026-10-21",
+      "date_mid": "2026-10-19",
+      "n_images": 10,
+      "wavelength_um": [
+        0.75,
+        5.0
+      ],
+      "target_expected_px": [
+        25.1,
+        23.65
+      ],
+      "target_measured_px": null,
+      "target_measured_err_px": null,
+      "saturated": true,
+      "frames": [
+        {
+          "i": 1,
+          "image": "frames/v4_1.png",
+          "time": "2026-10-16T23:13:46Z",
+          "detector": 4,
+          "wavelength_um": 3.393,
+          "target_expected_px": [
+            25.1,
+            23.66
+          ],
+          "target_measured_px": null,
+          "target_measured_err_px": null,
+          "saturated": true,
+          "bad_pixel_fraction": 0.012,
+          "target_flux_mjy": null,
+          "target_flux_err_mjy": null,
+          "data": "frames/v4_1.f32",
+          "flags": "frames/v4_1_flags.png",
+          "archive_url": "https://irsa.ipac.caltech.edu/FAKE/fake_saturated/v4_1.fits"
+        },
+        {
+          "i": 2,
+          "image": "frames/v4_2.png",
+          "time": "2026-10-17T08:40:10Z",
+          "detector": 1,
+          "wavelength_um": 0.786,
+          "target_expected_px": [
+            25.1,
+            23.66
+          ],
+          "target_measured_px": null,
+          "target_measured_err_px": null,
+          "saturated": true,
+          "bad_pixel_fraction": 0.012,
+          "target_flux_mjy": null,
+          "target_flux_err_mjy": null,
+          "data": "frames/v4_2.f32",
+          "flags": "frames/v4_2_flags.png",
+          "archive_url": "https://irsa.ipac.caltech.edu/FAKE/fake_saturated/v4_2.fits"
+        },
+        {
+          "i": 3,
+          "image": "frames/v4_3.png",
+          "time": "2026-10-17T21:04:24Z",
+          "detector": 3,
+          "wavelength_um": 1.744,
+          "target_expected_px": [
+            25.1,
+            23.66
+          ],
+          "target_measured_px": null,
+          "target_measured_err_px": null,
+          "saturated": true,
+          "bad_pixel_fraction": 0.01,
+          "target_flux_mjy": null,
+          "target_flux_err_mjy": null,
+          "data": "frames/v4_3.f32",
+          "flags": "frames/v4_3_flags.png",
+          "archive_url": "https://irsa.ipac.caltech.edu/FAKE/fake_saturated/v4_3.fits"
+        },
+        {
+          "i": 4,
+          "image": "frames/v4_4.png",
+          "time": "2026-10-18T11:37:38Z",
+          "detector": 2,
+          "wavelength_um": 1.16,
+          "target_expected_px": [
+            25.1,
+            23.66
+          ],
+          "target_measured_px": null,
+          "target_measured_err_px": null,
+          "saturated": true,
+          "bad_pixel_fraction": 0.012,
+          "target_flux_mjy": null,
+          "target_flux_err_mjy": null,
+          "data": "frames/v4_4.f32",
+          "flags": "frames/v4_4_flags.png",
+          "archive_url": "https://irsa.ipac.caltech.edu/FAKE/fake_saturated/v4_4.fits"
+        },
+        {
+          "i": 5,
+          "image": "frames/v4_5.png",
+          "time": "2026-10-18T21:38:50Z",
+          "detector": 1,
+          "wavelength_um": 0.941,
+          "target_expected_px": [
+            25.1,
+            23.66
+          ],
+          "target_measured_px": null,
+          "target_measured_err_px": null,
+          "saturated": true,
+          "bad_pixel_fraction": 0.01,
+          "target_flux_mjy": null,
+          "target_flux_err_mjy": null,
+          "data": "frames/v4_5.f32",
+          "flags": "frames/v4_5_flags.png",
+          "archive_url": "https://irsa.ipac.caltech.edu/FAKE/fake_saturated/v4_5.fits"
+        },
+        {
+          "i": 6,
+          "image": "frames/v4_6.png",
+          "time": "2026-10-19T14:59:50Z",
+          "detector": 4,
+          "wavelength_um": 2.929,
+          "target_expected_px": [
+            25.1,
+            23.65
+          ],
+          "target_measured_px": null,
+          "target_measured_err_px": null,
+          "saturated": true,
+          "bad_pixel_fraction": 0.009,
+          "target_flux_mjy": null,
+          "target_flux_err_mjy": null,
+          "data": "frames/v4_6.f32",
+          "flags": "frames/v4_6_flags.png",
+          "archive_url": "https://irsa.ipac.caltech.edu/FAKE/fake_saturated/v4_6.fits"
+        },
+        {
+          "i": 7,
+          "image": "frames/v4_7.png",
+          "time": "2026-10-20T01:57:57Z",
+          "detector": 5,
+          "wavelength_um": 4.259,
+          "target_expected_px": [
+            25.1,
+            23.65
+          ],
+          "target_measured_px": null,
+          "target_measured_err_px": null,
+          "saturated": true,
+          "bad_pixel_fraction": 0.011,
+          "target_flux_mjy": null,
+          "target_flux_err_mjy": null,
+          "data": "frames/v4_7.f32",
+          "flags": "frames/v4_7_flags.png",
+          "archive_url": "https://irsa.ipac.caltech.edu/FAKE/fake_saturated/v4_7.fits"
+        },
+        {
+          "i": 8,
+          "image": "frames/v4_8.png",
+          "time": "2026-10-20T07:01:44Z",
+          "detector": 3,
+          "wavelength_um": 2.275,
+          "target_expected_px": [
+            25.1,
+            23.65
+          ],
+          "target_measured_px": null,
+          "target_measured_err_px": null,
+          "saturated": true,
+          "bad_pixel_fraction": 0.012,
+          "target_flux_mjy": null,
+          "target_flux_err_mjy": null,
+          "data": "frames/v4_8.f32",
+          "flags": "frames/v4_8_flags.png",
+          "archive_url": "https://irsa.ipac.caltech.edu/FAKE/fake_saturated/v4_8.fits"
+        },
+        {
+          "i": 9,
+          "image": "frames/v4_9.png",
+          "time": "2026-10-20T21:18:42Z",
+          "detector": 6,
+          "wavelength_um": 4.535,
+          "target_expected_px": [
+            25.1,
+            23.65
+          ],
+          "target_measured_px": null,
+          "target_measured_err_px": null,
+          "saturated": true,
+          "bad_pixel_fraction": 0.01,
+          "target_flux_mjy": null,
+          "target_flux_err_mjy": null,
+          "data": "frames/v4_9.f32",
+          "flags": "frames/v4_9_flags.png",
+          "archive_url": "https://irsa.ipac.caltech.edu/FAKE/fake_saturated/v4_9.fits"
+        },
+        {
+          "i": 10,
+          "image": "frames/v4_10.png",
+          "time": "2026-10-21T04:19:35Z",
+          "detector": 4,
+          "wavelength_um": 3.039,
+          "target_expected_px": [
+            25.1,
+            23.65
+          ],
+          "target_measured_px": null,
+          "target_measured_err_px": null,
+          "saturated": true,
+          "bad_pixel_fraction": 0.013,
+          "target_flux_mjy": null,
+          "target_flux_err_mjy": null,
+          "data": "frames/v4_10.f32",
+          "flags": "frames/v4_10_flags.png",
+          "archive_url": "https://irsa.ipac.caltech.edu/FAKE/fake_saturated/v4_10.fits"
+        }
+      ]
+    }
+  ],
+  "verdict": "saturated",
+  "measured_motion_mas_yr": null,
+  "catalog_motion_mas_yr": {
+    "ra": -802.8,
+    "dec": 10362.4,
+    "source": "Gaia DR3 (FAKE)"
+  }
+}

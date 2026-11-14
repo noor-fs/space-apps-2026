@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SPHEREx Motion Viewer</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%230b0f17'/%3E%3Cpath d='M8 1v5M8 10v5M1 8h5M10 8h5' stroke='%2370ffa0' stroke-width='1.5'/%3E%3Crect x='6.5' y='6.5' width='3' height='3' fill='%23ff5050'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/style.css">
+  <script type="module" src="js/app.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <h1 class="brand">SPHEREx Motion Viewer</h1>
+    <nav id="target-buttons" class="targets" aria-label="Targets"></nav>
+    <form id="search-form" class="search" role="search">
+      <input id="search-input" type="search" autocomplete="off"
+             placeholder="Name or RA Dec"
+             title="A target name (e.g. Barnard's Star) or coordinates (e.g. 269.45 4.77 or 17h57m48s +04d46m)"
+             aria-label="Search by name or coordinates">
+      <button type="submit">Go</button>
+    </form>
+    <nav class="about-links" aria-label="About">
+      <button type="button" data-dialog="how">How it works</button>
+      <button type="button" data-dialog="limits">Limits</button>
+      <button type="button" data-dialog="credits">Credits</button>
+    </nav>
+  </header>
+  <p id="search-message" class="search-message" role="status" hidden></p>
+
+  <main class="layout">
+    <section class="viewer-col" aria-label="Viewer">
+      <!-- what am I looking at: target, verdict, field size -->
+      <div class="title-row">
+        <div class="title-main">
+          <h2 id="target-name">&nbsp;</h2>
+          <span id="verdict-chip" class="chip verdict-chip" hidden></span>
+        </div>
+        <div class="field-size" title="How much sky the image covers (not zoom)">
+          <span class="muted small">Field</span>
+          <div id="fov-buttons" class="seg seg-small" role="group" aria-label="Field size"></div>
+        </div>
+      </div>
+      <p id="field-info" class="muted small field-info"></p>
+
+      <!-- how to look: the four modes -->
+      <div id="mode-bar" class="mode-bar" hidden>
+        <div id="mode-buttons" class="tabs" role="group" aria-label="Mode">
+          <button type="button" data-mode="flipbook">Flipbook</button>
+          <button type="button" data-mode="blink">Blink</button>
+          <button type="button" data-mode="difference">Difference</button>
+          <button type="button" data-mode="brightness">Brightness</button>
+        </div>
+        <p id="mode-hint" class="mode-hint"></p>
+        <p id="mode-note" class="note-line" hidden></p>
+        <div id="filter-chips" class="filter-chips" hidden></div>
+      </div>
+
+      <!-- image view -->
+      <div id="viewport" class="viewport" tabindex="0"
+           aria-label="Image. Drag to pan, scroll or pinch to zoom.">
+        <div id="stage" class="stage">
+          <canvas id="image-canvas" class="image-canvas"></canvas>
+          <canvas id="flags-canvas" class="image-canvas flags-canvas"></canvas>
+          <svg id="overlay" class="overlay" xmlns="http://www.w3.org/2000/svg"></svg>
+        </div>
+        <div id="blink-badge" class="badge" hidden></div>
+        <div id="diff-legend" class="diff-legend" hidden>
+          <span>brighter in A</span><i class="diff-bar"></i><span>brighter in B</span>
+        </div>
+        <div id="tooltip" class="tooltip" role="tooltip" hidden></div>
+        <div id="viewer-message" class="viewer-message" hidden></div>
+        <div class="zoom-controls" role="group" aria-label="Magnification">
+          <button id="zoom-out" type="button" title="Zoom out (−)" aria-label="Zoom out">−</button>
+          <span id="zoom-label" class="zoom-label">1×</span>
+          <button id="zoom-in" type="button" title="Zoom in (+)" aria-label="Zoom in">+</button>
+          <button id="zoom-reset" type="button" title="Reset view (0)" aria-label="Reset view">⌖</button>
+        </div>
+      </div>
+
+      <!-- brightness mode view -->
+      <section id="brightness-view" class="chart-panel" aria-labelledby="brightness-heading" hidden>
+        <h3 id="brightness-heading">Target brightness over time</h3>
+        <p id="brightness-note" class="note-line" hidden></p>
+        <div id="brightness-chart" class="chart-box"></div>
+        <details class="table-toggle"><summary>Show as a table</summary><div id="brightness-table"></div></details>
+      </section>
+
+      <!-- player bar: everything that changes which picture is on screen -->
+      <div id="player" class="player" hidden>
+        <div id="flipbook-controls" class="player-row">
+          <span class="player-label">Visit</span>
+          <div id="visit-strip" class="visit-strip" role="group" aria-label="Visits"></div>
+          <button id="back-to-stack" type="button" hidden>↩ Back to the visit stack</button>
+        </div>
+        <div id="pair-controls" class="player-row" hidden>
+          <span id="pair-heading" class="sr-only">Compare</span>
+          <label class="pick"><span class="ab ab-a">A</span><select id="pick-a" aria-label="Image A"></select></label>
+          <button id="swap-ab" type="button" title="Swap A and B" aria-label="Swap A and B">⇄</button>
+          <label class="pick"><span class="ab ab-b">B</span><select id="pick-b" aria-label="Image B"></select></label>
+          <span class="show-ab">
+            <button id="show-a" type="button">Show A</button>
+            <button id="show-b" type="button">Show B</button>
+          </span>
+        </div>
+        <div id="playback-controls" class="player-row">
+          <button id="prev" type="button" title="Back (←)" aria-label="Step back">⏮</button>
+          <button id="play" type="button" class="primary" title="Play / pause (space)">▶ Play</button>
+          <button id="next" type="button" title="Forward (→)" aria-label="Step forward">⏭</button>
+          <label class="inline-slider">Speed
+            <input id="speed" type="range" min="0.5" max="8" step="0.5" value="2">
+            <span><output id="speed-out">2</output>/s</span>
+          </label>
+          <span class="keys muted small">Keys: ← → step · space play · + − zoom</span>
+        </div>
+        <div id="diff-controls" class="player-row" hidden>
+          <label class="inline-slider" title="k scales A so stars that didn't change cancel out">k
+            <input id="k-slider" type="range" min="0" max="3" step="0.001" value="1">
+            <output id="k-out">1</output>
+          </label>
+          <button id="k-auto" type="button">Auto k</button>
+          <span class="muted small">k scales A so stars that didn't change cancel out.</span>
+        </div>
+      </div>
+
+      <div id="image-label" class="image-label" aria-live="polite"></div>
+
+      <section id="info-panel" class="info-panel" aria-labelledby="info-heading" hidden>
+        <div class="info-head">
+          <h3 id="info-heading">What am I looking at?</h3>
+          <button id="info-close" type="button" aria-label="Close">✕</button>
+        </div>
+        <div id="info-body"></div>
+      </section>
+
+      <section id="thumbs-panel" class="card" aria-labelledby="thumbs-heading" hidden>
+        <div class="card-head">
+          <h3 id="thumbs-heading">Single images</h3>
+          <span id="thumbs-count" class="muted"></span>
+        </div>
+        <p class="muted small card-hint">Each visit is made of these photos, one wavelength each. Click one to open it. Asteroids only show up here.</p>
+        <div id="thumbs"></div>
+      </section>
+
+      <section id="target-panel" class="card" aria-label="About this target" hidden></section>
+
+      <details id="fingerprint" class="card fingerprint">
+        <summary><h3>Infrared fingerprint</h3> <span class="muted">brightness against wavelength, compared with reference shapes</span></summary>
+        <p id="fingerprint-note" class="muted small"></p>
+        <div id="fingerprint-legend" class="legend" role="group" aria-label="Reference spectra"></div>
+        <div id="fingerprint-chart" class="chart-box"></div>
+        <details class="table-toggle"><summary>Show as a table</summary><div id="fingerprint-table"></div></details>
+      </details>
+    </section>
+
+    <!-- settings: three groups -->
+    <aside id="controls" class="controls" aria-label="Settings" hidden>
+      <details class="side-section" open>
+        <summary><h3 id="filters-heading">Filters</h3><span id="filters-summary" class="muted small"></span></summary>
+        <p class="muted small side-hint">Choose which pictures to use, by date and by wavelength.</p>
+        <div class="filter">
+          <div class="filter-head"><span>Time</span><output id="time-out" class="muted"></output></div>
+          <div id="time-range" class="dual"></div>
+          <div class="row dates">
+            <label>From <input id="date-from" type="date"></label>
+            <label>To <input id="date-to" type="date"></label>
+          </div>
+          <div id="year-buttons" class="row chips"></div>
+        </div>
+        <div class="filter">
+          <div class="filter-head"><span>Wavelength</span><output id="wl-out" class="muted"></output></div>
+          <div id="wl-range" class="dual"></div>
+          <div id="wl-presets" class="row chips"></div>
+          <p class="muted small side-hint">Compare photos at the same wavelength: objects look brighter or dimmer at different wavelengths. D1–D6 are the six detectors.</p>
+        </div>
+        <p id="match-count" class="match-count"></p>
+        <p id="match-warn" class="note-line" hidden></p>
+      </details>
+
+      <details class="side-section" open>
+        <summary><h3>Layers</h3></summary>
+        <p class="muted small side-hint">Markers drawn on the image. Hover one for its name; click a star for details.</p>
+        <div id="layer-list" class="layer-list"></div>
+      </details>
+
+      <details id="display-controls" class="side-section">
+        <summary><h3>Display</h3></summary>
+        <p class="muted small side-hint">How the picture is painted. This doesn't change the data.</p>
+        <label class="check">
+          <input id="color-toggle" type="checkbox">
+          <span>Color <span class="muted">(visit stacks: blue 0.75–1.6, green 1.6–3.8, red 3.8–5.0 µm)</span></span>
+        </label>
+        <label class="select-row">Color map
+          <select id="cmap"></select>
+        </label>
+        <label class="slider">
+          <span>Brightness <output id="bright-out">0</output></span>
+          <input id="brightness" type="range" min="-0.5" max="0.5" step="0.01" value="0">
+        </label>
+        <label class="slider">
+          <span>Contrast <output id="contrast-out">1.0×</output></span>
+          <input id="contrast" type="range" min="-2" max="2" step="0.05" value="0">
+        </label>
+        <button id="display-reset" type="button" class="wide">Reset brightness and contrast</button>
+        <p id="display-note" class="muted small" hidden></p>
+      </details>
+    </aside>
+  </main>
+
+  <dialog id="about-dialog" class="about-dialog" aria-labelledby="about-title">
+    <form method="dialog" class="dialog-close"><button aria-label="Close">✕</button></form>
+    <div id="about-body"></div>
+  </dialog>
+</body>
+</html>

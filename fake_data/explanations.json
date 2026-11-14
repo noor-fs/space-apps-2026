@@ -1,0 +1,220 @@
+{
+  "types": {
+    "star": {
+      "title": "Star",
+      "text": "PLACEHOLDER text about star. Amna replaces this with two to four sourced sentences.",
+      "sources": [
+        {
+          "label": "FAKE source",
+          "url": "https://example.org"
+        }
+      ]
+    },
+    "brown_dwarf": {
+      "title": "Brown dwarf",
+      "text": "PLACEHOLDER text about brown dwarf. Amna replaces this with two to four sourced sentences.",
+      "sources": [
+        {
+          "label": "FAKE source",
+          "url": "https://example.org"
+        }
+      ]
+    },
+    "variable_star": {
+      "title": "Variable star",
+      "text": "PLACEHOLDER text about variable star. Amna replaces this with two to four sourced sentences.",
+      "sources": [
+        {
+          "label": "FAKE source",
+          "url": "https://example.org"
+        }
+      ]
+    },
+    "galaxy": {
+      "title": "Galaxy",
+      "text": "PLACEHOLDER text about galaxy. Amna replaces this with two to four sourced sentences.",
+      "sources": [
+        {
+          "label": "FAKE source",
+          "url": "https://example.org"
+        }
+      ]
+    },
+    "asteroid": {
+      "title": "Asteroid",
+      "text": "PLACEHOLDER text about asteroid. Amna replaces this with two to four sourced sentences.",
+      "sources": [
+        {
+          "label": "FAKE source",
+          "url": "https://example.org"
+        }
+      ]
+    },
+    "young_star": {
+      "title": "Young star",
+      "text": "PLACEHOLDER text about young star. Amna replaces this with two to four sourced sentences.",
+      "sources": [
+        {
+          "label": "FAKE source",
+          "url": "https://example.org"
+        }
+      ]
+    },
+    "unknown": {
+      "title": "Unknown",
+      "text": "PLACEHOLDER text about unknown. Amna replaces this with two to four sourced sentences.",
+      "sources": [
+        {
+          "label": "FAKE source",
+          "url": "https://example.org"
+        }
+      ]
+    }
+  },
+  "verdicts": {
+    "moves_as_expected": {
+      "title": "Moves as expected",
+      "text": "PLACEHOLDER text about moves as expected. Amna replaces this with two to four sourced sentences.",
+      "sources": [
+        {
+          "label": "FAKE source",
+          "url": "https://example.org"
+        }
+      ]
+    },
+    "moves_unexpected": {
+      "title": "Moves unexpected",
+      "text": "PLACEHOLDER text about moves unexpected. Amna replaces this with two to four sourced sentences.",
+      "sources": [
+        {
+          "label": "FAKE source",
+          "url": "https://example.org"
+        }
+      ]
+    },
+    "no_motion_detected": {
+      "title": "No motion detected",
+      "text": "PLACEHOLDER text about no motion detected. Amna replaces this with two to four sourced sentences.",
+      "sources": [
+        {
+          "label": "FAKE source",
+          "url": "https://example.org"
+        }
+      ]
+    },
+    "brightness_changes": {
+      "title": "Brightness changes",
+      "text": "PLACEHOLDER text about brightness changes. Amna replaces this with two to four sourced sentences.",
+      "sources": [
+        {
+          "label": "FAKE source",
+          "url": "https://example.org"
+        }
+      ]
+    },
+    "saturated": {
+      "title": "Saturated",
+      "text": "PLACEHOLDER text about saturated. Amna replaces this with two to four sourced sentences.",
+      "sources": [
+        {
+          "label": "FAKE source",
+          "url": "https://example.org"
+        }
+      ]
+    },
+    "too_faint": {
+      "title": "Too faint",
+      "text": "PLACEHOLDER text about too faint. Amna replaces this with two to four sourced sentences.",
+      "sources": [
+        {
+          "label": "FAKE source",
+          "url": "https://example.org"
+        }
+      ]
+    }
+  },
+  "targets": {
+    "epsilon_indi_b": {
+      "title": "Epsilon Indi B",
+      "text": "PLACEHOLDER text about epsilon indi b. Amna replaces this with two to four sourced sentences.",
+      "sources": [
+        {
+          "label": "FAKE source",
+          "url": "https://example.org"
+        }
+      ]
+    },
+    "barnards_star": {
+      "title": "Barnard's Star",
+      "text": "PLACEHOLDER text about barnard's star. Amna replaces this with two to four sourced sentences.",
+      "sources": [
+        {
+          "label": "FAKE source",
+          "url": "https://example.org"
+        }
+      ]
+    },
+    "r_draconis": {
+      "title": "R Draconis",
+      "text": "PLACEHOLDER text about r draconis. Amna replaces this with two to four sourced sentences.",
+      "sources": [
+        {
+          "label": "FAKE source",
+          "url": "https://example.org"
+        }
+      ]
+    },
+    "rw_aurigae": {
+      "title": "RW Aurigae",
+      "text": "PLACEHOLDER text about rw aurigae. Amna replaces this with two to four sourced sentences.",
+      "sources": [
+        {
+          "label": "FAKE source",
+          "url": "https://example.org"
+        }
+      ]
+    },
+    "wise_0855": {
+      "title": "WISE 0855",
+      "text": "PLACEHOLDER text about wise 0855. Amna replaces this with two to four sourced sentences.",
+      "sources": [
+        {
+          "label": "FAKE source",
+          "url": "https://example.org"
+        }
+      ]
+    },
+    "fake_saturated": {
+      "title": "Fake: saturated star",
+      "text": "PLACEHOLDER text about fake: saturated star. Amna replaces this with two to four sourced sentences.",
+      "sources": [
+        {
+          "label": "FAKE source",
+          "url": "https://example.org"
+        }
+      ]
+    }
+  },
+  "about": {
+    "how_it_works": {
+      "title": "How this works",
+      "text": "PLACEHOLDER text about how this works. Amna replaces this with two to four sourced sentences.",
+      "sources": [
+        {
+          "label": "FAKE source",
+          "url": "https://example.org"
+        }
+      ]
+    },
+    "limits": {
+      "title": "What this tool can't tell you",
+      "text": "PLACEHOLDER text about what this tool can't tell you. Amna replaces this with two to four sourced sentences.",
+      "sources": [
+        {
+          "label": "FAKE source",
+          "url": "https://example.org"
+        }
+      ]
+    }
+  }
+}
