@@ -32,6 +32,7 @@ from spx.export import export_field, frame_key, write_results  # noqa: E402
 from spx.field import FIELD_SIZES_PX, Field, parse_coordinates  # noqa: E402
 from spx.measure import gaia_sources, measure_frame, reference_stars  # noqa: E402
 from spx.names import CatalogSource, resolve_name  # noqa: E402
+from spx.objects import export_objects, field_objects, measure_objects  # noqa: E402
 from spx.psf import measure_visits  # noqa: E402
 from spx.verdict import brightness_test, measure_motion, verdict  # noqa: E402
 from spx.visits import build_visits, visit_ranges  # noqa: E402
@@ -117,12 +118,14 @@ def build(target_key, label, field, target, budget, offline):
 
     references = reference_stars(field, field.center)
     catalog = gaia_sources(field)
-    measurements, aligned, missing_wave = {}, [], 0
+    objects = field_objects(field, catalog, target)
+    measurements, aligned, missing_wave, object_results = {}, [], 0, []
     for k, path in enumerate(paths, start=1):
         frame = clean_frame(path)
         wave = _wave_table(frame.header, rows_by_id.get(path.stem), field)
         missing_wave += wave is None
         measurements[frame_key(frame.header)] = measure_frame(frame, field, target, references, wave, catalog)
+        object_results.append((frame.header["MJD-AVG"], measure_objects(frame, field, objects, catalog)))
         aligned.append(align_frame(frame, field))
         if k % 100 == 0:
             print(f"  measured {k}")
@@ -146,12 +149,14 @@ def build(target_key, label, field, target, budget, offline):
     uris = {f"{r['exposure']}_D{r['detector']}": str(r["uri"]) for r in frames} if "uri" in frames.colnames else None
     export_field(DATA_DIR / target_key, target_key, label, field, target, visits, ranges, measurements,
                  visit_fits, motion, motion_source, result, uris)
+    export_objects(DATA_DIR / target_key / f"fov{field.size_px}" / "objects.json", target_key, field, visits, ranges,
+                   object_results, frame_measurements, objects, catalog, references)
     results = RESULTS_DIR / target_key
     write_results(results, field, measurements, visit_fits, motion, motion_source, brightness, result)
     log = {"built": Time.now().isot[:19] + "Z", "size_px": field.size_px, "offline": offline,
            "frames_found": len(frames), "frames_from": frames_from, "budget": budget,
            "cutouts_used": len(paths), "failed_downloads": failures, "frames_without_wavelength": missing_wave,
-           "visits": len(visits), "reference_stars": len(references), "verdict": result,
+           "visits": len(visits), "reference_stars": len(references), "field_objects": len(objects), "verdict": result,
            "minutes": round((time.time() - started) / 60, 1)}
     (results / f"build_log_fov{field.size_px}.json").write_text(json.dumps(log, indent=1))
     motion_text = (f"{motion.pmra:+.0f} ± {motion.pmra_err:.0f}, {motion.pmdec:+.0f} ± {motion.pmdec_err:.0f} mas/yr "

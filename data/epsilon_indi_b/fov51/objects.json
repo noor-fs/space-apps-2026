@@ -1,0 +1,736 @@
+{
+ "target_key": "epsilon_indi_b",
+ "size_px": 51,
+ "selection": "Gaia DR3 stars inside the field on 2026-01-01 with G <= 17, except the target and anything within 0.5 px of it",
+ "objects": [
+  {
+   "name": "Gaia DR3 6412596458823395328",
+   "catalog": "Gaia DR3",
+   "g_mag": 12.95,
+   "reference": false,
+   "blended_with": [],
+   "visits": [
+    {
+     "n": 1,
+     "expected_px": [
+      14.486,
+      9.864
+     ],
+     "measured_px": [
+      14.483,
+      9.86
+     ],
+     "measured_err_px": [
+      0.016,
+      0.013
+     ],
+     "n_measured": 93,
+     "n_frames": 135,
+     "saturated": false
+    },
+    {
+     "n": 2,
+     "expected_px": [
+      14.489,
+      9.866
+     ],
+     "measured_px": [
+      14.506,
+      9.89
+     ],
+     "measured_err_px": [
+      0.016,
+      0.013
+     ],
+     "n_measured": 114,
+     "n_frames": 153,
+     "saturated": false
+    },
+    {
+     "n": 3,
+     "expected_px": [
+      14.491,
+      9.867
+     ],
+     "measured_px": [
+      14.477,
+      9.869
+     ],
+     "measured_err_px": [
+      0.016,
+      0.013
+     ],
+     "n_measured": 53,
+     "n_frames": 79,
+     "saturated": false
+    },
+    {
+     "n": 4,
+     "expected_px": [
+      14.493,
+      9.869
+     ],
+     "measured_px": [
+      14.503,
+      9.891
+     ],
+     "measured_err_px": [
+      0.016,
+      0.013
+     ],
+     "n_measured": 103,
+     "n_frames": 120,
+     "saturated": false
+    }
+   ]
+  },
+  {
+   "name": "Gaia DR3 6412593435166417536",
+   "catalog": "Gaia DR3",
+   "g_mag": 13.93,
+   "reference": true,
+   "blended_with": [],
+   "visits": [
+    {
+     "n": 1,
+     "expected_px": [
+      0.883,
+      20.717
+     ],
+     "measured_px": [
+      0.87,
+      20.702
+     ],
+     "measured_err_px": [
+      0.016,
+      0.013
+     ],
+     "n_measured": 91,
+     "n_frames": 135,
+     "saturated": false
+    },
+    {
+     "n": 2,
+     "expected_px": [
+      0.883,
+      20.717
+     ],
+     "measured_px": [
+      0.892,
+      20.716
+     ],
+     "measured_err_px": [
+      0.016,
+      0.013
+     ],
+     "n_measured": 101,
+     "n_frames": 153,
+     "saturated": false
+    },
+    {
+     "n": 3,
+     "expected_px": [
+      0.883,
+      20.716
+     ],
+     "measured_px": [
+      0.866,
+      20.702
+     ],
+     "measured_err_px": [
+      0.016,
+      0.013
+     ],
+     "n_measured": 57,
+     "n_frames": 79,
+     "saturated": false
+    },
+    {
+     "n": 4,
+     "expected_px": [
+      0.883,
+      20.716
+     ],
+     "measured_px": [
+      0.893,
+      20.724
+     ],
+     "measured_err_px": [
+      0.016,
+      0.013
+     ],
+     "n_measured": 100,
+     "n_frames": 120,
+     "saturated": false
+    }
+   ]
+  },
+  {
+   "name": "Gaia DR3 6412596390103981824",
+   "catalog": "Gaia DR3",
+   "g_mag": 15.34,
+   "reference": false,
+   "blended_with": [],
+   "visits": [
+    {
+     "n": 1,
+     "expected_px": [
+      43.557,
+      1.287
+     ],
+     "measured_px": [
+      43.538,
+      1.283
+     ],
+     "measured_err_px": [
+      0.016,
+      0.014
+     ],
+     "n_measured": 80,
+     "n_frames": 135,
+     "saturated": false
+    },
+    {
+     "n": 2,
+     "expected_px": [
+      43.557,
+      1.288
+     ],
+     "measured_px": [
+      43.562,
+      1.31
+     ],
+     "measured_err_px": [
+      0.016,
+      0.013
+     ],
+     "n_measured": 91,
+     "n_frames": 153,
+     "saturated": false
+    },
+    {
+     "n": 3,
+     "expected_px": [
+      43.557,
+      1.289
+     ],
+     "measured_px": [
+      43.541,
+      1.288
+     ],
+     "measured_err_px": [
+      0.016,
+      0.014
+     ],
+     "n_measured": 54,
+     "n_frames": 79,
+     "saturated": false
+    },
+    {
+     "n": 4,
+     "expected_px": [
+      43.557,
+      1.29
+     ],
+     "measured_px": [
+      43.557,
+      1.306
+     ],
+     "measured_err_px": [
+      0.016,
+      0.014
+     ],
+     "n_measured": 63,
+     "n_frames": 120,
+     "saturated": false
+    }
+   ]
+  },
+  {
+   "name": "Gaia DR3 6412594672117008128",
+   "catalog": "Gaia DR3",
+   "g_mag": 15.73,
+   "reference": false,
+   "blended_with": [],
+   "visits": [
+    {
+     "n": 1,
+     "expected_px": [
+      49.253,
+      32.838
+     ],
+     "measured_px": [
+      49.265,
+      32.818
+     ],
+     "measured_err_px": [
+      0.016,
+      0.013
+     ],
+     "n_measured": 89,
+     "n_frames": 135,
+     "saturated": false
+    },
+    {
+     "n": 2,
+     "expected_px": [
+      49.254,
+      32.84
+     ],
+     "measured_px": [
+      49.283,
+      32.843
+     ],
+     "measured_err_px": [
+      0.016,
+      0.013
+     ],
+     "n_measured": 93,
+     "n_frames": 153,
+     "saturated": false
+    },
+    {
+     "n": 3,
+     "expected_px": [
+      49.253,
+      32.842
+     ],
+     "measured_px": [
+      49.261,
+      32.835
+     ],
+     "measured_err_px": [
+      0.017,
+      0.014
+     ],
+     "n_measured": 52,
+     "n_frames": 79,
+     "saturated": false
+    },
+    {
+     "n": 4,
+     "expected_px": [
+      49.254,
+      32.844
+     ],
+     "measured_px": [
+      49.295,
+      32.853
+     ],
+     "measured_err_px": [
+      0.016,
+      0.013
+     ],
+     "n_measured": 84,
+     "n_frames": 120,
+     "saturated": false
+    }
+   ]
+  },
+  {
+   "name": "Gaia DR3 6412596183945494144",
+   "catalog": "Gaia DR3",
+   "g_mag": 15.77,
+   "reference": false,
+   "blended_with": [],
+   "visits": [
+    {
+     "n": 1,
+     "expected_px": [
+      42.094,
+      24.324
+     ],
+     "measured_px": [
+      42.084,
+      24.306
+     ],
+     "measured_err_px": [
+      0.016,
+      0.013
+     ],
+     "n_measured": 79,
+     "n_frames": 135,
+     "saturated": false
+    },
+    {
+     "n": 2,
+     "expected_px": [
+      42.095,
+      24.325
+     ],
+     "measured_px": [
+      42.112,
+      24.322
+     ],
+     "measured_err_px": [
+      0.016,
+      0.013
+     ],
+     "n_measured": 93,
+     "n_frames": 153,
+     "saturated": false
+    },
+    {
+     "n": 3,
+     "expected_px": [
+      42.095,
+      24.325
+     ],
+     "measured_px": [
+      42.079,
+      24.316
+     ],
+     "measured_err_px": [
+      0.017,
+      0.014
+     ],
+     "n_measured": 47,
+     "n_frames": 79,
+     "saturated": false
+    },
+    {
+     "n": 4,
+     "expected_px": [
+      42.096,
+      24.326
+     ],
+     "measured_px": [
+      42.105,
+      24.315
+     ],
+     "measured_err_px": [
+      0.016,
+      0.014
+     ],
+     "n_measured": 70,
+     "n_frames": 120,
+     "saturated": false
+    }
+   ]
+  },
+  {
+   "name": "Gaia DR3 6412595973491218944",
+   "catalog": "Gaia DR3",
+   "g_mag": 15.81,
+   "reference": false,
+   "blended_with": [],
+   "visits": [
+    {
+     "n": 1,
+     "expected_px": [
+      36.209,
+      24.657
+     ],
+     "measured_px": [
+      36.217,
+      24.662
+     ],
+     "measured_err_px": [
+      0.016,
+      0.014
+     ],
+     "n_measured": 71,
+     "n_frames": 135,
+     "saturated": false
+    },
+    {
+     "n": 2,
+     "expected_px": [
+      36.209,
+      24.657
+     ],
+     "measured_px": [
+      36.236,
+      24.677
+     ],
+     "measured_err_px": [
+      0.016,
+      0.013
+     ],
+     "n_measured": 95,
+     "n_frames": 153,
+     "saturated": false
+    },
+    {
+     "n": 3,
+     "expected_px": [
+      36.209,
+      24.657
+     ],
+     "measured_px": [
+      36.222,
+      24.663
+     ],
+     "measured_err_px": [
+      0.017,
+      0.014
+     ],
+     "n_measured": 55,
+     "n_frames": 79,
+     "saturated": false
+    },
+    {
+     "n": 4,
+     "expected_px": [
+      36.209,
+      24.657
+     ],
+     "measured_px": [
+      36.242,
+      24.673
+     ],
+     "measured_err_px": [
+      0.016,
+      0.014
+     ],
+     "n_measured": 68,
+     "n_frames": 120,
+     "saturated": false
+    }
+   ]
+  },
+  {
+   "name": "Gaia DR3 6412594706476744832",
+   "catalog": "Gaia DR3",
+   "g_mag": 16.05,
+   "reference": false,
+   "blended_with": [],
+   "visits": [
+    {
+     "n": 1,
+     "expected_px": [
+      44.286,
+      33.233
+     ],
+     "measured_px": [
+      44.299,
+      33.217
+     ],
+     "measured_err_px": [
+      0.017,
+      0.015
+     ],
+     "n_measured": 58,
+     "n_frames": 135,
+     "saturated": false
+    },
+    {
+     "n": 2,
+     "expected_px": [
+      44.287,
+      33.234
+     ],
+     "measured_px": [
+      44.322,
+      33.233
+     ],
+     "measured_err_px": [
+      0.017,
+      0.014
+     ],
+     "n_measured": 77,
+     "n_frames": 153,
+     "saturated": false
+    },
+    {
+     "n": 3,
+     "expected_px": [
+      44.287,
+      33.235
+     ],
+     "measured_px": [
+      44.307,
+      33.219
+     ],
+     "measured_err_px": [
+      0.017,
+      0.015
+     ],
+     "n_measured": 45,
+     "n_frames": 79,
+     "saturated": false
+    },
+    {
+     "n": 4,
+     "expected_px": [
+      44.288,
+      33.236
+     ],
+     "measured_px": [
+      44.332,
+      33.222
+     ],
+     "measured_err_px": [
+      0.017,
+      0.015
+     ],
+     "n_measured": 56,
+     "n_frames": 120,
+     "saturated": false
+    }
+   ]
+  },
+  {
+   "name": "Gaia DR3 6412594397239098752",
+   "catalog": "Gaia DR3",
+   "g_mag": 16.2,
+   "reference": true,
+   "blended_with": [],
+   "visits": [
+    {
+     "n": 1,
+     "expected_px": [
+      36.766,
+      47.667
+     ],
+     "measured_px": [
+      36.756,
+      47.639
+     ],
+     "measured_err_px": [
+      0.017,
+      0.015
+     ],
+     "n_measured": 48,
+     "n_frames": 135,
+     "saturated": false
+    },
+    {
+     "n": 2,
+     "expected_px": [
+      36.767,
+      47.67
+     ],
+     "measured_px": [
+      36.748,
+      47.665
+     ],
+     "measured_err_px": [
+      0.017,
+      0.015
+     ],
+     "n_measured": 82,
+     "n_frames": 153,
+     "saturated": false
+    },
+    {
+     "n": 3,
+     "expected_px": [
+      36.768,
+      47.672
+     ],
+     "measured_px": [
+      36.752,
+      47.658
+     ],
+     "measured_err_px": [
+      0.019,
+      0.018
+     ],
+     "n_measured": 43,
+     "n_frames": 79,
+     "saturated": false
+    },
+    {
+     "n": 4,
+     "expected_px": [
+      36.769,
+      47.674
+     ],
+     "measured_px": [
+      36.77,
+      47.653
+     ],
+     "measured_err_px": [
+      0.018,
+      0.016
+     ],
+     "n_measured": 51,
+     "n_frames": 120,
+     "saturated": false
+    }
+   ]
+  },
+  {
+   "name": "Gaia DR3 6412594362879363328",
+   "catalog": "Gaia DR3",
+   "g_mag": 16.41,
+   "reference": true,
+   "blended_with": [],
+   "visits": [
+    {
+     "n": 1,
+     "expected_px": [
+      49.675,
+      47.216
+     ],
+     "measured_px": [
+      49.697,
+      47.157
+     ],
+     "measured_err_px": [
+      0.018,
+      0.016
+     ],
+     "n_measured": 51,
+     "n_frames": 135,
+     "saturated": false
+    },
+    {
+     "n": 2,
+     "expected_px": [
+      49.675,
+      47.216
+     ],
+     "measured_px": [
+      49.695,
+      47.205
+     ],
+     "measured_err_px": [
+      0.018,
+      0.015
+     ],
+     "n_measured": 78,
+     "n_frames": 153,
+     "saturated": false
+    },
+    {
+     "n": 3,
+     "expected_px": [
+      49.674,
+      47.217
+     ],
+     "measured_px": [
+      49.671,
+      47.185
+     ],
+     "measured_err_px": [
+      0.02,
+      0.018
+     ],
+     "n_measured": 49,
+     "n_frames": 79,
+     "saturated": false
+    },
+    {
+     "n": 4,
+     "expected_px": [
+      49.673,
+      47.218
+     ],
+     "measured_px": [
+      49.681,
+      47.198
+     ],
+     "measured_err_px": [
+      0.018,
+      0.017
+     ],
+     "n_measured": 47,
+     "n_frames": 120,
+     "saturated": false
+    }
+   ]
+  }
+ ]
+}

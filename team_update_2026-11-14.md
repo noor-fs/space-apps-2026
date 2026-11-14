@@ -1,14 +1,18 @@
 ---
 title: Team update, images and measurements (2026-11-14)
 date: 2026-11-14
-updated: 2026-11-14
+updated: 2026-11-15
 tags:
-  - current
+  - superseded
   - nasa
   - team
+superseded_by: "[[team_update_2026-11-15]]"
 ---
 
 # Team update: images and measurements (Yara T, 2026-11-14)
+
+> [!warning] Superseded
+> See [[team_update_2026-11-15]]. Frame times are now whole seconds, not milliseconds.
 
 The data layer now works from start to finish. Give it any sky position (a name or coordinates) and it produces every file I own in [[nasa_repo/space-apps-2026/saturday_plan|the Saturday format]]. The five challenge targets are being built now as static files at 51 px. Once they're pushed to `data/`, the site needs no archive queries for them.
 

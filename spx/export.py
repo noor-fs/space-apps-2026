@@ -86,7 +86,8 @@ def export_field(data_dir, target_key, name, field, target, visits, ranges, fram
             frames.append({
                 "i": i,
                 "image": f"{stem}.png",
-                "time": frame.header["DATE-AVG"] + "Z",
+                # whole seconds, as in the format example; the asteroid layer matches on this exact string
+                "time": Time(frame.header["DATE-AVG"], format="isot", scale="utc", precision=0).isot + "Z",
                 "detector": int(frame.header["DETECTOR"]),
                 "wavelength_um": _number(m.wavelength_um, 4) if m else None,
                 **_position_fields(m, frame_floor, field),
