@@ -1,0 +1,167 @@
+# Source of truth for data/explanations.json.  Built by amna/build_explanations.py.
+# Each entry = ordered list of sentences. f: true  -> factual, needs >=1 source key.
+#                                         f: false -> describes how our tool works or tells the user what to do.
+# An entry's "sources" = ordered union of the source keys cited by its sentences.
+# Every factual claim below was checked against the page / abstract / catalog query named by its source key
+# (retrieved 2026-11-14).  Numbers computed from catalog values are noted in the comments.
+
+sources:
+  jpl_spherex:    {label: "NASA JPL: SPHEREx mission page", url: "https://www.jpl.nasa.gov/missions/spherex/"}
+  spherex_supp:   {label: "SPHEREx Explanatory Supplement (IRSA)", url: "https://irsa.ipac.caltech.edu/data/SPHEREx/docs/SPHEREx_Expsupp.pdf"}
+  nasa_sphx_bd:   {label: "NASA: SPHEREx Telescope Sees Menagerie of Brown Dwarfs", url: "https://www.nasa.gov/missions/spherex/nasas-spherex-telescope-sees-menagerie-of-brown-dwarfs/"}
+  nasa_stars:     {label: "NASA Science: Stars", url: "https://science.nasa.gov/universe/stars/"}
+  nasa_galaxies:  {label: "NASA Science: Galaxies", url: "https://science.nasa.gov/universe/galaxies/"}
+  nasa_asteroids: {label: "NASA Science: Asteroids", url: "https://science.nasa.gov/solar-system/asteroids/"}
+  nasa_ttauri:    {label: "NASA: Hubble observes a ghostly cloud alive with star formation", url: "https://www.nasa.gov/image-article/hubble-observes-ghostly-cloud-alive-with-star-formation/"}
+  aavso_varstars: {label: "AAVSO: Variable Stars and the Stories they Tell", url: "https://archive.aavso.org/variable-stars"}
+  vsx_types:      {label: "AAVSO VSX: variable star type designations", url: "https://www.aavso.org/vsx/index.php?view=about.vartypes"}
+  vsx_rdra:       {label: "AAVSO VSX entry: R Dra", url: "https://www.aavso.org/vsx/index.php?view=detail.top&oid=13673"}
+  gaia_dr3:       {label: "Gaia DR3 catalog (ESA)", url: "https://www.cosmos.esa.int/web/gaia/dr3"}
+  catwise:        {label: "CatWISE2020 catalog (NASA/IPAC IRSA)", url: "https://irsa.ipac.caltech.edu/data/WISE/CatWISE/overview.html"}
+  jpl_sbident:    {label: "JPL Small-Body Identification API", url: "https://ssd-api.jpl.nasa.gov/doc/sb_ident.html"}
+  luhman2014:     {label: "Luhman 2014, ApJ 786, L18 (arXiv)", url: "https://arxiv.org/abs/1404.6501"}
+  ribas2018:      {label: "Ribas et al. 2018 (arXiv)", url: "https://arxiv.org/abs/1811.05955"}
+  scholz2003:     {label: "Scholz et al. 2003, A&A 398, L29 (arXiv)", url: "https://arxiv.org/abs/astro-ph/0212487"}
+  sterzik2005:    {label: "Sterzik et al. 2005 (arXiv)", url: "https://arxiv.org/abs/astro-ph/0503297"}
+  bozhinova2016:  {label: "Bozhinova et al. 2016 (arXiv)", url: "https://arxiv.org/abs/1609.05667"}
+  lamzin2017:     {label: "Lamzin et al. 2017 (arXiv)", url: "https://arxiv.org/abs/1707.09671"}
+  simbad_map:     {label: "How SIMBAD object types map to our types", url: "data/simbad_otype_map.csv"}
+
+types:
+  star:
+    title: "Star"
+    sentences:
+      - {f: true,  s: [nasa_stars], t: "Stars are heated by nuclear fusion in their cores, which releases energy."}
+      - {f: true,  s: [nasa_stars], t: "Our Sun is a star."}
+      - {f: false, s: [simbad_map], t: "Markers from the Gaia catalog are stars, and so are SIMBAD objects that the SIMBAD object-type table groups as plain stars."}
+  brown_dwarf:
+    title: "Brown dwarf"
+    sentences:
+      - {f: true,  s: [nasa_sphx_bd], t: "Brown dwarfs form from collapsing clouds of gas, like stars do, but they are not massive enough to keep hydrogen fusion going in their cores."}
+      - {f: true,  s: [nasa_sphx_bd], t: "Brown dwarfs that drift alone in space are heated entirely from within and glow only dimly."}
+      - {f: true,  s: [nasa_sphx_bd], t: "SPHEREx is an infrared space telescope that is finding thousands of brown dwarfs."}
+      - {f: false, s: [simbad_map],   t: "Objects that SIMBAD lists as brown dwarfs or brown dwarf candidates get this label."}
+  variable_star:
+    title: "Variable star"
+    sentences:
+      - {f: true,  s: [aavso_varstars], t: "A star is called variable if we can measure its brightness changing over time, because of things happening inside, on the surface of, or around the star."}
+      - {f: true,  s: [vsx_types],      t: "Mira variables, for example, are giant stars whose brightness rises and falls over a cycle of roughly 80 to 1,000 days."}
+      - {f: false, s: [simbad_map],     t: "Markers from the AAVSO VSX catalog, and SIMBAD objects listed as variable stars, use this label."}
+  galaxy:
+    title: "Galaxy"
+    sentences:
+      - {f: true,  s: [nasa_galaxies], t: "Galaxies consist of stars, planets, and vast clouds of gas and dust, all bound together by gravity."}
+      - {f: true,  s: [nasa_galaxies], t: "Galaxies come in a variety of shapes, mostly spirals and ellipticals, as well as irregular ones."}
+      - {f: false, s: [simbad_map],    t: "This label also covers active galaxies, quasars and groups of galaxies from the SIMBAD catalog."}
+  asteroid:
+    title: "Asteroid"
+    sentences:
+      - {f: true,  s: [nasa_asteroids], t: "Asteroids are rocky, airless remnants left over from the early formation of our solar system about 4.6 billion years ago."}
+      - {f: true,  s: [nasa_asteroids], t: "Most asteroids orbit the Sun between Mars and Jupiter, in the main asteroid belt."}
+      - {f: false, s: [jpl_sbident],    t: "Asteroids move during a visit, so their markers appear only on single images, never on the stacked pictures."}
+      - {f: false, s: [jpl_sbident],    t: "Each marker is a position predicted by JPL's Small-Body Identification service as seen from the center of the Earth, so it can be off by up to about one pixel."}
+  young_star:
+    title: "Young star"
+    sentences:
+      - {f: true,  s: [nasa_stars],  t: "A star begins as a protostar, and at first most of its energy comes from heat released as it collapses."}
+      - {f: true,  s: [nasa_ttauri], t: "T Tauri stars are young stars, typically less than 10 million years old, and they vary in brightness both randomly and periodically."}
+      - {f: false, s: [simbad_map],  t: "Young stellar objects, T Tauri stars and similar objects from SIMBAD get this label."}
+  unknown:
+    title: "Unknown object"
+    sentences:
+      - {f: false, s: [simbad_map], t: "This label is used when the catalog gives no clear object type, or a type that does not fit our other labels, such as gas clouds or X-ray sources."}
+      - {f: false, s: [],           t: "Follow the catalog link in the panel to read what astronomers know about it."}
+
+verdicts:
+  moves_as_expected:
+    title: "Moves as expected"
+    sentences:
+      - {f: false, s: [], t: "SPHEREx shows the object moving, and the motion matches what the catalog predicts."}
+      - {f: false, s: [], t: "The measured position follows the expected position."}
+  moves_unexpected:
+    title: "Moves unexpectedly"
+    sentences:
+      - {f: false, s: [], t: "SPHEREx shows the object moving in a way the catalog does not predict."}
+      - {f: false, s: [], t: "Check the measured positions and their errors before deciding what this means."}
+  no_motion_detected:
+    title: "No motion detected"
+    sentences:
+      - {f: false, s: [], t: "No motion larger than the measurement error was found."}
+      - {f: false, s: [], t: "The object may be standing still, or moving too slowly for these pictures to show."}
+  brightness_changes:
+    title: "Brightness changes"
+    sentences:
+      - {f: false, s: [], t: "The object's brightness changes between visits."}
+      - {f: false, s: [], t: "Compare only images taken at nearly the same wavelength when judging brightness."}
+  saturated:
+    title: "Too bright to measure"
+    sentences:
+      - {f: false, s: [], t: "The object is too bright to measure: the detector maxed out."}
+      - {f: false, s: [], t: "No position or brightness is shown for it."}
+  too_faint:
+    title: "Too faint to measure"
+    sentences:
+      - {f: false, s: [], t: "The object is too faint to measure in these images."}
+      - {f: false, s: [], t: "No position or brightness is shown for it."}
+
+# Motion numbers below are computed from catalog values queried 2026-11-14:
+#   Gaia DR3 pmra/pmdec (mas/yr):  eps Ind B (3981.98, -2466.83) -> 4.684 "/yr, east+south, 0.76 px/yr (pixel = 6.15")
+#   Barnard's Star (-801.55, 10362.39) -> 10.393 "/yr, north (slightly west), 1.69 px/yr
+#   R Dra (-20.64, 6.15) -> 0.022 "/yr, west+north;  RW Aur B (4.91, -24.58) -> 0.025 "/yr, east+south
+#   CatWISE2020 (arcsec/yr), source J085507.96-071439.3: pmra -8.02 +/- 0.09, pmdec +1.04 +/- 0.14 -> 8.09 "/yr, west + slightly north
+# East is left and north is up on the images, so east = left, west = right, north = up, south = down.
+targets:
+  epsilon_indi_b:
+    title: "Epsilon Indi B"
+    sentences:
+      - {f: true,  s: [sterzik2005], t: "Epsilon Indi B is a pair of brown dwarfs, called Ba and Bb."}
+      - {f: true,  s: [scholz2003],  t: "It travels through space together with the star Epsilon Indi."}
+      - {f: true,  s: [scholz2003, gaia_dr3], t: "It is one of the fastest-moving objects outside our solar system: the Gaia catalog measures its motion at about 4.7 arcseconds per year, toward the east and south."}
+      - {f: true,  s: [gaia_dr3, spherex_supp], t: "On the pictures, look for its marker drifting left and down by about three quarters of a pixel each year."}
+  barnards_star:
+    title: "Barnard's Star"
+    sentences:
+      - {f: true,  s: [ribas2018], t: "Barnard's Star is a red dwarf about 6 light-years away, and it is the closest single star to the Sun."}
+      - {f: true,  s: [ribas2018, gaia_dr3], t: "It has the largest apparent motion of any known star: the Gaia catalog measures about 10.4 arcseconds per year, mostly toward the north."}
+      - {f: true,  s: [gaia_dr3, spherex_supp], t: "On the pictures, look for its marker climbing upward, slightly to the right, by about 1.7 pixels each year."}
+      - {f: false, s: [], t: "It is a bright star, so some images may be saturated; check the verdict."}
+  r_draconis:
+    title: "R Draconis"
+    sentences:
+      - {f: true,  s: [vsx_rdra, vsx_types], t: "R Draconis is a Mira-type variable star: a giant star whose brightness rises and falls over a cycle of about 246 days."}
+      - {f: true,  s: [spherex_supp, vsx_rdra], t: "Bright stars can saturate the detector pixels, so R Draconis may show up as saturated when it is near its brightest."}
+      - {f: true,  s: [gaia_dr3], t: "Its own motion across the sky is tiny: the Gaia catalog measures only about 0.02 arcseconds per year, toward the west and a little north."}
+      - {f: false, s: [], t: "So look for its brightness changing between visits, not for its marker moving."}
+  rw_aurigae:
+    title: "RW Aurigae"
+    sentences:
+      - {f: true,  s: [bozhinova2016], t: "RW Aurigae is a young binary star, two stars called A and B that orbit close together."}
+      - {f: true,  s: [gaia_dr3, spherex_supp], t: "In the Gaia catalog the two stars are only about 1.5 arcseconds apart, much less than one 6.15-arcsecond pixel, so they blend into a single dot."}
+      - {f: true,  s: [bozhinova2016, lamzin2017], t: "RW Aur A faded dramatically twice, in 2010-11 and again from 2014 to 2016, and astronomers explain this as dust passing in front of the star."}
+      - {f: true,  s: [gaia_dr3], t: "Its own motion across the sky is tiny, about 0.03 arcseconds per year, so look for brightness changes between visits instead."}
+  wise_0855:
+    title: "WISE 0855"
+    sentences:
+      - {f: true,  s: [luhman2014], t: "WISE 0855 is an extremely cold brown dwarf: a 2014 study estimated its temperature at only 225 to 260 kelvin, about -48 to -13 degrees Celsius, the coldest known for a brown dwarf at that time."}
+      - {f: true,  s: [luhman2014], t: "It is only about 7 light-years from the Sun, and in 2014 it had the third-highest motion of any known star or brown dwarf, about 8.1 arcseconds per year."}
+      - {f: true,  s: [catwise],    t: "The CatWISE2020 catalog also shows a source near its expected position moving about 8 arcseconds per year, toward the west and slightly north."}
+      - {f: false, s: [], t: "On the pictures, west is to the right; if the verdict says too faint, SPHEREx could not measure it in these images."}
+
+about:
+  how_it_works:
+    title: "How this works"
+    sentences:
+      - {f: true,  s: [jpl_spherex], t: "SPHEREx is a NASA space telescope that surveys the whole sky every six months and maps it in 102 different colors."}
+      - {f: false, s: [], t: "This tool lines up SPHEREx pictures of the same patch of sky from different visits, so you can flip through them like a flipbook, blink between two of them, or subtract one from the other."}
+      - {f: true,  s: [spherex_supp], t: "Small sizes on the sky are measured in arcseconds, and one pixel in these pictures is 6.15 arcseconds wide."}
+      - {f: false, s: [], t: "If an object moves between visits, its dot shifts, and the tool compares where SPHEREx measures it with where the catalogs say it should be."}
+      - {f: false, s: [jpl_sbident], t: "Colored markers show objects from the Gaia, SIMBAD and AAVSO VSX catalogs and known asteroids; click a marker to learn what it is."}
+  limits:
+    title: "What this tool can't tell you"
+    sentences:
+      - {f: true,  s: [spherex_supp], t: "Each pixel is 6.15 arcseconds wide, so only fast-moving objects shift enough to show motion."}
+      - {f: true,  s: [jpl_spherex, spherex_supp], t: "Each single image is taken at a different wavelength (color), so some brightness change between single images is expected."}
+      - {f: true,  s: [spherex_supp], t: "Bright stars saturate the detector pixels, and then their position and brightness cannot be measured."}
+      - {f: false, s: [], t: "A red and blue pair in a difference image is not proof of motion."}
+      - {f: true,  s: [nasa_sphx_bd], t: "Stars are not equally bright at every color, so a star that has not moved can still leave a red or blue mark."}
+      - {f: false, s: [], t: "Asteroid markers are predictions, and catalog markers can be out of date or wrong."}
