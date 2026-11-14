@@ -10,7 +10,7 @@ This folder holds the code that produces **Amna's files in `data/`**, as defined
 | `spectra/*.csv` (5 files) | Reference curves for the infrared-fingerprint chart | `spectra.py` |
 | `simbad_otype_map.csv` | Table showing how SIMBAD object codes became our types (open question: see "Open questions") | `simbad_map.py` |
 
-The five targets are `epsilon_indi_b`, `barnards_star`, `r_draconis`, `rw_aurigae`, `wise_0855`. Their field centers are in `config.py`: the plan's, except RW Aurigae and WISE 0855 (see "Current centers").
+The five targets are `epsilon_indi_b`, `barnards_star`, `r_draconis`, `rw_aurigae`, `wise_0855`. Their field centers are in `config.py`.
 
 ## How to run it
 

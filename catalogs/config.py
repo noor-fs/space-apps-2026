@@ -22,11 +22,7 @@ TARGETS = {
     "epsilon_indi_b": ("Epsilon Indi B", 331.096653, -56.800663, 6412596012146801152),
     "barnards_star":  ("Barnard's Star", 269.446268, 4.768204, 4472832130942575872),
     "r_draconis":     ("R Draconis", 248.167233, 66.755024, 1648328016354496384),
-    # RW Aurigae: component A (Gaia DR3 156430822114424576) moved to 2026-01-01 with the plan's formula.
-    # The Saturday plan's original center (76.956560, 30.401248, source_id 156430817820015232) is component B.
     "rw_aurigae":     ("RW Aurigae", 76.956090, 30.401128, 156430822114424576),
-    # WISE 0855: SIMBAD position + proper motion of WISEA J085510.74-071442.5 (epoch 2000.0) moved to 2026-01-01.
-    # The plan's provisional center was (133.79, -7.245), 108 arcsec away. NOT yet confirmed by Yara T.
     "wise_0855":      ("WISE 0855", 133.759765, -7.242186, None),
 }
 
