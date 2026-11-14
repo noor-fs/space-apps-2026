@@ -1,0 +1,15 @@
+{
+ "built": "2026-11-14T18:40:39Z",
+ "size_px": 51,
+ "offline": false,
+ "frames_found": 349,
+ "frames_from": "archive",
+ "budget": null,
+ "cutouts_used": 349,
+ "failed_downloads": [],
+ "frames_without_wavelength": 0,
+ "visits": 3,
+ "reference_stars": 24,
+ "verdict": "brightness_changes",
+ "minutes": 5.6
+}

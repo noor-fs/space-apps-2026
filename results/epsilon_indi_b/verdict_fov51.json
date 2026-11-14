@@ -1,5 +1,5 @@
 {
- "verdict": "moves_unexpected",
+ "verdict": "moves_as_expected",
  "motion_source": "frames",
  "position_floor_px": [
   0.03272089538076649,
@@ -7,10 +7,10 @@
  ],
  "stack_position_floor_px": null,
  "motion": {
-  "pmra": 3897.6848629668866,
-  "pmra_err": 20.569865199334018,
-  "pmdec": -2524.4196029869877,
-  "pmdec_err": 23.93279806432924,
+  "pmra": 3895.3560402373932,
+  "pmra_err": 102.25305021009859,
+  "pmdec": -2511.591996526303,
+  "pmdec_err": 76.37269245328062,
   "n_used": 347,
   "n_rejected": 0,
   "baseline_yr": 1.4390761226776076,
@@ -18,12 +18,12 @@
    1.0,
    1.0
   ],
-  "detection_chi2": 47030.563283368254,
-  "catalog_chi2": 22.582143528426606,
-  "shift_px": 1.0866252039907576,
+  "detection_chi2": 2532.737146410715,
+  "catalog_chi2": 1.0610973719574537,
+  "shift_px": 1.0845383823276382,
   "constrained": true,
   "detected": true,
-  "matches_catalog": 0.0
+  "matches_catalog": 1.0
  },
  "brightness": {
   "changes": {

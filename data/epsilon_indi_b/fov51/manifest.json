@@ -11428,12 +11428,12 @@
    ]
   }
  ],
- "verdict": "moves_unexpected",
+ "verdict": "moves_as_expected",
  "measured_motion_mas_yr": {
-  "ra": 3898,
-  "ra_err": 21,
-  "dec": -2524,
-  "dec_err": 24
+  "ra": 3895,
+  "ra_err": 102,
+  "dec": -2512,
+  "dec_err": 76
  },
  "catalog_motion_mas_yr": {
   "ra": 3982,
