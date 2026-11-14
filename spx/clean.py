@@ -15,26 +15,39 @@ from scipy.ndimage import binary_dilation
 
 from spx.cutouts import sky_wcs
 
-# Bit numbers, verified against the FLAGS header (MSKNnnnn keywords) on 2026-11-14.
+# Bit numbers from the FLAGS header (MSKNnnnn keywords, verified 2026-11-14) and Table 16 of the
+# SPHEREx Explanatory Supplement v2.0 (SATELLITE_HALO is newer than our files' headers).
 FLAG_BITS = {
     "TRANSIENT": 0, "OVERFLOW": 1, "SUR_ERROR": 2, "NONFUNC": 6, "DICHROIC": 7, "MISSING_DATA": 9,
     "HOT": 10, "COLD": 11, "FULLSAMPLE": 12, "PHANMISS": 14, "NONLINEAR": 15, "PERSIST": 17,
-    "OUTLIER": 19, "CROSSTALK": 20, "SOURCE": 21, "STREAK": 25, "BLOOM": 26, "SNOWBALL": 27, "HALO": 28,
+    "OUTLIER": 19, "CROSSTALK": 20, "SOURCE": 21, "GHOST": 22, "GHOST_FPA": 23, "GHOST_EXT": 24,
+    "STREAK": 25, "BLOOM": 26, "SNOWBALL": 27, "HALO": 28, "SATELLITE_HALO": 29,
 }
 
-# Pixels set to NaN. TRANSIENT and OUTLIER are included so a cosmic ray in a single frame
-# isn't mistaken for a new object. HALO, DICHROIC, CROSSTALK and PHANMISS are kept (shown only).
-MASKED = ["OVERFLOW", "SUR_ERROR", "NONFUNC", "MISSING_DATA", "HOT", "COLD", "NONLINEAR",
-          "PERSIST", "STREAK", "BLOOM", "SNOWBALL", "TRANSIENT", "OUTLIER"]
+# Pixels set to NaN whenever one of these is set: no usable value, a wrong value (persistence,
+# halo excess, poor calibration), or a fake source (crosstalk, ghost, satellite).
+ALWAYS_MASKED = ["NONFUNC", "MISSING_DATA", "HOT", "COLD", "NONLINEAR", "PERSIST", "DICHROIC",
+                 "PHANMISS", "CROSSTALK", "GHOST", "GHOST_FPA", "GHOST_EXT", "STREAK", "SNOWBALL",
+                 "HALO", "SATELLITE_HALO"]
+# Kept on purpose:
+# - OVERFLOW alone: the value is fitted from the reads taken before the pixel passed the overflow
+#   threshold (half full well), so bright stars stay measurable.
+# - TRANSIENT with BLOOM: a bright star's own spill-over, not a cosmic ray; the value is the
+#   slope from the reads before the spill-over.
+# - OUTLIER: also fires on real objects missing from the source catalog, which a discovery
+#   tool must keep. Single-frame outliers are removed from stacks by outlier rejection.
+# TRANSIENT without BLOOM is a cosmic ray. SUR_ERROR is an onboard error, or with OVERFLOW an
+# overflow in the first seconds (no usable reads); with TRANSIENT + BLOOM it is early spill-over.
 
 # Quality-flags layer: class number -> flags. A pixel takes the first class that matches.
 # SOURCE and FULLSAMPLE are informational and never shown.
 CLEAN, SATURATED, DEFECT, OTHER = 0, 1, 2, 3
 FLAG_CLASSES = {
     SATURATED: ["OVERFLOW", "NONLINEAR", "BLOOM"],  # red
-    DEFECT: ["TRANSIENT", "OUTLIER", "HOT", "COLD", "NONFUNC", "SNOWBALL", "PERSIST",
-             "SUR_ERROR", "MISSING_DATA"],  # orange
-    OTHER: ["HALO", "DICHROIC", "CROSSTALK", "PHANMISS", "STREAK"],  # blue
+    DEFECT: ["TRANSIENT", "HOT", "COLD", "NONFUNC", "SNOWBALL", "PERSIST", "SUR_ERROR",
+             "MISSING_DATA"],  # orange: cosmic rays and bad pixels
+    OTHER: ["OUTLIER", "HALO", "DICHROIC", "CROSSTALK", "PHANMISS", "GHOST", "GHOST_FPA",
+            "GHOST_EXT", "STREAK", "SATELLITE_HALO"],  # blue
 }
 
 BOX_PX = 16  # background mesh: smooth structure larger than a few stars
@@ -62,13 +75,24 @@ def clean_frame(path):
         image = hdul["IMAGE"].data.astype(float) - hdul["ZODI"].data
         variance = hdul["VARIANCE"].data.astype(float)
         flags = hdul["FLAGS"].data.astype(np.int64)
-    unusable = (flags & bitmask(MASKED)) != 0
-    unusable |= ~np.isfinite(image) | ~np.isfinite(variance) | (variance <= 0)
+    unusable = unusable_pixels(flags) | ~np.isfinite(image) | ~np.isfinite(variance) | (variance <= 0)
     image[unusable] = np.nan
     variance[unusable] = np.nan
     background = leftover_background(image)
     return CleanFrame(image - background, variance, flag_classes(flags), background, header,
                       sky_wcs(header))
+
+
+def unusable_pixels(flags):
+    """True where the FLAGS make a pixel's value unusable (see ALWAYS_MASKED and the notes above it)."""
+    def has(name):
+        return (flags & (1 << FLAG_BITS[name])) != 0
+
+    star_spillover = has("TRANSIENT") & has("BLOOM")
+    unusable = (flags & bitmask(ALWAYS_MASKED)) != 0
+    unusable |= has("TRANSIENT") & ~star_spillover
+    unusable |= has("SUR_ERROR") & ~star_spillover
+    return unusable
 
 
 def flag_classes(flags):
