@@ -1,5 +1,6 @@
 """Queries to the IRSA archive (SPHEREx images, CatWISE2020)."""
 import io
+import re
 import time
 
 import requests
@@ -21,6 +22,9 @@ def tap_query(adql, retries=5, timeout=(15, 180)):
                                      data={"LANG": "ADQL", "FORMAT": "csv", "QUERY": adql})
             if response.ok and not response.text.lstrip().startswith("<"):
                 return Table.read(io.BytesIO(response.content), format="ascii.csv")
+            query_error = re.search(r'name="QUERY_STATUS" value="ERROR">(.*?)</INFO>', response.text, re.S)
+            if query_error:  # a mistake in the query: retrying won't help
+                raise ValueError(f"IRSA rejected the query: {query_error.group(1).strip()}")
             last_error = f"HTTP {response.status_code}"
         except requests.RequestException as error:
             last_error = str(error)
