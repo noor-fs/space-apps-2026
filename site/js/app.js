@@ -629,6 +629,11 @@ function updateLabel(item) {
     notes.push(src.saturated ? "No measured position: the target is saturated (too bright to measure) here." : "No measured position for this image.");
   }
   if (item.kind === "visit") {
+    if (state.layers.has("flags")) {
+      notes.push(state.mode === "blink"
+        ? "Quality flags exist only for single images, not visit stacks. Pick single images as A and B to see them."
+        : "Quality flags exist only for single images, not visit stacks. Open a single image to see them.");
+    }
     const wl = Array.isArray(v.wavelength_um) ? `${fmtUm(v.wavelength_um[0])}–${fmtUm(v.wavelength_um[1])} µm` : "";
     fillLabel({
       badge: state.mode === "blink" ? (state.showB ? "B" : "A") : null,
@@ -655,7 +660,7 @@ function updateLabel(item) {
       fmtTime(f.time), `${fmtUm(f.wavelength_um)} µm`, `detector D${f.detector}`,
       f.bad_pixel_fraction != null ? `${(f.bad_pixel_fraction * 100).toFixed(1)}% bad pixels` : "",
     ],
-    link: url ? { href: url, text: "Original file at IRSA ↗" } : null,
+    link: url ? { href: url, text: "Download original FITS file from IRSA (about 65 MB)" } : null,
     notes,
   });
 }
@@ -670,6 +675,7 @@ function updateDiffLabel(A, B, k) {
     notes.push("A visit stack mixes many wavelengths, so comparing it with a single image leaves residue that is color difference, not change.");
   }
   notes.push(DIFF_NOTE);
+  if (state.layers.has("flags")) notes.push("Quality flags aren't shown in difference mode. Use flipbook or blink with single images to see them.");
   fillLabel({
     title: `Difference: B − ${k.toFixed(3)} × A`,
     details: [`A: ${refName(A)} (${A.kind === "frame" ? fmtTime(A.frame.time) : fmtDate(A.visit.date_mid)})`,
@@ -832,6 +838,9 @@ function renderBrightness() {
     note(notes.join(" "));
     return;
   }
+  if (pts.some((x) => x.frame.saturated)) {
+    notes.push("Hollow dots: the target is saturated (too bright) in that image, so its brightness is less precise.");
+  }
   note(notes.join(" "));
   const ts = pts.map((x) => x.t);
   let tMin = Math.min(...ts), tMax = Math.max(...ts);
@@ -847,13 +856,15 @@ function renderBrightness() {
     y: { min: yMin, max: yMax, label: "Brightness (mJy)" },
     points: pts.map((x) => ({
       x: x.t, y: x.frame.target_flux_mjy, err: x.frame.target_flux_err_mjy, color: BRIGHTNESS_COLOR,
-      tip: `${fmtTime(x.frame.time)} · ${fmtUm(x.frame.wavelength_um)} µm · D${x.frame.detector} · ${x.frame.target_flux_mjy.toFixed(3)}${x.frame.target_flux_err_mjy != null ? ` ± ${x.frame.target_flux_err_mjy.toFixed(3)}` : ""} mJy · click to open`,
+      hollow: !!x.frame.saturated,
+      tip: `${fmtTime(x.frame.time)} · ${fmtUm(x.frame.wavelength_um)} µm · D${x.frame.detector} · ${x.frame.target_flux_mjy.toFixed(3)}${x.frame.target_flux_err_mjy != null ? ` ± ${x.frame.target_flux_err_mjy.toFixed(3)}` : ""} mJy${x.frame.saturated ? " · saturated, less precise" : ""} · click to open`,
       onClick: () => openFrame(x.ref),
     })),
   });
-  drawTable(el.brightnessTable, ["Time (UTC)", "Visit, image", "Wavelength (µm)", "Detector", "Brightness (mJy)", "Error (mJy)"],
+  drawTable(el.brightnessTable, ["Time (UTC)", "Visit, image", "Wavelength (µm)", "Detector", "Brightness (mJy)", "Error (mJy)", "Saturated"],
     pts.map((x) => [fmtTime(x.frame.time), `${x.visit.n}, ${x.frame.i}`, fmtUm(x.frame.wavelength_um), `D${x.frame.detector}`,
-      x.frame.target_flux_mjy.toFixed(3), x.frame.target_flux_err_mjy != null ? x.frame.target_flux_err_mjy.toFixed(3) : "—"]));
+      x.frame.target_flux_mjy.toFixed(3), x.frame.target_flux_err_mjy != null ? x.frame.target_flux_err_mjy.toFixed(3) : "—",
+      x.frame.saturated ? "yes" : "no"]));
 }
 
 // ---------------------------------------------------------------- infrared fingerprint
@@ -903,15 +914,30 @@ async function renderFingerprint() {
     return;
   }
   // Divide everything by the target's value nearest 2.2 µm, as the reference files already are.
-  const ref = rows.reduce((best, x) => (Math.abs(x.frame.wavelength_um - 2.2) < Math.abs(best.frame.wavelength_um - 2.2) ? x : best));
+  // Prefer a non-saturated image, but only if it is about as close to 2.2 µm (within 0.15 µm more);
+  // a precise value far from 2.2 µm would misalign the dots with the reference curves more.
+  const dist = (x) => Math.abs(x.frame.wavelength_um - 2.2);
+  const nearest = (list) => list.reduce((best, x) => (dist(x) < dist(best) ? x : best));
+  const closest = nearest(rows);
+  const clean = rows.filter((x) => !x.frame.saturated && dist(x) <= dist(closest) + 0.15);
+  const ref = clean.length ? nearest(clean) : closest;
   const norm = ref.frame.target_flux_mjy;
-  el.fpNote.textContent = `Each dot is one single image (time filter applies). All values are divided by the image nearest 2.2 µm (${fmtUm(ref.frame.wavelength_um)} µm, ${norm.toFixed(3)} mJy), as the reference curves are. Reference curves stop where their source stops.`;
+  const anySat = rows.some((x) => x.frame.saturated);
+  if (anySat) {
+    const k = document.createElement("span");
+    k.className = "legend-item";
+    k.innerHTML = `<svg width="14" height="14" aria-hidden="true"><circle cx="7" cy="7" r="4" fill="none" stroke="${TARGET_POINT_COLOR}" stroke-width="2"/></svg>`;
+    k.append(" Saturated image (less precise)");
+    targetKey.after(k);
+  }
+  el.fpNote.textContent = `Each dot is one single image (time filter applies). All values are divided by the image nearest 2.2 µm (${fmtUm(ref.frame.wavelength_um)} µm, ${norm.toFixed(3)} mJy${ref.frame.saturated ? ", saturated, so the whole curve is less precise" : ""}), as the reference curves are.${anySat ? " Hollow dots are saturated images." : ""} Reference curves stop where their source stops.`;
   const pts = rows.map((x) => ({
     x: x.frame.wavelength_um,
     y: x.frame.target_flux_mjy / norm,
     err: x.frame.target_flux_err_mjy != null ? x.frame.target_flux_err_mjy / Math.abs(norm) : null,
     color: TARGET_POINT_COLOR,
-    tip: `${fmtUm(x.frame.wavelength_um)} µm · ${(x.frame.target_flux_mjy / norm).toFixed(3)} (relative) · ${x.frame.target_flux_mjy.toFixed(3)} mJy · visit ${x.visit.n}, image ${x.frame.i} · click to open`,
+    hollow: !!x.frame.saturated,
+    tip: `${fmtUm(x.frame.wavelength_um)} µm · ${(x.frame.target_flux_mjy / norm).toFixed(3)} (relative) · ${x.frame.target_flux_mjy.toFixed(3)} mJy${x.frame.saturated ? " · saturated, less precise" : ""} · visit ${x.visit.n}, image ${x.frame.i} · click to open`,
     onClick: () => openFrame(x.ref),
   }));
   const lines = spectra.filter((sp) => sp && enabledSpectra.has(sp.file))
@@ -925,9 +951,10 @@ async function renderFingerprint() {
     y: { min: yMin, max: yMax, label: "Brightness relative to 2.2 µm" },
     lines, points: pts,
   });
-  drawTable(el.fpTable, ["Wavelength (µm)", "Relative to 2.2 µm", "Brightness (mJy)", "Visit, image"],
+  drawTable(el.fpTable, ["Wavelength (µm)", "Relative to 2.2 µm", "Brightness (mJy)", "Visit, image", "Saturated"],
     [...rows].sort((p, q) => p.frame.wavelength_um - q.frame.wavelength_um)
-      .map((x) => [fmtUm(x.frame.wavelength_um), (x.frame.target_flux_mjy / norm).toFixed(3), x.frame.target_flux_mjy.toFixed(3), `${x.visit.n}, ${x.frame.i}`]));
+      .map((x) => [fmtUm(x.frame.wavelength_um), (x.frame.target_flux_mjy / norm).toFixed(3), x.frame.target_flux_mjy.toFixed(3), `${x.visit.n}, ${x.frame.i}`,
+        x.frame.saturated ? "yes" : "no"]));
 }
 
 // ---------------------------------------------------------------- panels

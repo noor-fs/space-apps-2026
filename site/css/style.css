@@ -428,6 +428,7 @@ button.wide { width: 100%; margin-top: 8px; }
 .chart .axis-label { fill: var(--muted); font-size: 12px; }
 .chart .series-line { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
 .chart .dot { stroke: var(--panel); stroke-width: 2; }
+.chart .dot.hollow { fill: var(--panel); stroke: currentColor; }
 .chart .errbar { stroke-width: 1.5; opacity: 0.6; fill: none; }
 .chart .hit { fill: transparent; }
 .chart .pt.clickable { cursor: pointer; }

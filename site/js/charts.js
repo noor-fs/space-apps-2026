@@ -42,7 +42,7 @@ const monthFmt = new Intl.DateTimeFormat("en-GB", { month: "short", year: "numer
  * opts: {
  *   x: {type: "time"|"linear", min, max, label}, y: {min, max, label},
  *   lines: [{label, color, points: [[x, y], ...]}],
- *   points: [{x, y, err, color, tip, onClick}],
+ *   points: [{x, y, err, color, hollow, tip, onClick}],  // hollow: ring instead of a filled dot
  *   ariaLabel
  * }
  */
@@ -109,7 +109,8 @@ export function drawChart(container, opts) {
       const y1 = sy(p.y - p.err), y2 = sy(p.y + p.err);
       s("path", { class: "errbar", stroke: p.color, d: `M${cx},${y1}V${y2}M${cx - 3},${y1}H${cx + 3}M${cx - 3},${y2}H${cx + 3}` }, g);
     }
-    s("circle", { class: "dot", cx, cy, r: 4.5, fill: p.color }, g);
+    if (p.hollow) s("circle", { class: "dot hollow", cx, cy, r: 4, color: p.color }, g);
+    else s("circle", { class: "dot", cx, cy, r: 4.5, fill: p.color }, g);
     s("circle", { class: "hit", cx, cy, r: 11 }, g);
     g.addEventListener("pointerenter", () => showTip(p, cx, cy));
     g.addEventListener("pointerleave", () => { tip.hidden = true; });

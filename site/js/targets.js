@@ -8,7 +8,8 @@ export const TARGETS = [
     aliases: ["r dra"] },
   { key: "rw_aurigae", name: "RW Aurigae", ra: 76.956560, dec: 30.401248,
     aliases: ["rw aur"] },
-  { key: "wise_0855", name: "WISE 0855", ra: 133.79, dec: -7.245,
+  // WISE 0855 center from Yara T's team update (2026-11-14), replacing the plan's provisional 133.79, -7.245.
+  { key: "wise_0855", name: "WISE 0855", ra: 133.760346, dec: -7.241822,
     aliases: ["wise 0855-0714", "wise j0855-0714", "wise j085510.83-071442.5"] },
 ];
 
