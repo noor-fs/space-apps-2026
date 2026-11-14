@@ -74,10 +74,13 @@ export function renderEntry(container, entry, fallbackTitle) {
 }
 
 /** Explanation panel: target entry, verdict with text, measured vs catalog motion. */
-export function renderTargetPanel(container, { key, name, manifest, explanations }) {
+/**
+ * Target description + verdict, for the "About <target>" box above the mode tabs.
+ * The box's summary line already shows the target's name, so no heading here.
+ */
+export function renderTargetPanel(container, { key, manifest, explanations }) {
   container.replaceChildren();
   const target = explanations?.targets?.[key];
-  container.append(h("h3", { class: "entry-title" }, target?.title || name));
   container.append(target?.text ? h("p", {}, target.text) : h("p", { class: "muted" }, "No description of this target yet."));
   const src = sourcesLine(target?.sources);
   if (src) container.append(src);
