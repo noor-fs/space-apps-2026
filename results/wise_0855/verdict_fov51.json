@@ -1,0 +1,33 @@
+{
+ "verdict": "moves_as_expected",
+ "motion_source": "visit fits",
+ "position_floor_px": [
+  0.0395594418602109,
+  0.04409785291477803
+ ],
+ "visit_fit_position_floor_px": [
+  0.011279379330883122,
+  0.0074813464743205445
+ ],
+ "motion": {
+  "pmra": -8349.897280330048,
+  "pmra_err": 1174.2232058373925,
+  "pmdec": 1023.9594850739719,
+  "pmdec_err": 570.1992967912959,
+  "n_used": 3,
+  "n_rejected": 0,
+  "baseline_yr": 0.9876218452086265,
+  "data_span_yr": 1.0228259822039654,
+  "error_scale": [
+   2.1306097024212094,
+   1.0
+  ],
+  "detection_chi2": 53.791143172101165,
+  "catalog_chi2": 0.41552102003595526,
+  "shift_px": 1.350945885743265,
+  "constrained": true,
+  "detected": true,
+  "matches_catalog": 1.0
+ },
+ "brightness": null
+}

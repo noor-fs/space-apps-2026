@@ -44,12 +44,12 @@ def frame_key(header):
 
 
 def export_field(data_dir, target_key, name, field, target, visits, ranges, frame_measurements,
-                 stack_measurements, motion, motion_source, verdict, uris=None):
+                 visit_measurements, motion, motion_source, verdict, uris=None):
     """Write data/<target_key>/fields.json and the whole fov<S>/ folder for one field size.
 
     visits: visits.build_visits output. ranges: visit_ranges of ALL frames found.
     frame_measurements: {frame_key: FrameMeasurement} for single frames.
-    stack_measurements: measure_stacks output, or None. motion, motion_source: measure_motion output.
+    visit_measurements: psf.measure_visits output, or None. motion, motion_source: measure_motion output.
     uris: {frame_key: archive uri} from archive.find_frames; archive_url is null without it.
     The fov<S>/ folder is rebuilt from scratch, so no file from an earlier run survives.
     """
@@ -60,7 +60,7 @@ def export_field(data_dir, target_key, name, field, target, visits, ranges, fram
     (fov / "frames").mkdir(parents=True)
 
     frame_floor = position_floor(list(frame_measurements.values()))
-    visit_set = list(frame_measurements.values()) if motion_source == "frames" else (stack_measurements or [])
+    visit_set = list(frame_measurements.values()) if motion_source == "frames" else (visit_measurements or [])
     visit_floor = position_floor(visit_set)
     visit_numbers = visit_of([m.mjd for m in visit_set], ranges) if visit_set else []
     shared_floor = visit_shared_floor(visit_set, visit_numbers)
@@ -141,7 +141,7 @@ def export_field(data_dir, target_key, name, field, target, visits, ranges, fram
     return manifest
 
 
-def write_results(results_dir, field, frame_measurements, stack_measurements, motion, motion_source,
+def write_results(results_dir, field, frame_measurements, visit_measurements, motion, motion_source,
                   brightness, verdict):
     """Measurement table and test summaries behind the manifest numbers (results/<target_key>/)."""
     results_dir = Path(results_dir)
@@ -151,13 +151,13 @@ def write_results(results_dir, field, frame_measurements, stack_measurements, mo
                "measured_col", "measured_row", "error_col", "error_row", "flux_mjy", "flux_err_mjy", "snr",
                "saturated"]
     rows = [(key, m) for key, m in frame_measurements.items()]
-    rows += [(f"stack_D{'+'.join(map(str, m.detector))}", m) for m in stack_measurements or []]
-    stack_floor = position_floor(stack_measurements or [])
+    rows += [(f"visitfit_D{'+'.join(map(str, m.detector))}", m) for m in visit_measurements or []]
+    visit_fit_floor = position_floor(visit_measurements or [])
     with (results_dir / f"measurements_fov{field.size_px}.csv").open("w", newline="") as handle:
         writer = csv.writer(handle)
         writer.writerow(columns)
         for key, m in sorted(rows, key=lambda row: row[1].mjd):
-            position = _position_fields(m, stack_floor if key.startswith("stack") else floor, field)
+            position = _position_fields(m, visit_fit_floor if key.startswith("visitfit") else floor, field)
             writer.writerow([key, f"{m.mjd:.6f}", m.detector, _number(m.wavelength_um, 4),
                              _number(m.bandwidth_um, 4), *_web_point(m.expected, field),
                              *(position["target_measured_px"] or ["", ""]),
@@ -165,7 +165,7 @@ def write_results(results_dir, field, frame_measurements, stack_measurements, mo
                              _number(m.flux_mjy, 5), _number(m.flux_err_mjy, 5), _number(m.snr, 3),
                              m.saturated])
     summary = {"verdict": verdict, "motion_source": motion_source,
-               "position_floor_px": floor, "stack_position_floor_px": stack_floor,
+               "position_floor_px": floor, "visit_fit_position_floor_px": visit_fit_floor,
                "motion": None if motion is None else {**motion.__dict__, "shift_px": motion.shift_px,
                                                       "constrained": motion.constrained,
                                                       "detected": motion.detected,

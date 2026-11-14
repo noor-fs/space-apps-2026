@@ -1,0 +1,30 @@
+{
+ "verdict": "saturated",
+ "motion_source": "frames",
+ "position_floor_px": [
+  0.046071989340852264,
+  0.04833518298418996
+ ],
+ "visit_fit_position_floor_px": null,
+ "motion": {
+  "pmra": -16753.62058122955,
+  "pmra_err": 22544.36522213178,
+  "pmdec": -19831.795873781473,
+  "pmdec_err": 26459.90894478686,
+  "n_used": 3,
+  "n_rejected": 0,
+  "baseline_yr": 0.06878740398629127,
+  "data_span_yr": 1.424809210130053,
+  "error_scale": [
+   3.56785334687116,
+   4.023791691868251
+  ],
+  "detection_chi2": 1.1140127082455522,
+  "catalog_chi2": 1.1130010270710167,
+  "shift_px": 0.29037456668570777,
+  "constrained": false,
+  "detected": 0.0,
+  "matches_catalog": 1.0
+ },
+ "brightness": null
+}

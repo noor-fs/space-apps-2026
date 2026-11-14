@@ -1,0 +1,15 @@
+{
+ "built": "2026-11-14T20:56:00Z",
+ "size_px": 51,
+ "offline": true,
+ "frames_found": 272,
+ "frames_from": "cached list",
+ "budget": null,
+ "cutouts_used": 272,
+ "failed_downloads": [],
+ "frames_without_wavelength": 0,
+ "visits": 3,
+ "reference_stars": 15,
+ "verdict": "moves_as_expected",
+ "minutes": 15.1
+}

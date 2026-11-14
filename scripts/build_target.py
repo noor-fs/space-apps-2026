@@ -16,6 +16,8 @@ import time
 import warnings
 from pathlib import Path
 
+import numpy as np
+
 from astropy.coordinates import SkyCoord
 from astropy.table import Table
 from astropy.time import Time
@@ -28,8 +30,9 @@ from spx.clean import clean_frame  # noqa: E402
 from spx.cutouts import CACHE_DIR, download_frames, field_dir, wavelength_calibration_id, wavelength_table  # noqa: E402
 from spx.export import export_field, frame_key, write_results  # noqa: E402
 from spx.field import FIELD_SIZES_PX, Field, parse_coordinates  # noqa: E402
-from spx.measure import gaia_sources, measure_frame, measure_stacks, reference_stars  # noqa: E402
+from spx.measure import gaia_sources, measure_frame, reference_stars  # noqa: E402
 from spx.names import CatalogSource, resolve_name  # noqa: E402
+from spx.psf import measure_visits  # noqa: E402
 from spx.verdict import brightness_test, measure_motion, verdict  # noqa: E402
 from spx.visits import build_visits, visit_ranges  # noqa: E402
 
@@ -128,17 +131,23 @@ def build(target_key, label, field, target, budget, offline):
 
     ranges = visit_ranges(frames["mjd_start"])
     visits = build_visits(aligned, ranges)
-    stacks = measure_stacks(visits, field, target, references, catalog)
     frame_measurements = list(measurements.values())
-    motion, motion_source = measure_motion(frame_measurements, stacks, field, target, ranges)
+    motion, motion_source = measure_motion(frame_measurements, None, field, target, ranges)
+    visit_fits = None
+    # The PSF can't describe a saturated core, so a mostly saturated target isn't refitted
+    mostly_saturated = np.mean([m.saturated for m in frame_measurements]) > 0.5
+    if target is not None and not mostly_saturated and (motion is None or not motion.constrained):
+        print("Single frames can't constrain the motion: fitting each visit with the PSF")
+        visit_fits = measure_visits(paths, rows_by_id, field, target, ranges, catalog, references)
+        motion, motion_source = measure_motion(frame_measurements, visit_fits, field, target, ranges)
     brightness = brightness_test(frame_measurements, ranges)
     result = verdict(frame_measurements, motion, brightness)
 
     uris = {f"{r['exposure']}_D{r['detector']}": str(r["uri"]) for r in frames} if "uri" in frames.colnames else None
     export_field(DATA_DIR / target_key, target_key, label, field, target, visits, ranges, measurements,
-                 stacks, motion, motion_source, result, uris)
+                 visit_fits, motion, motion_source, result, uris)
     results = RESULTS_DIR / target_key
-    write_results(results, field, measurements, stacks, motion, motion_source, brightness, result)
+    write_results(results, field, measurements, visit_fits, motion, motion_source, brightness, result)
     log = {"built": Time.now().isot[:19] + "Z", "size_px": field.size_px, "offline": offline,
            "frames_found": len(frames), "frames_from": frames_from, "budget": budget,
            "cutouts_used": len(paths), "failed_downloads": failures, "frames_without_wavelength": missing_wave,

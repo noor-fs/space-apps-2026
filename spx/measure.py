@@ -7,7 +7,6 @@ errors that the fit error alone misses.
 """
 import warnings
 from dataclasses import dataclass
-from types import SimpleNamespace
 
 import astropy.units as u
 import numpy as np
@@ -22,7 +21,6 @@ from erfa import ErfaWarning
 from spx.clean import CLEAN, SATURATED
 from spx.cutouts import field_dir, wavelength_at
 from spx.field import PIXEL_SCALE_ARCSEC
-from spx.visits import RGB_DETECTORS, equal_weight_mean
 
 STAMP_HALF = 3  # fit a 7 x 7 pixel stamp
 APERTURE_R = 2.0  # px; aperture photometry radius
@@ -148,6 +146,15 @@ def apparent_positions(ra, dec, pmra, pmdec, parallax, ref_epoch, when):
     return flat.spherical_offsets_by(dlon, dlat)
 
 
+def target_position(target, field, when):
+    """Catalog position of the target at `when` (proper motion and parallax); the field center
+    when there is no catalog target (typed coordinates)."""
+    if target is None:
+        return field.center
+    return apparent_positions(np.array([target.ra]), np.array([target.dec]), np.array([target.pmra]),
+                              np.array([target.pmdec]), np.array([target.parallax]), target.ref_epoch, when)[0]
+
+
 def gaia_sources(field):
     """Every Gaia DR3 source brighter than G = 20 in and around the field (cached per field)."""
     path = field_dir(field) / "gaia_reference_stars.ecsv"
@@ -185,7 +192,7 @@ def gaia_positions(table, when):
 @dataclass
 class FrameMeasurement:
     mjd: float  # mid-exposure
-    detector: int | tuple  # a tuple of detectors for a pair stack (measure_stacks)
+    detector: int | tuple  # a tuple of detectors for a visit fit (psf.measure_visits)
     expected: tuple  # (x, y) on the field grid (FITS orientation, 0-based)
     measured: tuple | None  # (x, y) on the field grid; None if not measurable
     measured_fit_err: tuple | None  # (x, y) fit error in px, before adding the field-star floor
@@ -257,32 +264,6 @@ def measure_frame(frame, field, target, references, wave_table, catalog=None):
     return FrameMeasurement(when.mjd, _detector(frame.header["DETECTOR"]), expected, measured, fit_err,
                             saturated, point and point.flux_mjy, point and point.flux_err_mjy,
                             point and point.snr, wavelength, bandwidth, residuals, fluxes)
-
-
-def measure_stacks(visits, field, target, references, catalog=None):
-    """Measure the target in each visit's detector-pair stacks, for targets too faint in single frames.
-
-    Pairs (visits.RGB_DETECTORS) rather than single detectors: about twice as deep, and a
-    position doesn't depend on mixing two wavelength ranges (a target too red for one pair is
-    simply not found there). One FrameMeasurement per (visit, pair), dated at the mean time of
-    its frames, with detector = the pair; 'saturated' if any of those frames is saturated there.
-    """
-    measurements = []
-    for visit in visits:
-        for pair in RGB_DETECTORS.values():
-            present = [d for d in pair if d in visit.detectors]
-            if not present:
-                continue
-            stack = equal_weight_mean([visit.detectors[d] for d in present])
-            frames = [f for f in visit.frames if int(f.header["DETECTOR"]) in present]
-            saturated = np.any([f.flag_class == SATURATED for f in frames], axis=0)
-            as_frame = SimpleNamespace(
-                image=stack.image, variance=stack.variance,
-                flag_class=np.where(saturated, SATURATED, CLEAN), wcs=field.wcs(),
-                header={"MJD-AVG": float(np.mean([f.header["MJD-AVG"] for f in frames])),
-                        "DETECTOR": tuple(present)})
-            measurements.append(measure_frame(as_frame, field, target, references, None, catalog))
-    return measurements
 
 
 def _detector(value):

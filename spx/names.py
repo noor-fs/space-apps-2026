@@ -47,6 +47,18 @@ class CatalogSource:
         return SkyCoord(ra=moved.ra, dec=moved.dec)
 
 
+# Published astrometry better than the catalog's, for objects whose motion we measure. Keyed by
+# the catalog source that identifies the object; the field center still comes from that catalog
+# match, the motion model (position, proper motion, parallax) from here.
+PUBLISHED_ASTROMETRY = {
+    # WISE 0855: CatWISE2020's motion (-7950 +/- 190, +812 +/- 265 mas/yr, no parallax) puts it 2-3"
+    # off by 2026. Kirkpatrick et al. 2021, ApJS 253, 7, Table 5 (19 Spitzer epochs, Gaia DR2 frame).
+    "J085508.34-071439.2": CatalogSource("Kirkpatrick et al. 2021 (Spitzer)", "WISE J085510.83-071442.5",
+                                         133.780984, -7.243932, -8123.7, 673.2, 439.0,
+                                         Time(57633.39, format="mjd")),
+}
+
+
 @dataclass
 class NameMatch:
     name: str
@@ -61,7 +73,8 @@ def resolve_name(name):
     for fetch in (_gaia_sources, _catwise_sources):
         source, separation = _closest_at_j2000(sesame, fetch(sesame))
         if source is not None and separation <= MATCH_TOLERANCE_ARCSEC:
-            return NameMatch(name, source.position_at(Time(CENTER_DATE)), source, separation)
+            motion_model = PUBLISHED_ASTROMETRY.get(source.source_id, source)
+            return NameMatch(name, source.position_at(Time(CENTER_DATE)), motion_model, separation)
     return NameMatch(name, sesame, None, np.nan)
 
 

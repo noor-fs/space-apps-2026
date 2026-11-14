@@ -5,7 +5,7 @@
   0.03272089538076649,
   0.03828797593220032
  ],
- "stack_position_floor_px": null,
+ "visit_fit_position_floor_px": null,
  "motion": {
   "pmra": 3895.3560402373932,
   "pmra_err": 102.25305021009859,
@@ -14,6 +14,7 @@
   "n_used": 347,
   "n_rejected": 0,
   "baseline_yr": 1.4390761226776076,
+  "data_span_yr": 1.4390761232032891,
   "error_scale": [
    1.0,
    1.0

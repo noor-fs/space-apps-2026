@@ -43,7 +43,8 @@ class MotionFit:
     pmdec_err: float
     n_used: int
     n_rejected: int
-    baseline_yr: float
+    baseline_yr: float  # time spanned by the measured points
+    data_span_yr: float  # time spanned by all the field's data (first to last visit)
     error_scale: tuple  # (RA, Dec) factor the errors were inflated by when the line didn't fit
     detection_chi2: float  # measured motion vs zero, 2 degrees of freedom
     catalog_chi2: float | None  # measured motion vs the catalog's; None without a catalog motion
@@ -55,8 +56,10 @@ class MotionFit:
 
     @property
     def constrained(self):
-        """True if a shift of MAX_UNDETECTABLE_SHIFT_PX over the time span would be detected."""
-        error_px = max(self.pmra_err, self.pmdec_err) / 1000 * self.baseline_yr / PIXEL_SCALE_ARCSEC
+        """True if a shift of MAX_UNDETECTABLE_SHIFT_PX over the data's whole time span would be
+        detected. The whole span, not the measured points' span: a few points days apart (R Dra:
+        3 of 2,600 frames) "constrain" any motion over those days and say nothing about the data."""
+        error_px = max(self.pmra_err, self.pmdec_err) / 1000 * self.data_span_yr / PIXEL_SCALE_ARCSEC
         return 3 * error_px <= MAX_UNDETECTABLE_SHIFT_PX
 
     @property
@@ -68,19 +71,20 @@ class MotionFit:
         return self.catalog_chi2 is not None and stats.chi2.sf(self.catalog_chi2, 2) >= THREE_SIGMA_P
 
 
-def measure_motion(frame_measurements, stack_measurements, field, target, ranges):
-    """Motion from single frames; from visit stacks when frames can't constrain it.
+def measure_motion(frame_measurements, visit_measurements, field, target, ranges):
+    """Motion from single frames; from one PSF fit per visit (psf.measure_visits) when frames
+    can't constrain it.
 
-    Returns (MotionFit or None, "frames" or "stacks"). Each set uses its own position floor
-    (reference stars measured the same way). stack_measurements may be None (not built yet).
+    Returns (MotionFit or None, "frames" or "visit fits"). Each set uses its own position floor
+    (reference stars measured the same way). visit_measurements may be None (not computed).
     ranges: visits.visit_ranges of all frames found.
     """
     from_frames = fit_motion(frame_measurements, field, target, position_floor(frame_measurements), ranges)
-    if (from_frames is not None and from_frames.constrained) or not stack_measurements:
+    if (from_frames is not None and from_frames.constrained) or not visit_measurements:
         return from_frames, "frames"
-    from_stacks = fit_motion(stack_measurements, field, target, position_floor(stack_measurements), ranges)
-    if from_stacks is not None and (from_frames is None or from_stacks.constrained):
-        return from_stacks, "stacks"
+    from_visits = fit_motion(visit_measurements, field, target, position_floor(visit_measurements), ranges)
+    if from_visits is not None and (from_frames is None or from_visits.constrained):
+        return from_visits, "visit fits"
     return from_frames, "frames"
 
 
@@ -100,6 +104,8 @@ def fit_motion(measurements, field, target, floor, ranges):
     errors = np.array([frame_position_error(m, floor) for m in used]) * PIXEL_SCALE_ARCSEC
     visits = visit_of([m.mjd for m in used], ranges)
     shared = np.array(visit_shared_floor(used, visits)) * PIXEL_SCALE_ARCSEC
+    if np.bincount(visits).max() <= 1:
+        shared[:] = 0  # one measurement per visit: its floor already is the visit-to-visit scatter
     years = (when - Time(CENTER_DATE)).to_value(u.yr)
 
     keep = np.ones(len(used), bool)
@@ -120,7 +126,8 @@ def fit_motion(measurements, field, target, floor, ranges):
     if target is not None:
         catalog_chi2 = float(np.sum(((pm - [target.pmra, target.pmdec]) / pm_err) ** 2))
     return MotionFit(float(pm[0]), float(pm_err[0]), float(pm[1]), float(pm_err[1]), int(keep.sum()),
-                     int((~keep).sum()), float(np.ptp(years[keep])), (float(ra_scale), float(dec_scale)),
+                     int((~keep).sum()), float(np.ptp(years[keep])), float((ranges[-1][1] - ranges[0][0]) / 365.25),
+                     (float(ra_scale), float(dec_scale)),
                      float(np.sum((pm / pm_err) ** 2)), catalog_chi2)
 
 

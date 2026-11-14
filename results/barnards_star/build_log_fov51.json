@@ -1,21 +1,15 @@
 {
- "built": "2026-11-14T18:34:46Z",
+ "built": "2026-11-14T20:32:39Z",
  "size_px": 51,
- "offline": false,
+ "offline": true,
  "frames_found": 386,
- "frames_from": "archive",
+ "frames_from": "cached list",
  "budget": null,
  "cutouts_used": 385,
- "failed_downloads": [
-  {
-   "frame": "2026W11_2A_0513_1",
-   "detector": 5,
-   "error": "(\"Connection broken: ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None)\", ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))"
-  }
- ],
+ "failed_downloads": [],
  "frames_without_wavelength": 0,
  "visits": 3,
  "reference_stars": 10,
  "verdict": "moves_as_expected",
- "minutes": 7.0
+ "minutes": 2.0
 }

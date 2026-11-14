@@ -57,6 +57,7 @@ def align_frame(frame, field):
         variance = resample(np.where(usable, frame.variance, 0.0))[0] / weight
     image[~keep] = np.nan
     variance[~keep] = np.nan
+    image, variance = image.astype(np.float32), variance.astype(np.float32)  # half the memory (R Dra: ~2,600 frames)
     flag_class = resample(frame.flag_class.astype(float), order="nearest-neighbor")[0]
     flag_class = np.where(covered & np.isfinite(flag_class), flag_class, CLEAN).astype(np.uint8)
     return AlignedFrame(image, variance, flag_class, covered, frame.header)
