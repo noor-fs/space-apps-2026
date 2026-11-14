@@ -1,0 +1,203 @@
+{
+ "generated_utc": "2026-11-14T19:59:43Z",
+ "method": {
+  "motion": "z = (measured - catalog) / measured error per axis; chi-square with 2 degrees of freedom; agrees if p > 0.05, disagrees if p <= 0.0027.",
+  "position": "offset = measured - expected per image, split into a constant offset (mean over all images) and a random part (offset minus its visit's mean, divided by its error); honest errors put 68% of the random part within 1 and 95% within 2.",
+  "field_stars": "same pull test on catalog stars, excluding calibration (reference) stars and stars with close neighbours."
+ },
+ "headline": [
+  "Measured motion agrees with the catalog for 3 of 3 targets (95% level).",
+  "Target position measured in 758 single SPHEREx images.",
+  "Error bars: 91% of image-to-image scatter falls within 2 sigma (95% if the error bars are exactly right).",
+  "Positions sit within 0.61 arcsec of the catalog (about 0.1 of a pixel)."
+ ],
+ "targets": [
+  {
+   "target_key": "epsilon_indi_b",
+   "name": "Epsilon Indi B",
+   "field_size_px": 51,
+   "verdict": "moves_as_expected",
+   "motion": {
+    "measured_mas_yr": {
+     "ra": 3895,
+     "ra_err": 102,
+     "dec": -2512,
+     "dec_err": 76
+    },
+    "catalog_mas_yr": {
+     "ra": 3982,
+     "dec": -2467,
+     "source": "Gaia DR3"
+    },
+    "z": {
+     "ra": -0.85,
+     "dec": -0.59
+    },
+    "chi2_2dof": 1.08,
+    "p_value": 0.583,
+    "agreement": "agrees",
+    "speed_measured_mas_yr": 4635,
+    "speed_catalog_mas_yr": 4684,
+    "speed_difference_percent": -1.1,
+    "baseline_years": 1.39,
+    "shift_over_baseline_px": 1.06
+   },
+   "target_position": {
+    "n_images": 461,
+    "n_measured": 347,
+    "n_saturated": 3,
+    "constant_offset": {
+     "px": [
+      -0.035,
+      0.093
+     ],
+     "arcsec": 0.61,
+     "fraction_of_pixel": 0.099
+    },
+    "random_pulls": {
+     "n": 694,
+     "within_1sigma": 0.777,
+     "within_2sigma": 0.976,
+     "within_3sigma": 0.996,
+     "mean_pull": 0.001,
+     "rms_pull": 0.861
+    },
+    "raw_pulls": {
+     "n": 694,
+     "within_1sigma": 0.264,
+     "within_2sigma": 0.595,
+     "within_3sigma": 0.889,
+     "mean_pull": 0.655,
+     "rms_pull": 2.026
+    }
+   },
+   "field_stars": null,
+   "candidates": null
+  },
+  {
+   "target_key": "barnards_star",
+   "name": "Barnard's Star",
+   "field_size_px": 51,
+   "verdict": "moves_as_expected",
+   "motion": {
+    "measured_mas_yr": {
+     "ra": -1369,
+     "ra_err": 248,
+     "dec": 10322,
+     "dec_err": 211
+    },
+    "catalog_mas_yr": {
+     "ra": -802,
+     "dec": 10362,
+     "source": "Gaia DR3"
+    },
+    "z": {
+     "ra": -2.29,
+     "dec": -0.19
+    },
+    "chi2_2dof": 5.26,
+    "p_value": 0.072,
+    "agreement": "agrees",
+    "speed_measured_mas_yr": 10412,
+    "speed_catalog_mas_yr": 10393,
+    "speed_difference_percent": 0.2,
+    "baseline_years": 0.98,
+    "shift_over_baseline_px": 1.66
+   },
+   "target_position": {
+    "n_images": 359,
+    "n_measured": 106,
+    "n_saturated": 359,
+    "constant_offset": {
+     "px": [
+      -0.019,
+      -0.002
+     ],
+     "arcsec": 0.12,
+     "fraction_of_pixel": 0.019
+    },
+    "random_pulls": {
+     "n": 212,
+     "within_1sigma": 0.811,
+     "within_2sigma": 0.925,
+     "within_3sigma": 0.976,
+     "mean_pull": 0.0,
+     "rms_pull": 1.13
+    },
+    "raw_pulls": {
+     "n": 212,
+     "within_1sigma": 0.623,
+     "within_2sigma": 0.915,
+     "within_3sigma": 0.972,
+     "mean_pull": -0.173,
+     "rms_pull": 1.345
+    }
+   },
+   "field_stars": null,
+   "candidates": null
+  },
+  {
+   "target_key": "rw_aurigae",
+   "name": "RW Aurigae",
+   "field_size_px": 51,
+   "verdict": "brightness_changes",
+   "motion": {
+    "measured_mas_yr": {
+     "ra": 492,
+     "ra_err": 336,
+     "dec": 33,
+     "dec_err": 51
+    },
+    "catalog_mas_yr": {
+     "ra": 5,
+     "dec": -25,
+     "source": "Gaia DR3"
+    },
+    "z": {
+     "ra": 1.45,
+     "dec": 1.14
+    },
+    "chi2_2dof": 3.39,
+    "p_value": 0.183,
+    "agreement": "agrees",
+    "speed_measured_mas_yr": 493,
+    "speed_catalog_mas_yr": 25,
+    "speed_difference_percent": null,
+    "baseline_years": 1.0,
+    "shift_over_baseline_px": 0.0
+   },
+   "target_position": {
+    "n_images": 335,
+    "n_measured": 305,
+    "n_saturated": 313,
+    "constant_offset": {
+     "px": [
+      0.091,
+      0.017
+     ],
+     "arcsec": 0.57,
+     "fraction_of_pixel": 0.092
+    },
+    "random_pulls": {
+     "n": 610,
+     "within_1sigma": 0.526,
+     "within_2sigma": 0.834,
+     "within_3sigma": 0.933,
+     "mean_pull": -0.0,
+     "rms_pull": 1.581
+    },
+    "raw_pulls": {
+     "n": 610,
+     "within_1sigma": 0.433,
+     "within_2sigma": 0.656,
+     "within_3sigma": 0.777,
+     "mean_pull": 1.454,
+     "rms_pull": 2.472
+    }
+   },
+   "field_stars": null,
+   "candidates": null
+  }
+ ],
+ "field_stars_all": null
+}
