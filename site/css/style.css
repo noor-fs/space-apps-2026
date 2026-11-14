@@ -542,6 +542,14 @@ button.wide { width: 100%; margin-top: 8px; }
 .seg-small button { padding: 4px 10px; font-size: 14px; flex: none; }
 .field-info { margin: 2px 0 10px; }
 
+/* about this target (collapsible, above the mode tabs) */
+.target-intro { margin: 0 0 10px; padding: 8px 14px; background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); }
+.target-intro > summary { display: flex; align-items: baseline; gap: 8px; cursor: pointer; list-style: none; font-weight: 600; }
+.target-intro > summary::-webkit-details-marker { display: none; }
+.target-intro > summary::after { content: "▾"; color: var(--muted); margin-left: auto; transition: transform 0.15s; }
+.target-intro:not([open]) > summary::after { transform: rotate(-90deg); }
+.target-intro p { margin: 8px 0 4px; }
+
 /* mode tabs */
 .mode-bar { margin-bottom: 10px; }
 .tabs { display: flex; gap: 4px; padding: 4px; background: var(--panel); border: 1px solid var(--border); border-radius: 10px; }

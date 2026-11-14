@@ -47,7 +47,7 @@ const el = {
   brightnessView: $("brightness-view"), brightnessNote: $("brightness-note"),
   brightnessChart: $("brightness-chart"), brightnessTable: $("brightness-table"),
   thumbsPanel: $("thumbs-panel"), thumbs: $("thumbs"), thumbsCount: $("thumbs-count"),
-  targetPanel: $("target-panel"),
+  intro: $("target-intro"), introTitle: $("target-intro-title"), introBody: $("target-intro-body"),
   fingerprint: $("fingerprint"), fpNote: $("fingerprint-note"), fpLegend: $("fingerprint-legend"),
   fpChart: $("fingerprint-chart"), fpTable: $("fingerprint-table"),
   controls: $("controls"), fovButtons: $("fov-buttons"), modeButtons: $("mode-buttons"), modeNote: $("mode-note"),
@@ -958,18 +958,28 @@ async function renderFingerprint() {
 }
 
 // ---------------------------------------------------------------- panels
+/**
+ * "About <target>" box above the mode tabs: description, verdict and motion.
+ * Shown even before a target's images exist (then without the verdict).
+ */
+function renderIntro() {
+  const t = targetByKey(state.target);
+  const name = t ? t.name : state.target;
+  el.introTitle.textContent = `About ${explanations?.targets?.[state.target]?.title || name}`;
+  renderTargetPanel(el.introBody, { key: state.target, manifest, explanations });
+  el.intro.hidden = false;
+}
+
 function renderTargetInfo() {
-  if (!manifest) { el.targetPanel.hidden = true; el.verdictChip.hidden = true; return; }
-  el.targetPanel.hidden = false;
+  renderIntro();
+  if (!manifest) { el.verdictChip.hidden = true; return; }
   const verdict = manifest.verdict;
   el.verdictChip.hidden = !verdict;
   if (verdict) {
     el.verdictChip.textContent = explanations?.verdicts?.[verdict]?.title || verdict.replace(/_/g, " ");
     el.verdictChip.className = `chip verdict-chip verdict-${verdict}`;
-    el.verdictChip.title = "Verdict: see “About this target” below the image";
+    el.verdictChip.title = "Verdict: open “About” below for details";
   }
-  const t = targetByKey(state.target);
-  renderTargetPanel(el.targetPanel, { key: state.target, name: t ? t.name : state.target, manifest, explanations });
 }
 
 function openAbout(which) {
@@ -1474,10 +1484,11 @@ async function openTarget(key, opts = {}) {
   for (const k of ["from", "to", "wl", "cmap", "color"]) if (k in opts) state[k] = opts[k];
   if (!("from" in opts)) state.from = state.to = null; // dates differ per target; keep wavelength and display choices
   el.targetName.textContent = t ? t.name : key;
+  renderIntro();
   el.fieldInfo.textContent = "";
   el.label.replaceChildren();
   el.badge.hidden = true;
-  el.thumbsPanel.hidden = el.targetPanel.hidden = true;
+  el.thumbsPanel.hidden = true;
   syncUI();
 
   const sizes = await loadFields(key);

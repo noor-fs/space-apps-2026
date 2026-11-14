@@ -42,6 +42,12 @@
       </div>
       <p id="field-info" class="muted small field-info"></p>
 
+      <!-- about this target: description from explanations.json, collapsible -->
+      <details id="target-intro" class="target-intro" hidden>
+        <summary id="target-intro-title">About this target</summary>
+        <div id="target-intro-body"></div>
+      </details>
+
       <!-- how to look: the four modes -->
       <div id="mode-bar" class="mode-bar" hidden>
         <div id="mode-buttons" class="tabs" role="group" aria-label="Mode">
@@ -141,7 +147,6 @@
         <div id="thumbs"></div>
       </section>
 
-      <section id="target-panel" class="card" aria-label="About this target" hidden></section>
 
       <details id="fingerprint" class="card fingerprint">
         <summary><h3>Infrared fingerprint</h3> <span class="muted">brightness against wavelength, compared with reference shapes</span></summary>
