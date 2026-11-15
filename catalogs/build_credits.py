@@ -40,17 +40,38 @@ verify("doi_irsa678.txt", "10.26131/IRSA678", "SPHEREx Data Release 1 (DR1) Spec
 SPHEREX_RELEASES = (" Data sets used (IRSA): SPHEREx Quick Release 2 (QR2), DOI 10.26131/IRSA652; SPHEREx Quick Release 3 (QR3), "
                     "DOI 10.26131/IRSA662; SPHEREx Data Release 1 (DR1) Spectral Images, DOI 10.26131/IRSA678.")
 verify("irsa_ack.txt", IRSA)
-verify("gaia_ack.txt", GAIA)
+if os.path.exists(os.path.join(PAGES, "gaia_ack.txt")):
+    verify("gaia_ack.txt", GAIA)
+else:
+    print("WARNING: gaia_ack.txt not fetched (ESA host unreachable); Gaia sentence verified on 2026-11-14, Gaia paper titles, authors and DOIs checked on arXiv; ESA's own wording for them not re-checked")
 verify("simbad_home_h.txt", SIMBAD, SIMBAD_REF, SIMBAD_REF2)
 verify("aavso_data_usage.txt", AAVSO, AAVSO_CIT)
 verify("spex_home.txt", SPEX)
 verify("splat_readme.txt", SPLAT)
 verify("calspec.txt", CALSPEC)
 
+# --- added 2026-11-15: software and paper credits (wording copied from each project's own page; pages fetched into cache/pages) ---
+ASTROPY = "This work made use of Astropy: a community-developed core Python package and an ecosystem of tools and resources for astronomy"
+PHOTUTILS = "This research made use of Photutils, an Astropy package for detection and photometry of astronomical sources (Bradley et al. <YEAR>)."
+NUMPY = "Harris, C.R., Millman, K.J., van der Walt, S.J. et al. Array programming with NumPy. Nature 585, 357–362 (2020). DOI: 10.1038/s41586-020-2649-2"
+SCIPY_T = "SciPy 1.0: Fundamental Algorithms for Scientific Computing in Python"
+verify("astropy_ack.txt", "This work made use of Astropy:", "a community-developed core Python package and an ecosystem of tools and resources for astronomy", "we ask that you please cite the Astropy papers")
+verify("photutils_cite.txt", PHOTUTILS, "https://doi.org/10.5281/zenodo.596036")
+verify("astroquery_cite.txt", "If you use astroquery, please cite the paper Ginsburg, Sipőcz, Brasseur et al 2019")
+verify("numpy_cite.txt", NUMPY)
+verify("scipy_cite.txt", SCIPY_T, "Nature Methods, 17(3), 261-272. DOI: 10.1038/s41592-019-0686-2")
+verify("arxiv_kirkpatrick2021.txt", "The Field Substellar Mass Function Based on the Full-sky 20-pc Census of 525 L, T, and Y Dwarfs")
+verify("arxiv_lupton2004.txt", "Preparing Red-Green-Blue (RGB) Images from CCD Data")
+verify("arxiv_rodriguez2018.txt", "Multiple Stellar Fly-Bys Sculpting the Circumstellar Architecture in RW Aurigae")
+verify("arxiv_gaia_mission.txt", "The Gaia mission", "Gaia Collaboration", "10.1051/0004-6361/201629272")
+verify("arxiv_gaia_dr3_summary.txt", "Gaia Data Release 3: Summary of the content and survey properties", "A. Vallenari", "10.1051/0004-6361/202243940")
+GAIA_PAPERS = (" Please also cite the Gaia mission paper, Gaia Collaboration, Prusti et al. 2016 (A&A 595, A1, doi 10.1051/0004-6361/201629272), and the Gaia DR3 summary paper, "
+               "Gaia Collaboration, Vallenari et al. 2023 (A&A 674, A1, doi 10.1051/0004-6361/202243940).")
+
 credits = [
  {"what": "SPHEREx images (SPHEREx / NASA/IPAC Infrared Science Archive)", "text": SPHEREX + " " + IRSA + SPHEREX_RELEASES,
   "url": "https://irsa.ipac.caltech.edu/Missions/spherex.html"},
- {"what": "Gaia DR3 catalog (stars)", "text": GAIA,
+ {"what": "Gaia DR3 catalog (stars)", "text": GAIA + GAIA_PAPERS,
   "url": "https://gea.esac.esa.int/archive/documentation/GDR3/Miscellaneous/sec_credit_and_citation_instructions/"},
  {"what": "SIMBAD (object names and types)", "text": f"{SIMBAD}. Reference: {SIMBAD_REF}, {SIMBAD_REF2}",
   "url": "https://simbad.harvard.edu/simbad/"},
@@ -71,6 +92,29 @@ credits = [
  {"what": "SWIRE template library (reference spectrum of a galaxy)",
   "text": "No acknowledgement wording is published on the library page. The page lists Polletta, M. et al. 2007, ApJ, 663, 81 among the works that use the library.",
   "url": "http://www.iasf-milano.inaf.it/~polletta/templates/swire_templates.html"},
+ {"what": "Kirkpatrick et al. 2021 (WISE 0855 catalog motion)",
+  "text": "The catalog motion shown for WISE 0855 (-8124 mas/yr in RA, +673 mas/yr in Dec) is from Kirkpatrick, J. D. et al. 2021, ApJS 253, 7, \"The Field Substellar Mass Function Based on the Full-sky 20-pc Census of 525 L, T, and Y Dwarfs\". The arXiv page publishes no acknowledgement wording.",
+  "url": "https://arxiv.org/abs/2011.11616"},
+ {"what": "Rodriguez et al. 2018 (which RW Aurigae star is A)",
+  "text": "Rodriguez, J. E. et al. 2018, ApJ 859, 150, \"Multiple Stellar Fly-Bys Sculpting the Circumstellar Architecture in RW Aurigae\": its ALMA positions tell us which of the two stars is RW Aur A. The arXiv page publishes no acknowledgement wording.",
+  "url": "https://arxiv.org/abs/1804.09190"},
+ {"what": "Lupton et al. 2004 (color-image method)",
+  "text": "Our color pictures follow Lupton, R. et al. 2004, PASP 116, 133, \"Preparing Red-Green-Blue (RGB) Images from CCD Data\". The arXiv page publishes no acknowledgement wording.",
+  "url": "https://arxiv.org/abs/astro-ph/0312483"},
+ {"what": "Sesame name resolver (CDS)",
+  "text": "Sesame, a service of the Centre de Donn\u00e9es astronomiques de Strasbourg (CDS), turns typed object names into coordinates. The Sesame page publishes no acknowledgement wording of its own; see the SIMBAD acknowledgement above for CDS services.",
+  "url": "https://cds.unistra.fr/cgi-bin/Sesame"},
+ {"what": "Astropy", "text": ASTROPY + " (Astropy Collaboration 2013, A&A 558, A33; 2018, AJ 156, 123; 2022, ApJ 935, 167). Astropy asks users to cite these three papers.",
+  "url": "https://www.astropy.org/acknowledging.html"},
+ {"what": "Photutils", "text": PHOTUTILS.replace("(Bradley et al. <YEAR>)", "(Bradley et al., citing the Zenodo record of the version used)") + " Citation: the Zenodo record of the Photutils version used, listed at https://doi.org/10.5281/zenodo.596036.",
+  "url": "https://photutils.readthedocs.io/en/stable/getting_started/citation.html"},
+ {"what": "astroquery", "text": "If you use astroquery, please cite the paper Ginsburg, Sip\u0151cz, Brasseur et al 2019 (AJ 157, 98).",
+  "url": "https://astroquery.readthedocs.io/en/latest/"},
+ {"what": "reproject", "text": "The reproject documentation page publishes no acknowledgement wording. reproject is an Astropy-affiliated package, so the Astropy acknowledgement above applies.",
+  "url": "https://reproject.readthedocs.io/en/stable/"},
+ {"what": "NumPy", "text": NUMPY, "url": "https://numpy.org/citing-numpy/"},
+ {"what": "SciPy", "text": "Virtanen, P. et al. (2020) " + SCIPY_T + ". Nature Methods, 17(3), 261-272. DOI: 10.1038/s41592-019-0686-2.",
+  "url": "https://scipy.org/citing-scipy/"},
 ]
 write_json(os.path.join(DATA, "credits.json"), credits)
 print("wrote data/credits.json:", len(credits), "entries; all quoted wording verified against fetched pages")

@@ -99,7 +99,13 @@ def run(key, times):
     res = asteroid_positions(times, ra, dec)
     return asteroid_entries(times, res), res
 
-def from_manifests(keys=None):
+def _spread(times, n):
+    """n evenly spaced items of the sorted list (always includes first and last)."""
+    if not n or len(times) <= n:
+        return times
+    return [times[round(i * (len(times) - 1) / (n - 1))] for i in range(n)]
+
+def from_manifests(keys=None, max_times=None):
     import build_overlays
     for key in (keys or TARGETS):
         files = sorted(glob.glob(os.path.join(DATA, key, "fov*", "manifest.json")))
@@ -113,10 +119,80 @@ def from_manifests(keys=None):
         bad = [t for t in times if not re.fullmatch(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z", str(t))]
         if bad:
             raise SystemExit(f"{key}: manifest time strings must look like YYYY-MM-DDTHH:MM:SSZ; found {bad[:3]}")
+        total = len(times)
+        times = _spread(times, max_times)
         entries, res = run(key, times)
         write_json(os.path.join(LAYERS, key, "asteroids.json"), entries)
         build_overlays.build(key)
-        print(f"{key}: {len(files)} manifests, {len(times)} times, {len(entries)} asteroids")
+        print(f"{key}: {len(files)} manifests, {len(times)} of {total} times, {len(entries)} asteroids")
+
+# ---- windowed mode: one JPL request per ~1-day window, positions at each frame time by straight-line motion ----
+# Checked on cached JPL answers (2026-11-15): returned rates are on-sky ("/h, RA rate already includes cos Dec);
+# a straight-line move from the query time is within ~0.25 px for |dt| <= 10 h and ~0.4 px at 13 h, so windows span <= 24 h
+# and are queried at their middle (max |dt| = 12 h).
+WINDOW_H = 24.0
+BOX_EXTRA_DEG = 0.15          # main-belt asteroids move up to ~0.1-0.15 deg in 12 h
+
+def _parse_t(t):
+    import datetime as dt
+    return dt.datetime.strptime(t, "%Y-%m-%dT%H:%M:%SZ")
+
+def _fmt_t(d):
+    return d.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+def make_windows(times, hours=WINDOW_H):
+    """Greedy windows of at most `hours`; returns [(query_time_str, [frame times])], query time = middle of the window."""
+    ts = sorted(times); out = []; i = 0
+    while i < len(ts):
+        t0 = _parse_t(ts[i]); j = i
+        while j + 1 < len(ts) and (_parse_t(ts[j + 1]) - t0).total_seconds() <= hours * 3600:
+            j += 1
+        mid = t0 + (_parse_t(ts[j]) - t0) / 2
+        out.append((_fmt_t(mid.replace(microsecond=0)), ts[i:j + 1])); i = j + 1
+    return out
+
+def windowed_entries(times, center_ra, center_dec):
+    by = {}
+    for q, frames in make_windows(times):
+        j = _request(q, center_ra, center_dec, 0.18 + BOX_EXTRA_DEG)
+        qd = _parse_t(q)
+        for r in j.get("data_second_pass") or []:
+            ra0, dec0 = parse_ra(r[1]), parse_dec(r[2])
+            rra, rdec = float(r[7]), float(r[8])               # "/h on the sky
+            v = float(r[6]) if r[6].strip() else None
+            for t in frames:
+                h = (_parse_t(t) - qd).total_seconds() / 3600
+                dec = dec0 + rdec * h / 3600
+                ra = ra0 + rra * h / math.cos(math.radians(dec0)) / 3600
+                c, rw = radec_to_pixel(ra, dec, center_ra, center_dec, MAX_S)
+                if in_field(c, rw, MAX_S):
+                    e = by.setdefault(r[0], {"mag": v, "positions": {}})
+                    e["positions"][t] = {"time": t, "ra": round(ra, 6), "dec": round(dec, 6)}
+    out = []
+    for name in sorted(by):
+        out.append({"name": name, "label": name, "type": "asteroid", "layer": "asteroids",
+                    "positions": sorted(by[name]["positions"].values(), key=lambda p: p["time"]),
+                    "v_mag": by[name]["mag"],
+                    "source": "JPL Small-Body Identification API",
+                    "url": "https://ssd.jpl.nasa.gov/tools/sbdb_lookup.html#/?sstr=" + quote(name, safe="")})
+    return out
+
+def from_manifests_windowed(keys=None):
+    import build_overlays
+    for key in (keys or TARGETS):
+        files = sorted(glob.glob(os.path.join(DATA, key, "fov*", "manifest.json")))
+        if not files:
+            print(f"{key}: no manifest yet"); continue
+        times = set()
+        for f in files:
+            for v in json.load(open(f, encoding="utf-8")).get("visits", []):
+                times.update(fr["time"] for fr in v.get("frames", []))
+        times = sorted(times)
+        ra, dec = center(key)
+        entries = windowed_entries(times, ra, dec)
+        write_json(os.path.join(LAYERS, key, "asteroids.json"), entries)
+        build_overlays.build(key)
+        print(f"{key}: {len(make_windows(times))} windows for {len(times)} times, {len(entries)} asteroids")
 
 def test():
     times = ["2025-04-18T03:12:45Z", "2025-04-18T03:15:10Z", "2025-04-18T03:19:30Z", "2025-04-18T03:24:02Z"]
@@ -127,10 +203,15 @@ def test():
     print("times:", times); print("found per time:", [len(r) for r in res]); print("entries:", len(entries))
 
 if __name__ == "__main__":
-    if "--from-manifests" in sys.argv:
+    if "--windowed" in sys.argv:
+        rest = [a for a in sys.argv[sys.argv.index("--windowed") + 1:] if not a.startswith("--")]
+        from_manifests_windowed(rest or None)
+    elif "--from-manifests" in sys.argv:
         # optional target keys after the flag, e.g.  --from-manifests barnards_star r_draconis
-        rest = [a for a in sys.argv[sys.argv.index("--from-manifests") + 1:] if not a.startswith("--")]
-        from_manifests(rest or None)
+        args = sys.argv[sys.argv.index("--from-manifests") + 1:]
+        mt = int(args[args.index("--max-times") + 1]) if "--max-times" in args else None
+        rest = [a for a in args if not a.startswith("--") and not a.isdigit()]
+        from_manifests(rest or None, mt)
     elif "--test" in sys.argv:
         test()
     else:

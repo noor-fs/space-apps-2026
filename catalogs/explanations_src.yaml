@@ -25,6 +25,9 @@ sources:
   sterzik2005:    {label: "Sterzik et al. 2005 (arXiv)", url: "https://arxiv.org/abs/astro-ph/0503297"}
   bozhinova2016:  {label: "Bozhinova et al. 2016 (arXiv)", url: "https://arxiv.org/abs/1609.05667"}
   lamzin2017:     {label: "Lamzin et al. 2017 (arXiv)", url: "https://arxiv.org/abs/1707.09671"}
+  kirkpatrick2021: {label: "Kirkpatrick et al. 2021, ApJS 253, 7 (arXiv)", url: "https://arxiv.org/abs/2011.11616"}
+  lupton2004:     {label: "Lupton et al. 2004, PASP 116, 133 (arXiv)", url: "https://arxiv.org/abs/astro-ph/0312483"}
+  methodology:    {label: "How we measure", url: "#about.methodology"}
   simbad_map:     {label: "How SIMBAD object types map to our types", url: "data/simbad_otype_map.csv"}
 
 types:
@@ -78,31 +81,37 @@ verdicts:
     sentences:
       - {f: false, s: [], t: "SPHEREx shows the object moving, and the motion matches what the catalog predicts."}
       - {f: false, s: [], t: "The measured position follows the expected position."}
+      - {f: false, s: [methodology], t: "How this is decided: The measured motion differs from zero by more than 3 sigma, adds up to at least 0.25 pixel over the data, and agrees with the catalog motion within 3 sigma."}
   moves_unexpected:
     title: "Moves unexpectedly"
     sentences:
       - {f: false, s: [], t: "SPHEREx shows the object moving in a way the catalog does not predict."}
       - {f: false, s: [], t: "Check the measured positions and their errors before deciding what this means."}
+      - {f: false, s: [methodology], t: "How this is decided: Motion is detected as for 'moves as expected', but it is more than 3 sigma away from the catalog motion."}
   no_motion_detected:
     title: "No motion detected"
     sentences:
       - {f: false, s: [], t: "No motion larger than the measurement error was found."}
       - {f: false, s: [], t: "The object may be standing still, or moving too slowly for these pictures to show."}
+      - {f: false, s: [methodology], t: "How this is decided: The data could have detected a 1-pixel shift, but no motion was found, and brightness does not change significantly."}
   brightness_changes:
     title: "Brightness changes"
     sentences:
       - {f: false, s: [], t: "The object's brightness changes between visits."}
       - {f: false, s: [], t: "Compare only images taken at nearly the same wavelength when judging brightness."}
+      - {f: false, s: [methodology], t: "How this is decided: No motion was found, but brightness differs between visits by more than 3 sigma after accounting for wavelength and for the variation of isolated stars."}
   saturated:
     title: "Too bright to measure"
     sentences:
-      - {f: false, s: [], t: "The object is too bright to measure: the detector maxed out."}
-      - {f: false, s: [], t: "No position or brightness is shown for it."}
+      - {f: true,  s: [spherex_supp], t: "The object saturates the detector in most images, so its motion can't be measured reliably."}
+      - {f: true,  s: [spherex_supp], t: "Any positions and brightness shown are less precise than for fainter objects."}
+      - {f: false, s: [methodology], t: "How this is decided: Motion can't be measured (a 1-pixel shift would not be detectable) and the object is saturated in more than half of its images."}
   too_faint:
     title: "Too faint to measure"
     sentences:
       - {f: false, s: [], t: "The object is too faint to measure in these images."}
       - {f: false, s: [], t: "No position or brightness is shown for it."}
+      - {f: false, s: [methodology], t: "How this is decided: Motion can't be measured and the object is mostly not saturated, so it is too faint."}
 
 # Motion numbers below are computed from catalog values queried 2026-11-14:
 #   Gaia DR3 pmra/pmdec (mas/yr):  eps Ind B (3981.98, -2466.83) -> 4.684 "/yr, east+south, 0.76 px/yr (pixel = 6.15")
@@ -144,8 +153,8 @@ targets:
     sentences:
       - {f: true,  s: [luhman2014], t: "WISE 0855 is an extremely cold brown dwarf: a 2014 study estimated its temperature at only 225 to 260 kelvin, about -48 to -13 degrees Celsius, the coldest known for a brown dwarf at that time."}
       - {f: true,  s: [luhman2014], t: "It is only about 7 light-years from the Sun, and in 2014 it had the third-highest motion of any known star or brown dwarf, about 8.1 arcseconds per year."}
-      - {f: true,  s: [catwise],    t: "The CatWISE2020 catalog also shows a source near its expected position moving about 8 arcseconds per year, toward the west and slightly north."}
-      - {f: false, s: [], t: "On the pictures, west is to the right; if the verdict says too faint, SPHEREx could not measure it in these images."}
+      - {f: true,  s: [kirkpatrick2021], t: "The catalog motion shown here is from Kirkpatrick et al. (2021): -8124 milliarcseconds per year in right ascension (toward the west) and +673 in declination (slightly north)."}
+      - {f: false, s: [], t: "On the pictures, west is to the right, so look for its marker drifting right."}
 
 about:
   how_it_works:
@@ -161,7 +170,20 @@ about:
     sentences:
       - {f: true,  s: [spherex_supp], t: "Each pixel is 6.15 arcseconds wide, so only fast-moving objects shift enough to show motion."}
       - {f: true,  s: [jpl_spherex, spherex_supp], t: "Each single image is taken at a different wavelength (color), so some brightness change between single images is expected."}
-      - {f: true,  s: [spherex_supp], t: "Bright stars saturate the detector pixels, and then their position and brightness cannot be measured."}
+      - {f: true,  s: [spherex_supp], t: "Bright stars saturate the detector. SPHEREx still estimates their brightness from readouts taken before saturation, so positions and brightness are shown, but they are less precise (hollow points in the charts)."}
+      - {f: false, s: [], t: "Images at 4-5 micrometers are noisier, so the color images show faint red speckle that is not a real source."}
       - {f: false, s: [], t: "A red and blue pair in a difference image is not proof of motion."}
       - {f: true,  s: [nasa_sphx_bd], t: "Stars are not equally bright at every color, so a star that has not moved can still leave a red or blue mark."}
       - {f: false, s: [], t: "Asteroid markers are predictions, and catalog markers can be out of date or wrong."}
+  methodology:
+    title: "How we measure"
+    sentences:
+      - {f: false, s: [spherex_supp], t: "Images. For each field we take every SPHEREx image that covers it, from every public release, and cut out the field. Each image records one wavelength at each point on the detector, so we record the exact wavelength at the target in every image."}
+      - {f: false, s: [spherex_supp], t: "Cleaning. We subtract the model of zodiacal light (sunlight scattered by interplanetary dust) supplied with each image, then any remaining smooth background, and blank the pixels the quality flags mark as unusable. Saturated pixels are kept: SPHEREx estimates their brightness from readouts taken before the detector filled up, so they are usable but less precise."}
+      - {f: false, s: [lupton2004], t: "Visits and pictures. Images more than 30 days apart belong to different visits. All images are placed on one grid with north up, and each visit's images are averaged into one picture, rejecting values far from the rest (cosmic rays, asteroids). These pictures are for looking at; we don't measure on them. Color pictures combine 0.75-1.6 micrometers (blue), 1.6-3.8 micrometers (green) and 3.8-5.0 micrometers (red)."}
+      - {f: false, s: [gaia_dr3, kirkpatrick2021], t: "Positions. We measure each object in every single image, in that image's own pixels, because resampling blurs positions. A brighter catalog star close by is fitted at the same time at its known position, so it can't pull the measurement. The expected position comes from Gaia DR3, moved to the image's date using the star's motion and parallax (for WISE 0855, which Gaia can't see, from Kirkpatrick et al. 2021)."}
+      - {f: false, s: [], t: "Error bars. Each field contains isolated stars with very precise Gaia positions. Their scatter around those positions is added to every error bar, so the errors include everything that affects real measurements, not only the fit. Images from the same visit also share a small error (about 0.02 pixel) that averaging can't remove, and we include it."}
+      - {f: false, s: [], t: "Motion. We fit a straight line through the measured positions over time, after removing the yearly parallax wobble the catalog predicts."}
+      - {f: false, s: [], t: "Brightness. Because each image is at a different wavelength, we compare brightness between visits only after accounting for wavelength, and against how much the isolated stars' brightness changes from visit to visit."}
+      - {f: false, s: [spherex_supp], t: "Very faint objects. When a target is too faint to measure in single images (WISE 0855), we fit SPHEREx's own model of a star's image to all of a visit's images at once."}
+      - {f: false, s: [], t: "The 0.25 pixel minimum for motion exists because an unresolved pair's light center shifts when one star changes brightness (RW Aurigae: 0.07 pixel), which isn't motion."}

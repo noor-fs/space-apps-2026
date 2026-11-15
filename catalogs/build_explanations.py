@@ -26,7 +26,7 @@ def build():
         "types": {k: entry(f"types.{k}", y["types"][k]) for k in ALLOWED_TYPES},
         "verdicts": {k: entry(f"verdicts.{k}", y["verdicts"][k]) for k in VERDICTS},
         "targets": {k: entry(f"targets.{k}", y["targets"][k]) for k in TARGETS},
-        "about": {k: entry(f"about.{k}", y["about"][k]) for k in ("how_it_works", "limits")},
+        "about": {k: entry(f"about.{k}", y["about"][k]) for k in ("how_it_works", "limits", "methodology")},
     }
     for sect, keys in (("types", ALLOWED_TYPES), ("verdicts", VERDICTS), ("targets", list(TARGETS))):
         extra = set(y[sect]) - set(keys)

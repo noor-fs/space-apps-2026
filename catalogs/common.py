@@ -3,7 +3,7 @@ import hashlib, json, os, time
 import requests
 from config import CACHE
 
-TIMEOUT = 90
+TIMEOUT = 300
 RETRIES = 3
 DELAY = 1.0
 HEADERS = {"User-Agent": "sky-flipbook-student-project/1.0"}

@@ -38,13 +38,20 @@ def text(raw):
     return re.sub(r"[ \t\r\f\v​\xa0]+", " ", re.sub(r"\n\s*\n+", "\n", s))
 
 for k, u in PAGES.items():
-    r = requests.get(u, headers=H, timeout=60)
+    if os.path.exists(os.path.join(OUT, k + ".txt")): continue   # already fetched (delete the file to refetch)
+    try:
+        r = requests.get(u, headers=H, timeout=30)
+    except Exception as e:
+        print("FAILED", k, u, str(e)[:60]); continue
     open(os.path.join(OUT, k + ".txt"), "w", encoding="utf-8").write(r.text if k == "splat_readme" else text(r.text))
     print(r.status_code, k, u); time.sleep(1)
 # arXiv abstract pages (cited peer-reviewed papers)
 for k, u in {"arxiv_luhman2014": "https://arxiv.org/abs/1404.6501", "arxiv_ribas2018": "https://arxiv.org/abs/1811.05955",
              "arxiv_scholz2003": "https://arxiv.org/abs/astro-ph/0212487", "arxiv_sterzik2005": "https://arxiv.org/abs/astro-ph/0503297",
-             "arxiv_bozhinova2016": "https://arxiv.org/abs/1609.05667", "arxiv_lamzin2017": "https://arxiv.org/abs/1707.09671"}.items():
+             "arxiv_bozhinova2016": "https://arxiv.org/abs/1609.05667", "arxiv_lamzin2017": "https://arxiv.org/abs/1707.09671",
+             "arxiv_gaia_mission": "https://arxiv.org/abs/1609.04153", "arxiv_gaia_dr3_summary": "https://arxiv.org/abs/2208.00211",
+             "arxiv_kirkpatrick2021": "https://arxiv.org/abs/2011.11616", "arxiv_lupton2004": "https://arxiv.org/abs/astro-ph/0312483",
+             "arxiv_rodriguez2018": "https://arxiv.org/abs/1804.09190"}.items():
     r = requests.get(u, headers=H, timeout=60)
     open(os.path.join(OUT, k + ".txt"), "w", encoding="utf-8").write(text(r.text))
     print(r.status_code, k, u); time.sleep(3)
