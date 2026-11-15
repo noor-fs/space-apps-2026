@@ -1,29 +1,65 @@
 {
- "generated_utc": "2026-11-15T08:41:45Z",
+ "generated_utc": "2026-11-15T11:54:28Z",
  "headline": [
-  "Motion: 4 of 4 measurable targets move as the catalogs predict. Not measurable: R Draconis (saturated).",
-  "Other stars: of 6 Gaia stars the tool was not tuned on, 5 agree with Gaia, 1 shows mild tension and 0 disagree (1 field so far; 9 of 9 Gaia stars down to G = 17 recovered).",
-  "Error bars: 56% of their positions fall within 1 error bar and 92% within 2 (honest error bars give 68% and 95%), so our error bars are slightly too small (real scatter is about 1.1x the error bar).",
+  "Targets: 4 of 4 measurable targets move as the catalogs predict. Not measurable: R Draconis (saturated).",
+  "Other stars: 65 of 73 Gaia stars the tool was never tuned on move exactly as Gaia predicts (4 fields). 81% of their measurements fall within 1 error bar and 95% within 2, against 68% and 95% for honest error bars.",
+  "Positions: allowing for crowding, 75% of star positions fall within 1 error bar of Gaia and 89% within 2 (81% and 98% for stars with no close neighbour). 59 of 73 stars have a neighbour within 2 pixels, which shifts their light centre slightly; this never fakes motion.",
   "Measured targets sit within 0.61 arcsec of their catalog positions (at most 0.1 of a pixel), a constant shift that can't create motion."
  ],
  "method": {
   "motion": "Measured vs catalog motion per axis, z = difference / error; combined chi-square with 2 degrees of freedom. Agrees if p >= 0.05, tension if 0.0027 <= p < 0.05, disagrees if p < 0.0027 (3 sigma).",
   "error_bars": "Pull = (measured - expected position) / error bar. Honest error bars put 68% of pulls within 1 and 95% within 2.",
-  "field_stars": "The same tests on Gaia stars in the field, excluding stars used to set the error bars, stars blended with a neighbour, and saturated visits. Per star: chi-square of its pulls over all its visits.",
+  "field_stars": "Gaia stars in the field, excluding stars used to set the error bars, stars merged with a neighbour, and saturated visits. Motion test (main): each star's constant offset is removed, then its visits are tested against Gaia's predicted motion. Position test: distance from Gaia's position, with an extra allowance for the constant shift crowding causes (measured on the reference stars).",
   "not_scored": "Field-star brightness, objects in no catalog, and motion of saturated targets."
  },
  "summary": {
   "targets_scored": 5,
-  "field_stars": {
-   "n": 48,
-   "within_1sigma": 0.562,
-   "within_2sigma": 0.917,
-   "within_3sigma": 1.0,
-   "mean_pull": 0.376,
-   "rms_pull": 1.145
+  "fields_left_out_of_totals": {
+   "r_draconis": "crowding floor [0.137, 0.402] px is above 0.25 px: the bright target's glow dominates this field"
   },
-  "field_star_error_bars": "slightly too small (real scatter is about 1.1x the error bar)",
-  "disagreeing_objects": []
+  "field_stars_motion": {
+   "n": 450,
+   "within_1sigma": 0.809,
+   "within_2sigma": 0.951,
+   "within_3sigma": 0.971,
+   "mean_pull": 0.001,
+   "rms_pull": 1.377
+  },
+  "field_stars_motion_uncrowded": {
+   "n": 90,
+   "within_1sigma": 0.911,
+   "within_2sigma": 1.0,
+   "within_3sigma": 1.0,
+   "mean_pull": -0.004,
+   "rms_pull": 0.678
+  },
+  "field_stars_absolute": {
+   "n": 450,
+   "within_1sigma": 0.747,
+   "within_2sigma": 0.887,
+   "within_3sigma": 0.956,
+   "mean_pull": 0.236,
+   "rms_pull": 1.454
+  },
+  "field_stars_absolute_uncrowded": {
+   "n": 90,
+   "within_1sigma": 0.811,
+   "within_2sigma": 0.978,
+   "within_3sigma": 1.0,
+   "mean_pull": 0.283,
+   "rms_pull": 0.807
+  },
+  "field_star_error_bars": "slightly too small (real scatter is about 1.4x the error bar)",
+  "disagreeing_objects": [
+   "Gaia DR3 4472836082301521536",
+   "Gaia DR3 4472836288459958656",
+   "Gaia DR3 4472837770227461120",
+   "Gaia DR3 4472835944862431232",
+   "Gaia DR3 4472836013581937408",
+   "Gaia DR3 4472836082301438848",
+   "Gaia DR3 4472836254100210432",
+   "Gaia DR3 5756955781099740544"
+  ]
  },
  "targets": [
   {
@@ -63,13 +99,17 @@
     "n_images": 461,
     "n_images_measured": 347,
     "n_images_measured_saturated": 0,
+    "absolute_floor_px": [
+     0.009,
+     0.02
+    ],
     "image_pulls": {
      "n": 694,
-     "within_1sigma": 0.264,
-     "within_2sigma": 0.595,
-     "within_3sigma": 0.889,
-     "mean_pull": 0.655,
-     "rms_pull": 2.026
+     "within_1sigma": 0.284,
+     "within_2sigma": 0.661,
+     "within_3sigma": 0.934,
+     "mean_pull": 0.545,
+     "rms_pull": 1.842
     },
     "random_part": {
      "n": 694,
@@ -83,9 +123,9 @@
      "n": 8,
      "within_1sigma": 0.0,
      "within_2sigma": 0.25,
-     "within_3sigma": 0.25,
-     "mean_pull": 2.367,
-     "rms_pull": 5.277
+     "within_3sigma": 0.5,
+     "mean_pull": 0.92,
+     "rms_pull": 3.106
     },
     "visit_pulls_offset_removed": {
      "n": 8,
@@ -106,12 +146,17 @@
     "error_bars": "slightly too large (conservative)"
    },
    "field_stars": {
+    "absolute_floor_px": [
+     0.009,
+     0.02
+    ],
     "counts": {
      "in_file": 9,
      "scored": 6,
+     "crowded": 3,
      "reference": 3,
      "blended": 0,
-     "no_usable_visit": 0
+     "too_few_visits": 0
     },
     "recovered_by_g": {
      "G < 14": {
@@ -127,121 +172,207 @@
       "total": 3
      }
     },
-    "pulls_scored": {
-     "n": 48,
-     "within_1sigma": 0.562,
-     "within_2sigma": 0.917,
-     "within_3sigma": 1.0,
-     "mean_pull": 0.376,
-     "rms_pull": 1.145
+    "motion_test": {
+     "pulls": {
+      "n": 48,
+      "within_1sigma": 0.854,
+      "within_2sigma": 1.0,
+      "within_3sigma": 1.0,
+      "mean_pull": -0.007,
+      "rms_pull": 0.71
+     },
+     "pulls_uncrowded": {
+      "n": 24,
+      "within_1sigma": 0.958,
+      "within_2sigma": 1.0,
+      "within_3sigma": 1.0,
+      "mean_pull": -0.007,
+      "rms_pull": 0.602
+     },
+     "pulls_crowded": {
+      "n": 24,
+      "within_1sigma": 0.75,
+      "within_2sigma": 1.0,
+      "within_3sigma": 1.0,
+      "mean_pull": -0.006,
+      "rms_pull": 0.804
+     },
+     "pulls_reference": {
+      "n": 24,
+      "within_1sigma": 0.875,
+      "within_2sigma": 1.0,
+      "within_3sigma": 1.0,
+      "mean_pull": -0.005,
+      "rms_pull": 0.733
+     },
+     "agreement_counts": {
+      "agrees": 6,
+      "tension": 0,
+      "disagrees": 0
+     },
+     "disagreeing": []
     },
-    "pulls_reference": {
-     "n": 24,
-     "within_1sigma": 0.542,
-     "within_2sigma": 0.958,
-     "within_3sigma": 0.958,
-     "mean_pull": -0.58,
-     "rms_pull": 1.212
+    "absolute_test": {
+     "pulls": {
+      "n": 48,
+      "within_1sigma": 0.812,
+      "within_2sigma": 0.958,
+      "within_3sigma": 1.0,
+      "mean_pull": 0.312,
+      "rms_pull": 0.883
+     },
+     "pulls_uncrowded": {
+      "n": 24,
+      "within_1sigma": 0.792,
+      "within_2sigma": 0.958,
+      "within_3sigma": 1.0,
+      "mean_pull": 0.359,
+      "rms_pull": 0.947
+     },
+     "pulls_crowded": {
+      "n": 24,
+      "within_1sigma": 0.833,
+      "within_2sigma": 0.958,
+      "within_3sigma": 1.0,
+      "mean_pull": 0.266,
+      "rms_pull": 0.814
+     },
+     "pulls_reference": {
+      "n": 24,
+      "within_1sigma": 0.833,
+      "within_2sigma": 0.958,
+      "within_3sigma": 1.0,
+      "mean_pull": -0.364,
+      "rms_pull": 0.833
+     },
+     "agreement_counts": {
+      "agrees": 6,
+      "tension": 0,
+      "disagrees": 0
+     },
+     "disagreeing": []
     },
-    "error_bars": "slightly too small (real scatter is about 1.1x the error bar)",
-    "agreement_counts": {
-     "agrees": 5,
-     "tension": 1,
-     "disagrees": 0
-    },
-    "disagreeing": [],
+    "error_bars": "slightly too large (conservative)",
     "objects": [
      {
       "name": "Gaia DR3 6412596458823395328",
       "agreement": "agrees",
-      "chi2": 8.71,
+      "chi2": 5.75,
+      "dof": 6,
+      "p_value": 0.4519,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 3.66,
       "n_visits": 4,
-      "dof": 8,
-      "p_value": 0.3673,
       "g_mag": 12.95,
+      "crowded": true,
       "role": "scored"
      },
      {
       "name": "Gaia DR3 6412593435166417536",
       "agreement": "agrees",
-      "chi2": 5.37,
+      "chi2": 4.54,
+      "dof": 6,
+      "p_value": 0.6043,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 2.75,
       "n_visits": 4,
-      "dof": 8,
-      "p_value": 0.7172,
       "g_mag": 13.93,
+      "crowded": false,
       "role": "reference"
      },
      {
       "name": "Gaia DR3 6412596390103981824",
       "agreement": "agrees",
-      "chi2": 6.76,
+      "chi2": 4.25,
+      "dof": 6,
+      "p_value": 0.6428,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 3.21,
       "n_visits": 4,
-      "dof": 8,
-      "p_value": 0.5622,
       "g_mag": 15.34,
+      "crowded": true,
       "role": "scored"
      },
      {
       "name": "Gaia DR3 6412594672117008128",
       "agreement": "agrees",
-      "chi2": 13.78,
+      "chi2": 5.5,
+      "dof": 6,
+      "p_value": 0.4809,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 9.03,
       "n_visits": 4,
-      "dof": 8,
-      "p_value": 0.0875,
       "g_mag": 15.73,
+      "crowded": true,
       "role": "scored"
      },
      {
       "name": "Gaia DR3 6412596183945494144",
       "agreement": "agrees",
-      "chi2": 5.72,
+      "chi2": 3.4,
+      "dof": 6,
+      "p_value": 0.7578,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 3.01,
       "n_visits": 4,
-      "dof": 8,
-      "p_value": 0.6783,
       "g_mag": 15.77,
+      "crowded": false,
       "role": "scored"
      },
      {
       "name": "Gaia DR3 6412595973491218944",
       "agreement": "agrees",
-      "chi2": 11.92,
+      "chi2": 2.47,
+      "dof": 6,
+      "p_value": 0.8713,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 7.28,
       "n_visits": 4,
-      "dof": 8,
-      "p_value": 0.1548,
       "g_mag": 15.81,
+      "crowded": false,
       "role": "scored"
      },
      {
       "name": "Gaia DR3 6412594706476744832",
-      "agreement": "tension",
-      "chi2": 16.06,
+      "agreement": "agrees",
+      "chi2": 2.83,
+      "dof": 6,
+      "p_value": 0.8304,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 11.22,
       "n_visits": 4,
-      "dof": 8,
-      "p_value": 0.0416,
       "g_mag": 16.05,
+      "crowded": false,
       "role": "scored"
      },
      {
       "name": "Gaia DR3 6412594397239098752",
       "agreement": "agrees",
-      "chi2": 8.23,
+      "chi2": 2.01,
+      "dof": 6,
+      "p_value": 0.9191,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 4.06,
       "n_visits": 4,
-      "dof": 8,
-      "p_value": 0.4113,
       "g_mag": 16.2,
+      "crowded": false,
       "role": "reference"
      },
      {
       "name": "Gaia DR3 6412594362879363328",
-      "agreement": "tension",
-      "chi2": 21.63,
+      "agreement": "agrees",
+      "chi2": 6.36,
+      "dof": 6,
+      "p_value": 0.3838,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 9.85,
       "n_visits": 4,
-      "dof": 8,
-      "p_value": 0.0057,
       "g_mag": 16.41,
+      "crowded": false,
       "role": "reference"
      }
-    ]
+    ],
+    "in_pooled_totals": true
    }
   },
   {
@@ -281,13 +412,17 @@
     "n_images": 359,
     "n_images_measured": 106,
     "n_images_measured_saturated": 106,
+    "absolute_floor_px": [
+     0.092,
+     0.106
+    ],
     "image_pulls": {
      "n": 212,
-     "within_1sigma": 0.623,
-     "within_2sigma": 0.915,
-     "within_3sigma": 0.972,
-     "mean_pull": -0.173,
-     "rms_pull": 1.345
+     "within_1sigma": 0.906,
+     "within_2sigma": 0.981,
+     "within_3sigma": 0.995,
+     "mean_pull": -0.093,
+     "rms_pull": 0.731
     },
     "random_part": {
      "n": 212,
@@ -299,11 +434,11 @@
     },
     "visit_pulls": {
      "n": 6,
-     "within_1sigma": 0.0,
-     "within_2sigma": 0.167,
-     "within_3sigma": 0.333,
-     "mean_pull": -0.636,
-     "rms_pull": 3.435
+     "within_1sigma": 1.0,
+     "within_2sigma": 1.0,
+     "within_3sigma": 1.0,
+     "mean_pull": -0.094,
+     "rms_pull": 0.532
     },
     "visit_pulls_offset_removed": {
      "n": 6,
@@ -323,7 +458,756 @@
     },
     "error_bars": "slightly too small (real scatter is about 1.1x the error bar)"
    },
-   "field_stars": null
+   "field_stars": {
+    "absolute_floor_px": [
+     0.092,
+     0.106
+    ],
+    "counts": {
+     "in_file": 48,
+     "scored": 41,
+     "crowded": 37,
+     "reference": 5,
+     "blended": 1,
+     "too_few_visits": 1
+    },
+    "recovered_by_g": {
+     "G < 14": {
+      "recovered": 7,
+      "total": 7
+     },
+     "G 14-16": {
+      "recovered": 19,
+      "total": 19
+     },
+     "G 16-17": {
+      "recovered": 22,
+      "total": 22
+     }
+    },
+    "motion_test": {
+     "pulls": {
+      "n": 246,
+      "within_1sigma": 0.744,
+      "within_2sigma": 0.923,
+      "within_3sigma": 0.951,
+      "mean_pull": 0.002,
+      "rms_pull": 1.716
+     },
+     "pulls_uncrowded": {
+      "n": 24,
+      "within_1sigma": 0.792,
+      "within_2sigma": 1.0,
+      "within_3sigma": 1.0,
+      "mean_pull": -0.006,
+      "rms_pull": 0.865
+     },
+     "pulls_crowded": {
+      "n": 222,
+      "within_1sigma": 0.739,
+      "within_2sigma": 0.914,
+      "within_3sigma": 0.946,
+      "mean_pull": 0.003,
+      "rms_pull": 1.784
+     },
+     "pulls_reference": {
+      "n": 24,
+      "within_1sigma": 0.75,
+      "within_2sigma": 0.917,
+      "within_3sigma": 1.0,
+      "mean_pull": 0.043,
+      "rms_pull": 0.978
+     },
+     "agreement_counts": {
+      "agrees": 34,
+      "tension": 0,
+      "disagrees": 7
+     },
+     "disagreeing": [
+      "Gaia DR3 4472836082301521536",
+      "Gaia DR3 4472836288459958656",
+      "Gaia DR3 4472837770227461120",
+      "Gaia DR3 4472835944862431232",
+      "Gaia DR3 4472836013581937408",
+      "Gaia DR3 4472836082301438848",
+      "Gaia DR3 4472836254100210432"
+     ]
+    },
+    "absolute_test": {
+     "pulls": {
+      "n": 246,
+      "within_1sigma": 0.805,
+      "within_2sigma": 0.902,
+      "within_3sigma": 0.959,
+      "mean_pull": 0.181,
+      "rms_pull": 1.354
+     },
+     "pulls_uncrowded": {
+      "n": 24,
+      "within_1sigma": 1.0,
+      "within_2sigma": 1.0,
+      "within_3sigma": 1.0,
+      "mean_pull": 0.054,
+      "rms_pull": 0.137
+     },
+     "pulls_crowded": {
+      "n": 222,
+      "within_1sigma": 0.784,
+      "within_2sigma": 0.892,
+      "within_3sigma": 0.955,
+      "mean_pull": 0.195,
+      "rms_pull": 1.425
+     },
+     "pulls_reference": {
+      "n": 24,
+      "within_1sigma": 0.625,
+      "within_2sigma": 0.958,
+      "within_3sigma": 1.0,
+      "mean_pull": 0.226,
+      "rms_pull": 1.042
+     },
+     "agreement_counts": {
+      "agrees": 33,
+      "tension": 3,
+      "disagrees": 5
+     },
+     "disagreeing": [
+      "Gaia DR3 4472836082301521536",
+      "Gaia DR3 4472835983521060096",
+      "Gaia DR3 4472837770227461120",
+      "Gaia DR3 4472835944862431232",
+      "Gaia DR3 4472836082301438848"
+     ]
+    },
+    "error_bars": "too small (real scatter is about 1.7x the error bar)",
+    "objects": [
+     {
+      "name": "Gaia DR3 4472836292758713216",
+      "agreement": "agrees",
+      "chi2": 4.73,
+      "dof": 4,
+      "p_value": 0.3156,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 0.09,
+      "n_visits": 3,
+      "g_mag": 11.86,
+      "crowded": true,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 4472837770227461504",
+      "agreement": "agrees",
+      "chi2": 5.5,
+      "dof": 4,
+      "p_value": 0.24,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 0.13,
+      "n_visits": 3,
+      "g_mag": 12.65,
+      "crowded": true,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 4472832508888391168",
+      "agreement": "agrees",
+      "chi2": 3.54,
+      "dof": 4,
+      "p_value": 0.472,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 0.06,
+      "n_visits": 3,
+      "g_mag": 13.03,
+      "crowded": false,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 4472836327118455552",
+      "agreement": "agrees",
+      "chi2": 5.32,
+      "dof": 4,
+      "p_value": 0.2564,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 0.1,
+      "n_visits": 3,
+      "g_mag": 13.45,
+      "crowded": true,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 4472837495349546240",
+      "agreement": "agrees",
+      "chi2": 1.73,
+      "dof": 4,
+      "p_value": 0.7854,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 0.05,
+      "n_visits": 3,
+      "g_mag": 13.47,
+      "crowded": true,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 4472836047939582592",
+      "agreement": "agrees",
+      "chi2": 3.95,
+      "dof": 4,
+      "p_value": 0.4126,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 0.14,
+      "n_visits": 3,
+      "g_mag": 13.6,
+      "crowded": true,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 4472837770227463680",
+      "agreement": "agrees",
+      "chi2": 4.21,
+      "dof": 4,
+      "p_value": 0.3787,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 0.12,
+      "n_visits": 3,
+      "g_mag": 13.9,
+      "crowded": true,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 4472835846082110464",
+      "agreement": "agrees",
+      "chi2": 5.38,
+      "dof": 4,
+      "p_value": 0.2508,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 0.22,
+      "n_visits": 3,
+      "g_mag": 14.44,
+      "crowded": true,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 4472832513187484544",
+      "agreement": "agrees",
+      "chi2": 3.86,
+      "dof": 4,
+      "p_value": 0.4259,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 0.84,
+      "n_visits": 3,
+      "g_mag": 14.49,
+      "crowded": true,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 4472835846082111232",
+      "agreement": "agrees",
+      "chi2": 6.62,
+      "dof": 4,
+      "p_value": 0.1572,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 2.33,
+      "n_visits": 3,
+      "g_mag": 14.53,
+      "crowded": true,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 4472832959864074752",
+      "agreement": "agrees",
+      "chi2": 6.18,
+      "dof": 4,
+      "p_value": 0.1862,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 0.11,
+      "n_visits": 3,
+      "g_mag": 14.79,
+      "crowded": false,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 4472835914801589888",
+      "agreement": "agrees",
+      "chi2": 4.15,
+      "dof": 4,
+      "p_value": 0.3857,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 0.95,
+      "n_visits": 3,
+      "g_mag": 14.84,
+      "crowded": true,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 4472836361478195200",
+      "agreement": "agrees",
+      "chi2": 4.75,
+      "dof": 4,
+      "p_value": 0.314,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 0.12,
+      "n_visits": 3,
+      "g_mag": 14.9,
+      "crowded": true,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 4472835983521061248",
+      "agreement": null,
+      "chi2": null,
+      "dof": 0,
+      "p_value": null,
+      "agreement_absolute": "disagrees",
+      "chi2_absolute": 20.6,
+      "n_visits": 1,
+      "g_mag": 14.98,
+      "crowded": true,
+      "role": "not_scored"
+     },
+     {
+      "name": "Gaia DR3 4472833062943293952",
+      "agreement": "agrees",
+      "chi2": 0.47,
+      "dof": 4,
+      "p_value": 0.9759,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 0.69,
+      "n_visits": 3,
+      "g_mag": 15.22,
+      "crowded": true,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 4472837632788148224",
+      "agreement": "agrees",
+      "chi2": 4.4,
+      "dof": 4,
+      "p_value": 0.3547,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 0.16,
+      "n_visits": 3,
+      "g_mag": 15.43,
+      "crowded": false,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 4472832994223814016",
+      "agreement": "agrees",
+      "chi2": 3.83,
+      "dof": 4,
+      "p_value": 0.43,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 0.12,
+      "n_visits": 3,
+      "g_mag": 15.46,
+      "crowded": false,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 4472833062943297024",
+      "agreement": "agrees",
+      "chi2": 2.32,
+      "dof": 4,
+      "p_value": 0.6777,
+      "agreement_absolute": "tension",
+      "chi2_absolute": 12.76,
+      "n_visits": 3,
+      "g_mag": 15.46,
+      "crowded": true,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 4472837083032703744",
+      "agreement": "agrees",
+      "chi2": 5.49,
+      "dof": 4,
+      "p_value": 0.2404,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 0.37,
+      "n_visits": 3,
+      "g_mag": 15.47,
+      "crowded": true,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 4472832822422325632",
+      "agreement": "agrees",
+      "chi2": 2.62,
+      "dof": 4,
+      "p_value": 0.6234,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 0.3,
+      "n_visits": 3,
+      "g_mag": 15.56,
+      "crowded": true,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 4472836082301521536",
+      "agreement": "disagrees",
+      "chi2": 236.58,
+      "dof": 4,
+      "p_value": 0.0,
+      "agreement_absolute": "disagrees",
+      "chi2_absolute": 33.64,
+      "n_visits": 3,
+      "g_mag": 15.57,
+      "crowded": true,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 4472835983521060096",
+      "agreement": "agrees",
+      "chi2": 5.18,
+      "dof": 4,
+      "p_value": 0.2694,
+      "agreement_absolute": "disagrees",
+      "chi2_absolute": 85.07,
+      "n_visits": 3,
+      "g_mag": 15.57,
+      "crowded": true,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 4472837628489787904",
+      "agreement": "agrees",
+      "chi2": 1.34,
+      "dof": 4,
+      "p_value": 0.8552,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 0.6,
+      "n_visits": 3,
+      "g_mag": 15.81,
+      "crowded": true,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 4472837529709284992",
+      "agreement": "agrees",
+      "chi2": 1.71,
+      "dof": 4,
+      "p_value": 0.7885,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 2.21,
+      "n_visits": 3,
+      "g_mag": 15.82,
+      "crowded": true,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 4472836288459958656",
+      "agreement": "disagrees",
+      "chi2": 32.31,
+      "dof": 4,
+      "p_value": 0.0,
+      "agreement_absolute": "tension",
+      "chi2_absolute": 17.65,
+      "n_visits": 3,
+      "g_mag": 15.87,
+      "crowded": true,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 4472835330683245824",
+      "agreement": "agrees",
+      "chi2": 1.41,
+      "dof": 4,
+      "p_value": 0.8423,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 0.49,
+      "n_visits": 3,
+      "g_mag": 15.94,
+      "crowded": true,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 4472832581906948224",
+      "agreement": "agrees",
+      "chi2": 4.65,
+      "dof": 4,
+      "p_value": 0.3256,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 0.14,
+      "n_visits": 3,
+      "g_mag": 16.09,
+      "crowded": false,
+      "role": "reference"
+     },
+     {
+      "name": "Gaia DR3 4472836013581953152",
+      "agreement": "agrees",
+      "chi2": 5.8,
+      "dof": 4,
+      "p_value": 0.2143,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 7.05,
+      "n_visits": 3,
+      "g_mag": 16.12,
+      "crowded": false,
+      "role": "reference"
+     },
+     {
+      "name": "Gaia DR3 4472836116661112576",
+      "agreement": "agrees",
+      "chi2": 0.65,
+      "dof": 4,
+      "p_value": 0.9573,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 0.82,
+      "n_visits": 3,
+      "g_mag": 16.16,
+      "crowded": true,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 4472832680687096576",
+      "agreement": "agrees",
+      "chi2": 1.15,
+      "dof": 4,
+      "p_value": 0.8866,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 0.36,
+      "n_visits": 3,
+      "g_mag": 16.21,
+      "crowded": true,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 4472832753705643776",
+      "agreement": "agrees",
+      "chi2": 5.28,
+      "dof": 4,
+      "p_value": 0.2596,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 0.91,
+      "n_visits": 3,
+      "g_mag": 16.25,
+      "crowded": true,
+      "role": "blended"
+     },
+     {
+      "name": "Gaia DR3 4472832650626427904",
+      "agreement": "agrees",
+      "chi2": 1.7,
+      "dof": 4,
+      "p_value": 0.7914,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 0.78,
+      "n_visits": 3,
+      "g_mag": 16.3,
+      "crowded": true,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 4472836258398975744",
+      "agreement": "tension",
+      "chi2": 9.84,
+      "dof": 4,
+      "p_value": 0.0431,
+      "agreement_absolute": "tension",
+      "chi2_absolute": 17.51,
+      "n_visits": 3,
+      "g_mag": 16.31,
+      "crowded": false,
+      "role": "reference"
+     },
+     {
+      "name": "Gaia DR3 4472837765928741504",
+      "agreement": "agrees",
+      "chi2": 4.11,
+      "dof": 4,
+      "p_value": 0.3909,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 7.56,
+      "n_visits": 3,
+      "g_mag": 16.49,
+      "crowded": true,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 4472837770227461120",
+      "agreement": "disagrees",
+      "chi2": 79.54,
+      "dof": 4,
+      "p_value": 0.0,
+      "agreement_absolute": "disagrees",
+      "chi2_absolute": 94.78,
+      "n_visits": 3,
+      "g_mag": 16.57,
+      "crowded": true,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 4472832959864078080",
+      "agreement": "agrees",
+      "chi2": 0.94,
+      "dof": 4,
+      "p_value": 0.9194,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 2.29,
+      "n_visits": 3,
+      "g_mag": 16.57,
+      "crowded": true,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 4472835910502631040",
+      "agreement": "agrees",
+      "chi2": 0.68,
+      "dof": 4,
+      "p_value": 0.9536,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 7.24,
+      "n_visits": 3,
+      "g_mag": 16.63,
+      "crowded": true,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 4472835876142910336",
+      "agreement": null,
+      "chi2": null,
+      "dof": 0,
+      "p_value": null,
+      "agreement_absolute": null,
+      "chi2_absolute": null,
+      "n_visits": 0,
+      "g_mag": 16.7,
+      "crowded": false,
+      "role": "reference"
+     },
+     {
+      "name": "Gaia DR3 4472835944862431232",
+      "agreement": "disagrees",
+      "chi2": 156.86,
+      "dof": 4,
+      "p_value": 0.0,
+      "agreement_absolute": "disagrees",
+      "chi2_absolute": 105.55,
+      "n_visits": 3,
+      "g_mag": 16.7,
+      "crowded": true,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 4472833062943295104",
+      "agreement": "agrees",
+      "chi2": 0.78,
+      "dof": 4,
+      "p_value": 0.9405,
+      "agreement_absolute": "tension",
+      "chi2_absolute": 13.8,
+      "n_visits": 3,
+      "g_mag": 16.71,
+      "crowded": true,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 4472832852485802752",
+      "agreement": "agrees",
+      "chi2": 2.66,
+      "dof": 4,
+      "p_value": 0.6168,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 1.37,
+      "n_visits": 3,
+      "g_mag": 16.71,
+      "crowded": false,
+      "role": "reference"
+     },
+     {
+      "name": "Gaia DR3 4472836013581937408",
+      "agreement": "disagrees",
+      "chi2": 20.12,
+      "dof": 4,
+      "p_value": 0.0005,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 6.4,
+      "n_visits": 3,
+      "g_mag": 16.87,
+      "crowded": true,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 4472836082301438848",
+      "agreement": "disagrees",
+      "chi2": 47.48,
+      "dof": 4,
+      "p_value": 0.0,
+      "agreement_absolute": "disagrees",
+      "chi2_absolute": 34.97,
+      "n_visits": 3,
+      "g_mag": 16.91,
+      "crowded": true,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 4472832891144605952",
+      "agreement": "agrees",
+      "chi2": 4.88,
+      "dof": 4,
+      "p_value": 0.3,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 4.89,
+      "n_visits": 3,
+      "g_mag": 16.91,
+      "crowded": true,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 4472832989924908416",
+      "agreement": "agrees",
+      "chi2": 0.1,
+      "dof": 4,
+      "p_value": 0.9987,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 0.12,
+      "n_visits": 3,
+      "g_mag": 16.92,
+      "crowded": true,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 4472832478827747840",
+      "agreement": "agrees",
+      "chi2": 6.04,
+      "dof": 4,
+      "p_value": 0.1963,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 4.25,
+      "n_visits": 3,
+      "g_mag": 16.93,
+      "crowded": true,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 4472832650626428928",
+      "agreement": "agrees",
+      "chi2": 1.57,
+      "dof": 4,
+      "p_value": 0.8148,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 0.2,
+      "n_visits": 3,
+      "g_mag": 16.97,
+      "crowded": true,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 4472836254100210432",
+      "agreement": "disagrees",
+      "chi2": 40.21,
+      "dof": 4,
+      "p_value": 0.0,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 7.92,
+      "n_visits": 3,
+      "g_mag": 16.97,
+      "crowded": true,
+      "role": "scored"
+     }
+    ],
+    "in_pooled_totals": true
+   }
   },
   {
    "target_key": "rw_aurigae",
@@ -362,13 +1246,17 @@
     "n_images": 335,
     "n_images_measured": 305,
     "n_images_measured_saturated": 287,
+    "absolute_floor_px": [
+     0.013,
+     0.019
+    ],
     "image_pulls": {
      "n": 610,
-     "within_1sigma": 0.433,
-     "within_2sigma": 0.656,
-     "within_3sigma": 0.777,
-     "mean_pull": 1.454,
-     "rms_pull": 2.472
+     "within_1sigma": 0.462,
+     "within_2sigma": 0.672,
+     "within_3sigma": 0.793,
+     "mean_pull": 1.362,
+     "rms_pull": 2.318
     },
     "random_part": {
      "n": 610,
@@ -380,11 +1268,11 @@
     },
     "visit_pulls": {
      "n": 6,
-     "within_1sigma": 0.167,
-     "within_2sigma": 0.167,
-     "within_3sigma": 0.5,
-     "mean_pull": 3.619,
-     "rms_pull": 4.083
+     "within_1sigma": 0.333,
+     "within_2sigma": 0.5,
+     "within_3sigma": 0.667,
+     "mean_pull": 2.303,
+     "rms_pull": 2.906
     },
     "visit_pulls_offset_removed": {
      "n": 6,
@@ -404,7 +1292,552 @@
     },
     "error_bars": "slightly too small (real scatter is about 1.6x the error bar)"
    },
-   "field_stars": null
+   "field_stars": {
+    "absolute_floor_px": [
+     0.013,
+     0.019
+    ],
+    "counts": {
+     "in_file": 33,
+     "scored": 21,
+     "crowded": 17,
+     "reference": 7,
+     "blended": 5,
+     "too_few_visits": 0
+    },
+    "recovered_by_g": {
+     "G < 14": {
+      "recovered": 2,
+      "total": 2
+     },
+     "G 14-16": {
+      "recovered": 9,
+      "total": 9
+     },
+     "G 16-17": {
+      "recovered": 22,
+      "total": 22
+     }
+    },
+    "motion_test": {
+     "pulls": {
+      "n": 126,
+      "within_1sigma": 0.897,
+      "within_2sigma": 1.0,
+      "within_3sigma": 1.0,
+      "mean_pull": -0.001,
+      "rms_pull": 0.674
+     },
+     "pulls_uncrowded": {
+      "n": 24,
+      "within_1sigma": 0.917,
+      "within_2sigma": 1.0,
+      "within_3sigma": 1.0,
+      "mean_pull": 0.002,
+      "rms_pull": 0.666
+     },
+     "pulls_crowded": {
+      "n": 102,
+      "within_1sigma": 0.892,
+      "within_2sigma": 1.0,
+      "within_3sigma": 1.0,
+      "mean_pull": -0.001,
+      "rms_pull": 0.675
+     },
+     "pulls_reference": {
+      "n": 42,
+      "within_1sigma": 0.857,
+      "within_2sigma": 1.0,
+      "within_3sigma": 1.0,
+      "mean_pull": 0.006,
+      "rms_pull": 0.635
+     },
+     "agreement_counts": {
+      "agrees": 21,
+      "tension": 0,
+      "disagrees": 0
+     },
+     "disagreeing": []
+    },
+    "absolute_test": {
+     "pulls": {
+      "n": 126,
+      "within_1sigma": 0.651,
+      "within_2sigma": 0.849,
+      "within_3sigma": 0.944,
+      "mean_pull": 0.395,
+      "rms_pull": 1.506
+     },
+     "pulls_uncrowded": {
+      "n": 24,
+      "within_1sigma": 0.667,
+      "within_2sigma": 0.958,
+      "within_3sigma": 1.0,
+      "mean_pull": 0.262,
+      "rms_pull": 1.054
+     },
+     "pulls_crowded": {
+      "n": 102,
+      "within_1sigma": 0.647,
+      "within_2sigma": 0.824,
+      "within_3sigma": 0.931,
+      "mean_pull": 0.426,
+      "rms_pull": 1.594
+     },
+     "pulls_reference": {
+      "n": 42,
+      "within_1sigma": 0.833,
+      "within_2sigma": 0.952,
+      "within_3sigma": 1.0,
+      "mean_pull": 0.072,
+      "rms_pull": 0.831
+     },
+     "agreement_counts": {
+      "agrees": 14,
+      "tension": 3,
+      "disagrees": 4
+     },
+     "disagreeing": [
+      "Gaia DR3 156430890833907584",
+      "Gaia DR3 156337329267576576",
+      "Gaia DR3 156429924467261184",
+      "Gaia DR3 156430611662094976"
+     ]
+    },
+    "error_bars": "slightly too large (conservative)",
+    "objects": [
+     {
+      "name": "Gaia DR3 156429997483589120",
+      "agreement": "agrees",
+      "chi2": 3.4,
+      "dof": 4,
+      "p_value": 0.4926,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 4.8,
+      "n_visits": 3,
+      "g_mag": 11.88,
+      "crowded": false,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 156430886538071552",
+      "agreement": "agrees",
+      "chi2": 4.1,
+      "dof": 4,
+      "p_value": 0.3926,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 1.38,
+      "n_visits": 3,
+      "g_mag": 12.8,
+      "crowded": true,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 156431234433162496",
+      "agreement": "agrees",
+      "chi2": 0.23,
+      "dof": 4,
+      "p_value": 0.9939,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 3.66,
+      "n_visits": 3,
+      "g_mag": 14.65,
+      "crowded": true,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 156430890833907584",
+      "agreement": "agrees",
+      "chi2": 5.61,
+      "dof": 4,
+      "p_value": 0.2301,
+      "agreement_absolute": "disagrees",
+      "chi2_absolute": 107.45,
+      "n_visits": 3,
+      "g_mag": 14.66,
+      "crowded": true,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 156430027546480512",
+      "agreement": "agrees",
+      "chi2": 2.09,
+      "dof": 4,
+      "p_value": 0.7186,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 1.77,
+      "n_visits": 3,
+      "g_mag": 14.78,
+      "crowded": true,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 156430238000750592",
+      "agreement": "agrees",
+      "chi2": 1.34,
+      "dof": 4,
+      "p_value": 0.8545,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 0.8,
+      "n_visits": 3,
+      "g_mag": 14.8,
+      "crowded": false,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 156430955257551360",
+      "agreement": "agrees",
+      "chi2": 4.42,
+      "dof": 4,
+      "p_value": 0.3522,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 3.21,
+      "n_visits": 3,
+      "g_mag": 14.85,
+      "crowded": true,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 156337329267576576",
+      "agreement": "agrees",
+      "chi2": 4.69,
+      "dof": 4,
+      "p_value": 0.3206,
+      "agreement_absolute": "disagrees",
+      "chi2_absolute": 20.47,
+      "n_visits": 3,
+      "g_mag": 14.87,
+      "crowded": false,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 156430856476049024",
+      "agreement": "agrees",
+      "chi2": 3.98,
+      "dof": 4,
+      "p_value": 0.4086,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 3.57,
+      "n_visits": 3,
+      "g_mag": 15.26,
+      "crowded": false,
+      "role": "reference"
+     },
+     {
+      "name": "Gaia DR3 156431131353952640",
+      "agreement": "agrees",
+      "chi2": 1.56,
+      "dof": 4,
+      "p_value": 0.8161,
+      "agreement_absolute": "tension",
+      "chi2_absolute": 19.23,
+      "n_visits": 3,
+      "g_mag": 15.32,
+      "crowded": true,
+      "role": "blended"
+     },
+     {
+      "name": "Gaia DR3 156430925195524224",
+      "agreement": "agrees",
+      "chi2": 6.15,
+      "dof": 4,
+      "p_value": 0.1884,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 3.0,
+      "n_visits": 3,
+      "g_mag": 15.93,
+      "crowded": true,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 156336156742208512",
+      "agreement": "agrees",
+      "chi2": 2.87,
+      "dof": 4,
+      "p_value": 0.5795,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 2.66,
+      "n_visits": 3,
+      "g_mag": 16.01,
+      "crowded": false,
+      "role": "reference"
+     },
+     {
+      "name": "Gaia DR3 156430989619218176",
+      "agreement": "agrees",
+      "chi2": 1.01,
+      "dof": 4,
+      "p_value": 0.9078,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 1.05,
+      "n_visits": 3,
+      "g_mag": 16.01,
+      "crowded": true,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 156337260548477184",
+      "agreement": "agrees",
+      "chi2": 2.56,
+      "dof": 4,
+      "p_value": 0.6336,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 0.81,
+      "n_visits": 3,
+      "g_mag": 16.03,
+      "crowded": false,
+      "role": "reference"
+     },
+     {
+      "name": "Gaia DR3 156430925195528576",
+      "agreement": "agrees",
+      "chi2": 1.92,
+      "dof": 4,
+      "p_value": 0.7512,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 2.27,
+      "n_visits": 3,
+      "g_mag": 16.35,
+      "crowded": true,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 156430852178333952",
+      "agreement": "agrees",
+      "chi2": 4.71,
+      "dof": 4,
+      "p_value": 0.3188,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 3.45,
+      "n_visits": 3,
+      "g_mag": 16.37,
+      "crowded": true,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 156431096994224384",
+      "agreement": "agrees",
+      "chi2": 4.28,
+      "dof": 4,
+      "p_value": 0.3695,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 3.07,
+      "n_visits": 3,
+      "g_mag": 16.39,
+      "crowded": false,
+      "role": "reference"
+     },
+     {
+      "name": "Gaia DR3 156430134921542272",
+      "agreement": "agrees",
+      "chi2": 1.84,
+      "dof": 4,
+      "p_value": 0.7646,
+      "agreement_absolute": "tension",
+      "chi2_absolute": 14.48,
+      "n_visits": 3,
+      "g_mag": 16.4,
+      "crowded": false,
+      "role": "reference"
+     },
+     {
+      "name": "Gaia DR3 156430955257549952",
+      "agreement": "agrees",
+      "chi2": 1.58,
+      "dof": 4,
+      "p_value": 0.8124,
+      "agreement_absolute": "tension",
+      "chi2_absolute": 16.93,
+      "n_visits": 3,
+      "g_mag": 16.46,
+      "crowded": true,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 156429924467261184",
+      "agreement": "agrees",
+      "chi2": 0.83,
+      "dof": 4,
+      "p_value": 0.9342,
+      "agreement_absolute": "disagrees",
+      "chi2_absolute": 32.76,
+      "n_visits": 3,
+      "g_mag": 16.57,
+      "crowded": true,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 156430611662094976",
+      "agreement": "agrees",
+      "chi2": 3.61,
+      "dof": 4,
+      "p_value": 0.4612,
+      "agreement_absolute": "disagrees",
+      "chi2_absolute": 47.11,
+      "n_visits": 3,
+      "g_mag": 16.61,
+      "crowded": true,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 156336951308578432",
+      "agreement": "agrees",
+      "chi2": 1.21,
+      "dof": 4,
+      "p_value": 0.8762,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 0.57,
+      "n_visits": 3,
+      "g_mag": 16.62,
+      "crowded": false,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 156430615957863040",
+      "agreement": "agrees",
+      "chi2": 0.04,
+      "dof": 4,
+      "p_value": 0.9998,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 1.23,
+      "n_visits": 3,
+      "g_mag": 16.65,
+      "crowded": true,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 156336229755949568",
+      "agreement": "agrees",
+      "chi2": 1.37,
+      "dof": 4,
+      "p_value": 0.8489,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 4.98,
+      "n_visits": 3,
+      "g_mag": 16.71,
+      "crowded": true,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 156336229755949440",
+      "agreement": "agrees",
+      "chi2": 1.88,
+      "dof": 4,
+      "p_value": 0.7581,
+      "agreement_absolute": "disagrees",
+      "chi2_absolute": 81.41,
+      "n_visits": 3,
+      "g_mag": 16.74,
+      "crowded": true,
+      "role": "blended"
+     },
+     {
+      "name": "Gaia DR3 156430130625704576",
+      "agreement": "agrees",
+      "chi2": 3.68,
+      "dof": 4,
+      "p_value": 0.4508,
+      "agreement_absolute": "tension",
+      "chi2_absolute": 12.63,
+      "n_visits": 3,
+      "g_mag": 16.75,
+      "crowded": true,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 156430615957866368",
+      "agreement": "agrees",
+      "chi2": 5.49,
+      "dof": 4,
+      "p_value": 0.241,
+      "agreement_absolute": "tension",
+      "chi2_absolute": 15.53,
+      "n_visits": 3,
+      "g_mag": 16.78,
+      "crowded": true,
+      "role": "blended"
+     },
+     {
+      "name": "Gaia DR3 156430611662100352",
+      "agreement": "agrees",
+      "chi2": 4.65,
+      "dof": 4,
+      "p_value": 0.3248,
+      "agreement_absolute": "disagrees",
+      "chi2_absolute": 24.6,
+      "n_visits": 3,
+      "g_mag": 16.78,
+      "crowded": true,
+      "role": "blended"
+     },
+     {
+      "name": "Gaia DR3 156429756964428928",
+      "agreement": "agrees",
+      "chi2": 4.07,
+      "dof": 4,
+      "p_value": 0.3964,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 3.08,
+      "n_visits": 3,
+      "g_mag": 16.82,
+      "crowded": true,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 156430096265962240",
+      "agreement": "agrees",
+      "chi2": 1.11,
+      "dof": 4,
+      "p_value": 0.8933,
+      "agreement_absolute": "tension",
+      "chi2_absolute": 13.24,
+      "n_visits": 3,
+      "g_mag": 16.83,
+      "crowded": true,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 156431092696502656",
+      "agreement": "agrees",
+      "chi2": 0.79,
+      "dof": 4,
+      "p_value": 0.9401,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 2.07,
+      "n_visits": 3,
+      "g_mag": 16.84,
+      "crowded": false,
+      "role": "reference"
+     },
+     {
+      "name": "Gaia DR3 156430096265955584",
+      "agreement": "agrees",
+      "chi2": 0.64,
+      "dof": 4,
+      "p_value": 0.9591,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 2.37,
+      "n_visits": 3,
+      "g_mag": 16.86,
+      "crowded": false,
+      "role": "reference"
+     },
+     {
+      "name": "Gaia DR3 156431062634468224",
+      "agreement": "agrees",
+      "chi2": 1.19,
+      "dof": 4,
+      "p_value": 0.8792,
+      "agreement_absolute": "disagrees",
+      "chi2_absolute": 177.95,
+      "n_visits": 3,
+      "g_mag": 16.98,
+      "crowded": false,
+      "role": "blended"
+     }
+    ],
+    "in_pooled_totals": true
+   }
   },
   {
    "target_key": "wise_0855",
@@ -443,13 +1876,17 @@
     "n_images": 258,
     "n_images_measured": 2,
     "n_images_measured_saturated": 0,
+    "absolute_floor_px": [
+     0.036,
+     0.013
+    ],
     "image_pulls": {
      "n": 4,
      "within_1sigma": 0.5,
      "within_2sigma": 1.0,
      "within_3sigma": 1.0,
-     "mean_pull": 0.196,
-     "rms_pull": 1.059
+     "mean_pull": 0.179,
+     "rms_pull": 1.026
     },
     "random_part": {
      "n": 4,
@@ -462,10 +1899,10 @@
     "visit_pulls": {
      "n": 6,
      "within_1sigma": 0.667,
-     "within_2sigma": 0.833,
+     "within_2sigma": 1.0,
      "within_3sigma": 1.0,
-     "mean_pull": -0.125,
-     "rms_pull": 1.202
+     "mean_pull": -0.176,
+     "rms_pull": 1.044
     },
     "visit_pulls_offset_removed": {
      "n": 6,
@@ -485,7 +1922,253 @@
     },
     "error_bars": null
    },
-   "field_stars": null
+   "field_stars": {
+    "absolute_floor_px": [
+     0.036,
+     0.013
+    ],
+    "counts": {
+     "in_file": 10,
+     "scored": 5,
+     "crowded": 2,
+     "reference": 5,
+     "blended": 0,
+     "too_few_visits": 0
+    },
+    "recovered_by_g": {
+     "G < 14": {
+      "recovered": 2,
+      "total": 2
+     },
+     "G 14-16": {
+      "recovered": 3,
+      "total": 3
+     },
+     "G 16-17": {
+      "recovered": 5,
+      "total": 5
+     }
+    },
+    "motion_test": {
+     "pulls": {
+      "n": 30,
+      "within_1sigma": 0.9,
+      "within_2sigma": 0.9,
+      "within_3sigma": 0.967,
+      "mean_pull": 0.016,
+      "rms_pull": 1.261
+     },
+     "pulls_uncrowded": {
+      "n": 18,
+      "within_1sigma": 1.0,
+      "within_2sigma": 1.0,
+      "within_3sigma": 1.0,
+      "mean_pull": -0.007,
+      "rms_pull": 0.477
+     },
+     "pulls_crowded": {
+      "n": 12,
+      "within_1sigma": 0.75,
+      "within_2sigma": 0.75,
+      "within_3sigma": 0.917,
+      "mean_pull": 0.051,
+      "rms_pull": 1.907
+     },
+     "pulls_reference": {
+      "n": 30,
+      "within_1sigma": 0.933,
+      "within_2sigma": 1.0,
+      "within_3sigma": 1.0,
+      "mean_pull": 0.02,
+      "rms_pull": 0.585
+     },
+     "agreement_counts": {
+      "agrees": 4,
+      "tension": 0,
+      "disagrees": 1
+     },
+     "disagreeing": [
+      "Gaia DR3 5756955781099740544"
+     ]
+    },
+    "absolute_test": {
+     "pulls": {
+      "n": 30,
+      "within_1sigma": 0.567,
+      "within_2sigma": 0.8,
+      "within_3sigma": 0.9,
+      "mean_pull": -0.102,
+      "rms_pull": 2.431
+     },
+     "pulls_uncrowded": {
+      "n": 18,
+      "within_1sigma": 0.778,
+      "within_2sigma": 1.0,
+      "within_3sigma": 1.0,
+      "mean_pull": 0.514,
+      "rms_pull": 0.746
+     },
+     "pulls_crowded": {
+      "n": 12,
+      "within_1sigma": 0.25,
+      "within_2sigma": 0.5,
+      "within_3sigma": 0.75,
+      "mean_pull": -1.027,
+      "rms_pull": 3.733
+     },
+     "pulls_reference": {
+      "n": 30,
+      "within_1sigma": 0.733,
+      "within_2sigma": 0.967,
+      "within_3sigma": 1.0,
+      "mean_pull": 0.289,
+      "rms_pull": 0.862
+     },
+     "agreement_counts": {
+      "agrees": 3,
+      "tension": 0,
+      "disagrees": 2
+     },
+     "disagreeing": [
+      "Gaia DR3 5756955785394371328",
+      "Gaia DR3 5756955781099740544"
+     ]
+    },
+    "error_bars": "slightly too small (real scatter is about 1.3x the error bar)",
+    "objects": [
+     {
+      "name": "Gaia DR3 5756955785394371328",
+      "agreement": "agrees",
+      "chi2": 2.1,
+      "dof": 4,
+      "p_value": 0.7169,
+      "agreement_absolute": "disagrees",
+      "chi2_absolute": 144.84,
+      "n_visits": 3,
+      "g_mag": 13.3,
+      "crowded": true,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 5756959491950135168",
+      "agreement": "agrees",
+      "chi2": 1.31,
+      "dof": 4,
+      "p_value": 0.8604,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 1.34,
+      "n_visits": 3,
+      "g_mag": 13.87,
+      "crowded": false,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 5756956163351495168",
+      "agreement": "agrees",
+      "chi2": 1.91,
+      "dof": 4,
+      "p_value": 0.7523,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 0.88,
+      "n_visits": 3,
+      "g_mag": 15.14,
+      "crowded": false,
+      "role": "reference"
+     },
+     {
+      "name": "Gaia DR3 5756956163351495040",
+      "agreement": "agrees",
+      "chi2": 1.82,
+      "dof": 4,
+      "p_value": 0.7693,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 0.59,
+      "n_visits": 3,
+      "g_mag": 15.34,
+      "crowded": false,
+      "role": "reference"
+     },
+     {
+      "name": "Gaia DR3 5756956541308616832",
+      "agreement": "agrees",
+      "chi2": 1.27,
+      "dof": 4,
+      "p_value": 0.8665,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 2.78,
+      "n_visits": 3,
+      "g_mag": 15.36,
+      "crowded": false,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 5756956747467044608",
+      "agreement": "agrees",
+      "chi2": 2.99,
+      "dof": 4,
+      "p_value": 0.5602,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 3.49,
+      "n_visits": 3,
+      "g_mag": 16.06,
+      "crowded": false,
+      "role": "reference"
+     },
+     {
+      "name": "Gaia DR3 5756956644387831296",
+      "agreement": "agrees",
+      "chi2": 1.51,
+      "dof": 4,
+      "p_value": 0.8243,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 5.91,
+      "n_visits": 3,
+      "g_mag": 16.31,
+      "crowded": false,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 5756956644387830912",
+      "agreement": "agrees",
+      "chi2": 2.58,
+      "dof": 4,
+      "p_value": 0.6311,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 4.61,
+      "n_visits": 3,
+      "g_mag": 16.35,
+      "crowded": false,
+      "role": "reference"
+     },
+     {
+      "name": "Gaia DR3 5756955781099740544",
+      "agreement": "disagrees",
+      "chi2": 41.52,
+      "dof": 4,
+      "p_value": 0.0,
+      "agreement_absolute": "disagrees",
+      "chi2_absolute": 22.37,
+      "n_visits": 3,
+      "g_mag": 16.69,
+      "crowded": true,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 5756956708811536128",
+      "agreement": "agrees",
+      "chi2": 0.98,
+      "dof": 4,
+      "p_value": 0.9122,
+      "agreement_absolute": "tension",
+      "chi2_absolute": 12.71,
+      "n_visits": 3,
+      "g_mag": 16.93,
+      "crowded": false,
+      "role": "reference"
+     }
+    ],
+    "in_pooled_totals": true
+   }
   },
   {
    "target_key": "r_draconis",
@@ -505,13 +2188,17 @@
     "n_images": 2493,
     "n_images_measured": 3,
     "n_images_measured_saturated": 3,
+    "absolute_floor_px": [
+     0.137,
+     0.402
+    ],
     "image_pulls": {
      "n": 6,
-     "within_1sigma": 0.167,
-     "within_2sigma": 0.333,
-     "within_3sigma": 0.667,
-     "mean_pull": -0.56,
-     "rms_pull": 3.57
+     "within_1sigma": 0.833,
+     "within_2sigma": 0.833,
+     "within_3sigma": 1.0,
+     "mean_pull": -0.339,
+     "rms_pull": 0.894
     },
     "random_part": {
      "n": 4,
@@ -523,11 +2210,11 @@
     },
     "visit_pulls": {
      "n": 4,
-     "within_1sigma": 0.0,
-     "within_2sigma": 0.5,
-     "within_3sigma": 0.75,
-     "mean_pull": -0.546,
-     "rms_pull": 2.766
+     "within_1sigma": 0.75,
+     "within_2sigma": 1.0,
+     "within_3sigma": 1.0,
+     "mean_pull": -0.284,
+     "rms_pull": 0.621
     },
     "visit_pulls_offset_removed": {
      "n": 4,
@@ -547,7 +2234,226 @@
     },
     "error_bars": null
    },
-   "field_stars": null
+   "field_stars": {
+    "absolute_floor_px": [
+     0.137,
+     0.402
+    ],
+    "counts": {
+     "in_file": 8,
+     "scored": 3,
+     "crowded": 2,
+     "reference": 5,
+     "blended": 0,
+     "too_few_visits": 0
+    },
+    "recovered_by_g": {
+     "G < 14": {
+      "recovered": 1,
+      "total": 1
+     },
+     "G 14-16": {
+      "recovered": 5,
+      "total": 5
+     },
+     "G 16-17": {
+      "recovered": 2,
+      "total": 2
+     }
+    },
+    "motion_test": {
+     "pulls": {
+      "n": 54,
+      "within_1sigma": 0.537,
+      "within_2sigma": 0.759,
+      "within_3sigma": 0.907,
+      "mean_pull": 0.061,
+      "rms_pull": 1.616
+     },
+     "pulls_uncrowded": {
+      "n": 18,
+      "within_1sigma": 0.611,
+      "within_2sigma": 0.778,
+      "within_3sigma": 0.889,
+      "mean_pull": 0.134,
+      "rms_pull": 1.72
+     },
+     "pulls_crowded": {
+      "n": 36,
+      "within_1sigma": 0.5,
+      "within_2sigma": 0.75,
+      "within_3sigma": 0.917,
+      "mean_pull": 0.024,
+      "rms_pull": 1.561
+     },
+     "pulls_reference": {
+      "n": 66,
+      "within_1sigma": 0.455,
+      "within_2sigma": 0.848,
+      "within_3sigma": 0.924,
+      "mean_pull": 0.058,
+      "rms_pull": 1.981
+     },
+     "agreement_counts": {
+      "agrees": 1,
+      "tension": 0,
+      "disagrees": 2
+     },
+     "disagreeing": [
+      "Gaia DR3 1648328119433021824",
+      "Gaia DR3 1648328355654678784"
+     ]
+    },
+    "absolute_test": {
+     "pulls": {
+      "n": 54,
+      "within_1sigma": 1.0,
+      "within_2sigma": 1.0,
+      "within_3sigma": 1.0,
+      "mean_pull": 0.078,
+      "rms_pull": 0.307
+     },
+     "pulls_uncrowded": {
+      "n": 18,
+      "within_1sigma": 1.0,
+      "within_2sigma": 1.0,
+      "within_3sigma": 1.0,
+      "mean_pull": 0.3,
+      "rms_pull": 0.367
+     },
+     "pulls_crowded": {
+      "n": 36,
+      "within_1sigma": 1.0,
+      "within_2sigma": 1.0,
+      "within_3sigma": 1.0,
+      "mean_pull": -0.033,
+      "rms_pull": 0.271
+     },
+     "pulls_reference": {
+      "n": 68,
+      "within_1sigma": 0.956,
+      "within_2sigma": 0.985,
+      "within_3sigma": 1.0,
+      "mean_pull": 0.304,
+      "rms_pull": 0.55
+     },
+     "agreement_counts": {
+      "agrees": 3,
+      "tension": 0,
+      "disagrees": 0
+     },
+     "disagreeing": []
+    },
+    "error_bars": "too small (real scatter is about 1.6x the error bar)",
+    "objects": [
+     {
+      "name": "Gaia DR3 1648327226079824640",
+      "agreement": "tension",
+      "chi2": 26.74,
+      "dof": 16,
+      "p_value": 0.0445,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 1.18,
+      "n_visits": 9,
+      "g_mag": 13.75,
+      "crowded": false,
+      "role": "reference"
+     },
+     {
+      "name": "Gaia DR3 1648328085073287040",
+      "agreement": "disagrees",
+      "chi2": 62.2,
+      "dof": 16,
+      "p_value": 0.0,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 2.99,
+      "n_visits": 9,
+      "g_mag": 14.2,
+      "crowded": false,
+      "role": "reference"
+     },
+     {
+      "name": "Gaia DR3 1648328119433021824",
+      "agreement": "disagrees",
+      "chi2": 53.24,
+      "dof": 16,
+      "p_value": 0.0,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 2.43,
+      "n_visits": 9,
+      "g_mag": 14.29,
+      "crowded": false,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 1648328355654678784",
+      "agreement": "disagrees",
+      "chi2": 63.38,
+      "dof": 16,
+      "p_value": 0.0,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 1.16,
+      "n_visits": 9,
+      "g_mag": 15.41,
+      "crowded": true,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 1648328325591451776",
+      "agreement": "tension",
+      "chi2": 32.33,
+      "dof": 16,
+      "p_value": 0.0091,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 3.87,
+      "n_visits": 9,
+      "g_mag": 15.43,
+      "crowded": false,
+      "role": "reference"
+     },
+     {
+      "name": "Gaia DR3 1648328359951193216",
+      "agreement": "agrees",
+      "chi2": 24.39,
+      "dof": 16,
+      "p_value": 0.0813,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 1.48,
+      "n_visits": 9,
+      "g_mag": 15.71,
+      "crowded": true,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 1648328119433021184",
+      "agreement": null,
+      "chi2": null,
+      "dof": 0,
+      "p_value": null,
+      "agreement_absolute": "tension",
+      "chi2_absolute": 7.26,
+      "n_visits": 1,
+      "g_mag": 16.18,
+      "crowded": false,
+      "role": "reference"
+     },
+     {
+      "name": "Gaia DR3 1648328222512233088",
+      "agreement": "disagrees",
+      "chi2": 137.73,
+      "dof": 10,
+      "p_value": 0.0,
+      "agreement_absolute": "agrees",
+      "chi2_absolute": 5.3,
+      "n_visits": 6,
+      "g_mag": 16.83,
+      "crowded": false,
+      "role": "reference"
+     }
+    ],
+    "in_pooled_totals": false,
+    "excluded_reason": "crowding floor [0.137, 0.402] px is above 0.25 px: the bright target's glow dominates this field"
+   }
   }
  ]
 }

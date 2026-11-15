@@ -15,9 +15,9 @@ from astropy.modeling import fitting, models
 from astropy.table import Table
 from astropy.time import Time
 from astropy.utils.exceptions import AstropyUserWarning
-from astroquery.gaia import Gaia
 from erfa import ErfaWarning
 
+from spx.archive import gaia_query
 from spx.clean import CLEAN, SATURATED
 from spx.cutouts import field_dir, wavelength_at
 from spx.field import PIXEL_SCALE_ARCSEC
@@ -161,9 +161,9 @@ def gaia_sources(field):
     if path.exists():
         return Table.read(path)
     radius = field.width_deg / np.sqrt(2) + 0.01
-    table = Gaia.launch_job(f"""SELECT source_id, ra, dec, pmra, pmdec, parallax, phot_g_mean_mag, ruwe
+    table = gaia_query(f"""SELECT source_id, ra, dec, pmra, pmdec, parallax, phot_g_mean_mag, ruwe
         FROM gaiadr3.gaia_source WHERE phot_g_mean_mag < 20 AND 1 = CONTAINS(POINT(ra, dec),
-        CIRCLE({field.center.ra.deg}, {field.center.dec.deg}, {radius}))""").get_results()
+        CIRCLE({field.center.ra.deg}, {field.center.dec.deg}, {radius}))""")
     path.parent.mkdir(parents=True, exist_ok=True)
     table.write(path, overwrite=True)
     return table

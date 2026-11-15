@@ -1,4 +1,4 @@
-"""Queries to the IRSA archive (SPHEREx images, CatWISE2020)."""
+"""Queries to the IRSA archive (SPHEREx images, CatWISE2020) and to Gaia DR3."""
 import io
 import re
 import time
@@ -14,6 +14,30 @@ IRSA = "https://irsa.ipac.caltech.edu/"
 
 # Pipeline versions whose file format (extensions, FLAGS bits, wavelength table) we have checked.
 VALIDATED_PIPELINES = {"v27"}
+
+
+# Gaia DR3 services, in order. GAVO's gaia.dr3lite holds the same DR3 values for the columns we use
+# (positions at J2016.0, proper motions, parallax, G, RUWE); it answered while ESA's archive was down
+# (2026-11-15).
+GAIA_SERVICES = [("ESA", "https://gea.esac.esa.int/tap-server/tap/sync", "gaiadr3.gaia_source"),
+                 ("GAVO", "https://dc.g-vo.org/tap/sync", "gaia.dr3lite")]
+
+
+def gaia_query(adql, timeout=(10, 120)):
+    """Run an ADQL query on gaiadr3.gaia_source, falling back to a mirror if ESA doesn't answer."""
+    errors = []
+    for name, url, table in GAIA_SERVICES:
+        try:
+            response = requests.post(url, timeout=timeout, data={
+                "REQUEST": "doQuery", "LANG": "ADQL", "FORMAT": "csv",
+                "QUERY": adql.replace("gaiadr3.gaia_source", table)})
+            if response.ok and not response.text.lstrip().startswith("<"):
+                return Table.read(io.BytesIO(response.content), format="ascii.csv")
+            errors.append(f"{name}: HTTP {response.status_code}")
+        except requests.RequestException as error:
+            errors.append(f"{name}: {type(error).__name__}")
+        print(f"Gaia query failed at {errors[-1]}")
+    raise ConnectionError("No Gaia DR3 service answered: " + "; ".join(errors))
 
 
 def tap_query(adql, retries=5, timeout=(15, 180)):

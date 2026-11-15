@@ -1,5 +1,5 @@
 {
- "built": "2026-11-14T21:30:22Z",
+ "built": "2026-11-14T22:42:43Z",
  "size_px": 51,
  "offline": true,
  "frames_found": 386,
@@ -10,6 +10,7 @@
  "frames_without_wavelength": 0,
  "visits": 3,
  "reference_stars": 10,
+ "field_objects": 48,
  "verdict": "moves_as_expected",
- "minutes": 2.5
+ "minutes": 36.6
 }

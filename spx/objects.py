@@ -19,6 +19,11 @@ from spx.measure import (APERTURE_R, BLEND_RADIUS_PX, NEIGHBOR_MARGIN_PX, NEIGHB
 from spx.visits import visit_of
 
 OBJECT_MAX_G = REF_MAX_G  # fainter Gaia stars rarely reach S/N 5 in a single SPHEREx frame
+# Crowding: a Gaia neighbor this close and at most this much fainter shifts the measured position by a
+# constant amount. Measured 2026-11-15 on 83 non-reference stars, absolute test with the field floor:
+# stars without such a neighbor 89% / 99% within 1 / 2 sigma, with one 71% / 86%.
+CROWDED_RADIUS_PX = 2.0
+CROWDED_MAX_DMAG = 5.0
 
 
 def _g_mag(table):
@@ -110,6 +115,7 @@ def export_objects(path, target_key, field, visits, ranges, object_results, fram
         ox, oy = center_xy[0][own][0], center_xy[1][own][0]
         blended = (~own & (np.hypot(center_xy[0] - ox, center_xy[1] - oy) <= BLEND_RADIUS_PX)
                    & (g_all <= float(row["phot_g_mean_mag"]) + NEIGHBOR_MAX_DMAG))
+        crowded = crowding_neighbors(center_xy, own, g_all, float(row["phot_g_mean_mag"]))
         visit_entries = []
         for visit in visits:
             mid = Time(np.mean([f.header["MJD-AVG"] for f in visit.frames]), format="mjd")
@@ -138,6 +144,7 @@ def export_objects(path, target_key, field, visits, ranges, object_results, fram
             "g_mag": round(float(row["phot_g_mean_mag"]), 2),
             "reference": source_id in reference_ids,
             "blended_with": [f"Gaia DR3 {i}" for i in ids[blended]],
+            "crowded_by": [f"Gaia DR3 {i}" for i in ids[crowded]],
             "visits": visit_entries,
         })
     entries.sort(key=lambda e: e["g_mag"])
@@ -146,7 +153,37 @@ def export_objects(path, target_key, field, visits, ranges, object_results, fram
         "size_px": field.size_px,
         "selection": (f"Gaia DR3 stars inside the field on {CENTER_DATE} with G <= {OBJECT_MAX_G:g}, "
                       f"except the target and anything within {BLEND_RADIUS_PX:g} px of it"),
+        **absolute_floor(entries),
         "objects": entries,
     }
     path.write_text(json.dumps(document, indent=1))
     return document
+
+
+def crowding_neighbors(xy, own, g_all, g):
+    """Gaia neighbors close and bright enough to shift a star's measured position (not merged with it:
+    those are blended_with)."""
+    separation = np.hypot(xy[0] - xy[0][own][0], xy[1] - xy[1][own][0])
+    return (~own & (separation > BLEND_RADIUS_PX) & (separation <= CROWDED_RADIUS_PX)
+            & (g_all <= g + CROWDED_MAX_DMAG))
+
+
+def absolute_floor(entries):
+    """Error to add (in quadrature) when comparing a position with Gaia's, not when testing motion.
+
+    Each star's measured position sits a constant amount off Gaia's in every visit (crowding,
+    color-dependent PSF), which the per-visit errors don't include. The reference stars measure it:
+    the RMS over stars of their offset averaged over visits. With it, 74% / 88% of non-reference
+    field-star positions fall within 1 / 2 sigma (38% / 59% without), 2026-11-15.
+    """
+    means = []
+    for entry in entries:
+        offsets = [np.subtract(v["measured_px"], v["expected_px"]) for v in entry["visits"]
+                   if entry["reference"] and v["measured_px"] is not None]
+        if offsets:
+            means.append(np.mean(offsets, axis=0))
+    if len(means) < 2:
+        return {"absolute_floor_px": None, "absolute_floor_from": "fewer than 2 reference stars measured"}
+    rms = np.sqrt(np.mean(np.square(means), axis=0))
+    return {"absolute_floor_px": [round(float(v), 3) for v in rms],
+            "absolute_floor_from": f"{len(means)} reference stars: RMS of each star's offset from Gaia, averaged over visits"}
