@@ -50,19 +50,22 @@
         <div id="target-intro-body"></div>
       </details>
 
-      <p class="guide" role="note">
-        <strong>Press Play.</strong>
-        <span class="guide-item"><svg viewBox="0 0 18 18" width="18" height="18" aria-hidden="true"><circle cx="9" cy="9" r="6" stroke="#ffd84d" fill="none" stroke-width="2.4"/></svg>where SPHEREx saw it</span>
-        <span class="guide-item"><svg viewBox="0 0 18 18" width="18" height="18" aria-hidden="true"><rect x="4" y="4" width="10" height="10" stroke="#5cc8ff" fill="none" stroke-width="2"/></svg>where the catalog predicts it</span>
-      </p>
+      <ol class="guide" aria-label="How to use this page">
+        <li><b>1</b> Pick a star at the top.</li>
+        <li><b>2</b> Press <strong>Play</strong> under the picture.</li>
+        <li><b>3</b> Watch the markers:
+          <span class="guide-item"><svg viewBox="0 0 18 18" width="18" height="18" aria-hidden="true"><circle cx="9" cy="9" r="6" stroke="#ffd84d" fill="none" stroke-width="2.4"/></svg>where SPHEREx saw the star</span>
+          <span class="guide-item"><svg viewBox="0 0 18 18" width="18" height="18" aria-hidden="true"><rect x="4" y="4" width="10" height="10" stroke="#5cc8ff" fill="none" stroke-width="2"/></svg>where the catalog says it should be</span>
+        </li>
+      </ol>
 
       <!-- how to look: the four modes -->
       <div id="mode-bar" class="mode-bar" hidden>
         <div id="mode-buttons" class="tabs" role="group" aria-label="Mode">
-          <button type="button" data-mode="flipbook">Flipbook</button>
-          <button type="button" data-mode="blink">Blink</button>
-          <button type="button" data-mode="difference">Difference</button>
-          <button type="button" data-mode="brightness">Brightness</button>
+          <button type="button" data-mode="flipbook">Watch it move</button>
+          <button type="button" data-mode="blink">Flip between two</button>
+          <button type="button" data-mode="difference">Spot the change</button>
+          <button type="button" data-mode="brightness">Brightness chart</button>
         </div>
         <p id="mode-hint" class="mode-hint"></p>
         <p id="mode-note" class="note-line" hidden></p>
@@ -105,9 +108,9 @@
       <!-- player bar: everything that changes which picture is on screen -->
       <div id="player" class="player" hidden>
         <div id="flipbook-controls" class="player-row">
-          <span class="player-label">Visit</span>
+          <span class="player-label" title="A visit is one of the times SPHEREx photographed this spot, about every 6 months">Visit</span>
           <div id="visit-strip" class="visit-strip" role="group" aria-label="Visits"></div>
-          <button id="back-to-stack" type="button" hidden>↩ Back to the visit stack</button>
+          <button id="back-to-stack" type="button" hidden>↩ Back to the combined picture</button>
         </div>
         <div id="pair-controls" class="player-row" hidden>
           <span id="pair-heading" class="sr-only">Compare</span>
@@ -127,7 +130,7 @@
             <input id="speed" type="range" min="0.5" max="8" step="0.5" value="2">
             <span><output id="speed-out">2</output>/s</span>
           </label>
-          <span class="keys muted small">Keys: ← → step · space play · + − zoom</span>
+          <span class="keys muted small">Keyboard: ← → step · space play · + − zoom</span>
         </div>
         <div id="diff-controls" class="player-row" hidden>
           <label class="inline-slider" title="k scales A so stars that didn't change cancel out">k
@@ -139,6 +142,7 @@
         </div>
       </div>
 
+      <p class="muted small visit-hint">A <strong>visit</strong> is one of the times SPHEREx photographed this spot, about every 6 months. Each visit's photos are combined into one clear picture.</p>
       <div id="image-label" class="image-label" aria-live="polite"></div>
       <p id="field-info" class="muted small field-info"></p>
 
@@ -151,7 +155,7 @@
       </section>
 
       <details id="fingerprint" class="card fingerprint" open>
-        <summary><h3>Infrared fingerprint</h3> <span class="muted">brightness against wavelength, compared with reference shapes</span></summary>
+        <summary><h3>Infrared fingerprint</h3> <span class="muted">how bright the object is in each infrared color. The shape of the curve shows what kind of object it is.</span></summary>
         <p id="fingerprint-note" class="muted small"></p>
         <div id="fingerprint-legend" class="legend" role="group" aria-label="Reference spectra"></div>
         <div id="fingerprint-chart" class="chart-box"></div>
@@ -160,10 +164,10 @@
 
       <section id="thumbs-panel" class="card" aria-labelledby="thumbs-heading" hidden>
         <div class="card-head">
-          <h3 id="thumbs-heading">Single images</h3>
+          <h3 id="thumbs-heading">The individual photos</h3>
           <span id="thumbs-count" class="muted"></span>
         </div>
-        <p class="muted small card-hint">Each visit is made of these photos, one wavelength each. Click one to open it. Asteroids only show up here.</p>
+        <p class="muted small card-hint">Every visit is made of these single photos, each taken in one infrared color. Click one to see it on its own. Passing asteroids only show up in single photos.</p>
         <div id="thumbs"></div>
       </section>
 
@@ -185,16 +189,16 @@
       </section>
     <aside id="controls" class="controls" aria-label="Settings" hidden>
       <details class="side-section" open>
-        <summary><h3>Show on image</h3></summary>
-        <p class="muted small side-hint">Hover a marker for its name; click a star for details.</p>
+        <summary><h3>Markers on the picture</h3></summary>
+        <p class="muted small side-hint">Tick or untick to show or hide each marker. Point at a marker to see its name.</p>
         <div id="layer-list" class="layer-list"></div>
       </details>
 
       <details class="side-section">
-        <summary><h3 id="filters-heading">Advanced: dates and wavelength</h3><span id="filters-summary" class="muted small"></span></summary>
-        <p class="muted small side-hint">Choose which pictures to use, by date and by wavelength.</p>
+        <summary><h3 id="filters-heading">Use only some of the photos</h3><span id="filters-summary" class="muted small"></span></summary>
+        <p class="muted small side-hint">Optional. SPHEREx takes each photo in a different infrared color, and objects look brighter in some colors than others. Narrow the dates or the color range here when you want to compare photos that match.</p>
         <div class="filter">
-          <div class="filter-head"><span>Time</span><output id="time-out" class="muted"></output></div>
+          <div class="filter-head"><span>Dates</span><output id="time-out" class="muted"></output></div>
           <div id="time-range" class="dual"></div>
           <div class="row dates">
             <label>From <input id="date-from" type="date"></label>
@@ -203,7 +207,7 @@
           <div id="year-buttons" class="row chips"></div>
         </div>
         <div class="filter">
-          <div class="filter-head"><span>Wavelength</span><output id="wl-out" class="muted"></output></div>
+          <div class="filter-head"><span>Infrared color (wavelength)</span><output id="wl-out" class="muted"></output></div>
           <div id="wl-range" class="dual"></div>
           <div id="wl-presets" class="row chips"></div>
           <p class="muted small side-hint">Compare photos at the same wavelength: objects look brighter or dimmer at different wavelengths. D1–D6 are the six detectors.</p>
@@ -213,13 +217,13 @@
       </details>
 
       <details id="display-controls" class="side-section">
-        <summary><h3>Display and field size</h3></summary>
+        <summary><h3>Change how the picture looks</h3></summary>
         <div class="field-size" style="margin: 8px 0" title="How much sky the image covers (not zoom)">
           <span class="muted small">Field size</span>
           <div id="fov-buttons" class="seg seg-small" role="group" aria-label="Field size"></div>
         </div>
 
-        <p class="muted small side-hint">How the picture is painted. This doesn't change the data.</p>
+        <p class="muted small side-hint">Optional. Brightness, contrast, color and how much sky is shown. This never changes the measurements.</p>
         <label class="check">
           <input id="color-toggle" type="checkbox">
           <span>Color <span class="muted">(visit stacks: blue 0.75–1.6, green 1.6–3.8, red 3.8–5.0 µm)</span></span>

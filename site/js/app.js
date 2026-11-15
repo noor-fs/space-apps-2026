@@ -608,7 +608,7 @@ const timeFmt = new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-d
 const fmtDate = (d) => dateFmt.format(new Date(`${d}T00:00:00Z`));
 const fmtTime = (t) => { const d = new Date(t); return `${dateFmt.format(d)}, ${timeFmt.format(d)} UTC`; };
 const fmtUm = (x) => Number(x).toFixed(2);
-const refName = (item) => (item.kind === "visit" ? `Visit ${item.visit.n} stack` : `Visit ${item.visit.n}, image ${item.frame.i}`);
+const refName = (item) => (item.kind === "visit" ? `Visit ${item.visit.n} (combined picture)` : `Visit ${item.visit.n}, image ${item.frame.i}`);
 
 function fillLabel({ badge, title, details, link, notes }) {
   el.label.replaceChildren();
@@ -661,8 +661,8 @@ function updateLabel(item) {
     const wl = Array.isArray(v.wavelength_um) ? `${fmtUm(v.wavelength_um[0])}–${fmtUm(v.wavelength_um[1])} µm` : "";
     fillLabel({
       badge: state.mode === "blink" ? (state.showB ? "B" : "A") : null,
-      title: `Visit ${v.n} of ${visits().length} (stack)`,
-      details: [`${fmtDate(v.date_start)} – ${fmtDate(v.date_end)}`, `${v.n_images} images`, wl],
+      title: `Visit ${v.n} of ${visits().length}: ${v.n_images} photos combined into one picture`,
+      details: [`Taken ${fmtDate(v.date_start)} – ${fmtDate(v.date_end)}`, wl ? `infrared colors ${wl}` : ""],
       notes,
     });
     return;
@@ -856,7 +856,7 @@ function renderBrightness() {
   el.brightnessChart.replaceChildren();
   el.brightnessTable.replaceChildren();
   if (!state.wl) {
-    note("Pick a wavelength range under Filters first, for example one detector. Brightness can only be compared at the same wavelength: comparing different wavelengths shows color, not change.");
+    note("Pick a wavelength range under “Use only some of the photos” first, for example one detector. Brightness can only be compared at the same wavelength: comparing different wavelengths shows color, not change.");
     return;
   }
   const notes = [];
@@ -1135,9 +1135,12 @@ function buildLayerControls() {
   const more = document.createElement("details");
   more.className = "more-layers";
   const moreSummary = document.createElement("summary");
-  moreSummary.textContent = "More layers";
+  moreSummary.textContent = "Mark other things in the picture";
+  const moreHint = document.createElement("p");
+  moreHint.className = "muted small side-hint";
+  moreHint.textContent = "Circles around nearby stars, named objects, known asteroids and bad pixels. Leave these off to keep the picture clean.";
   const moreBody = document.createElement("div");
-  more.append(moreSummary, moreBody);
+  more.append(moreSummary, moreHint, moreBody);
   if (LAYERS.some((L) => !MAIN_LAYERS.includes(L.key) && state.layers.has(L.key))) more.open = true;
   let group = null;
   for (const L of LAYERS) {
@@ -1437,7 +1440,7 @@ function buildPickerOptions(pk) {
     if (stacks.length) {
       const g = document.createElement("optgroup");
       g.label = "Visit stacks";
-      for (const r of stacks) { const it = resolveRef(r); g.append(new Option(`Visit ${it.visit.n} stack (${fmtDate(it.visit.date_mid)})`, r)); }
+      for (const r of stacks) { const it = resolveRef(r); g.append(new Option(`Visit ${it.visit.n}, combined picture (${fmtDate(it.visit.date_mid)})`, r)); }
       select.append(g);
     }
     for (const v of visits()) {
@@ -1595,13 +1598,13 @@ function setupControls() {
 /** One line under the mode tabs saying what the current mode does. */
 function modeHint() {
   switch (state.mode) {
-    case "blink": return "Flips between two pictures, A and B (pick them below the image). Motion makes a dot jump.";
-    case "difference": return "Shows B − k × A. White = no change, blue = brighter in A, red = brighter in B. A moving object leaves a blue/red pair.";
-    case "brightness": return "Charts the target's brightness over time. Pick one wavelength range under Filters first.";
+    case "blink": return "Flips back and forth between two pictures, A and B. Anything that moved seems to jump. Choose A and B under the picture.";
+    case "difference": return "Subtracts picture A from picture B. White means nothing changed. A moving object leaves a blue spot (where it was) next to a red spot (where it went).";
+    case "brightness": return "A chart of how bright the target is over time. First pick one color range under “Use only some of the photos”, so you compare like with like.";
     default:
       if (state.wl) return "Plays the single images in your wavelength range, from all visits, in time order.";
       if (state.frame) return "Showing one single image. Step through this visit's images below, or go back to the visit stack.";
-      return "Plays the visits in order, like a slideshow. Watch the center dot move against the crosshair.";
+      return "Plays the visits in order, like a short film. Watch the yellow ring: if the star moves, the ring moves with it.";
   }
 }
 

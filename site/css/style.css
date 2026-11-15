@@ -752,3 +752,12 @@ button.verdict-chip:hover { border-color: var(--accent); }
 .result-grid span:nth-child(3n+1) { white-space: normal; }
 .viewport { max-height: calc(100vh - 450px); }
 @media (max-width: 820px) { .viewport { max-height: none; } }
+ol.guide { list-style: none; padding: 10px 14px; margin: 8px 0 10px; gap: 6px 22px; }
+ol.guide li { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+ol.guide b { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); font-size: 13px; }
+.visit-hint { margin: 8px 0 0; }
+.controls h3, .side-section > summary h3 { text-transform: none; letter-spacing: 0; font-size: 14px; color: var(--text); }
+.more-layers > summary { color: var(--text); font-weight: 600; }
+.viewport { max-height: calc(100vh - 470px); }
+@media (max-width: 820px) { .viewport { max-height: none; } }
+@media (max-width: 600px) { .tabs button { font-size: 12px; } }
