@@ -1,7 +1,7 @@
 // SPHEREx Motion Viewer: reads only static files from data/ (real) and fake_data/ (test), see below.
 import { TARGETS, TEST_TARGETS, targetByKey, findTargetByName } from "./targets.js";
 import { skyToPx, inField, parseCoords, fieldArcmin } from "./sky.js";
-import { LAYERS, DEFAULT_LAYERS, drawMarkers } from "./markers.js";
+import { LAYERS, LAYER_GROUPS, DEFAULT_LAYERS, drawMarkers } from "./markers.js";
 import { tipText, renderInfo, renderEntry, renderTargetPanel, renderCredits, renderMethodology, renderVerdictPopup, safeUrl } from "./panel.js";
 import { loadF32, autoRange, drawData, COLORMAP_NAMES, defaultK, difference, diffLimit, drawDifference } from "./render.js";
 import { drawChart, drawTable } from "./charts.js";
@@ -93,6 +93,8 @@ const state = {
   wl: null,             // [lo, hi] µm or null (no wavelength filter)
 };
 let fields = null, manifest = null, overlays = [], explanations = {}, credits = [];
+// Field stars of the open field (objects.json) and the scoreboard's per-star agreement, by name.
+let fieldStars = [], fieldScores = new Map();
 let markerInfo = new Map();
 const view = { cx: 0, cy: 0 }; // image point (pixel units, 0..S) at the viewport center
 let loadToken = 0, drawSeq = 0, timer = null;
@@ -175,6 +177,11 @@ function loadImage(url) {
 }
 
 const loadOverlays = (key) => fetchJSONFirst(`${key}/overlays.json`).then((a) => (Array.isArray(a) ? a : [])).catch(() => []);
+
+/** Per-star agreement for one target from Noor's scoreboard.json; empty for fields it doesn't cover. */
+const loadFieldScores = (key) => fetchJSONFirst("scoreboard.json")
+  .then((s) => new Map(((s?.targets || []).find((t) => t.target_key === key)?.field_stars?.objects || []).map((o) => [o.name, o])))
+  .catch(() => new Map());
 
 /** One CSV line -> [wavelength, flux, source]. The source may be quoted and contain commas. */
 function parseSpectrumLine(line) {
@@ -430,7 +437,8 @@ async function renderDifference() {
 
 function renderMarkers(item) {
   if (!item || !el.markers) return;
-  markerInfo = drawMarkers({ group: el.markers, item, manifest, overlays, layers: state.layers, size: state.fov });
+  markerInfo = drawMarkers({ group: el.markers, item, manifest, overlays, layers: state.layers, size: state.fov,
+    fieldStars, fieldScores });
   updateStrokes();
   hideTooltip();
 }
@@ -741,9 +749,16 @@ function markerTapped(markerEl, p) {
   if (!info) { hideTooltip(); return; }
   showTooltip(tipText(info, explanations), p); // also gives touch users the hover text
   if (info.kind === "catalog") openInfo(info);
+  else if (info.kind === "field_star") {
+    // Same panel as the Gaia marker; live fields have no overlays.json, so build a minimal entry.
+    const obj = info.overlay || { name: info.star.name, label: info.star.name, type: "star", layer: "gaia",
+      source: info.star.catalog || "Gaia DR3", g_mag: info.star.g_mag };
+    openInfo({ kind: "catalog", obj, px: info.visit.expected_px || info.visit.measured_px,
+      fieldStar: { star: info.star, score: info.score, visit: info.visit } });
+  }
 }
 function openInfo(info) {
-  renderInfo(el.infoBody, info, explanations);
+  renderInfo(el.infoBody, info, explanations, manifest);
   el.infoPanel.hidden = false;
   el.infoPanel.scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
@@ -1033,13 +1048,45 @@ const SWATCHES = {
   gaia: `<circle cx="9" cy="9" r="6" stroke="#e6ebf5" fill="none" stroke-width="1.6"/>`,
   simbad: `<path d="M9 2L16 9L9 16L2 9Z" stroke="#ffa64d" fill="none" stroke-width="1.6"/>`,
   vsx: `<circle cx="9" cy="9" r="6.5" stroke="#c792ff" fill="none" stroke-width="1.6" stroke-dasharray="3 2"/>`,
+  field_stars: `<rect x="6" y="6" width="6" height="6" stroke="#5cc8ff" fill="none" stroke-width="1.4"/><path d="M2 9h4M12 9h4M9 2v4M9 12v4" stroke="#4cc38a" stroke-width="1.8"/>`,
   asteroids: `<circle cx="9" cy="9" r="6" stroke="#ff6b6b" fill="none" stroke-width="1.6"/><path d="M6.5 6.5l5 5M11.5 6.5l-5 5" stroke="#ff6b6b" stroke-width="1.6"/>`,
   flags: `<rect x="2" y="2" width="6" height="6" fill="#ff0000"/><rect x="10" y="2" width="6" height="6" fill="#ff8c00"/><rect x="6" y="10" width="6" height="6" fill="#286eff"/>`,
 };
 
+// Sub-legends under a layer: [swatch svg (18x18 box), text].
+const SUB_LEGENDS = {
+  field_stars: [
+    [`<rect x="5" y="5" width="8" height="8" stroke="#5cc8ff" fill="none" stroke-width="1.6"/>`, "Gaia prediction", "Where Gaia predicts the star in this visit"],
+    [`<path d="M3 9h4M11 9h4M9 3v4M9 11v4" stroke="#4cc38a" stroke-width="2"/>`, "matches", "SPHEREx position moves as Gaia predicts"],
+    [`<path d="M3 9h4M11 9h4M9 3v4M9 11v4" stroke="#e0a040" stroke-width="2"/>`, "tension", "Slight tension with Gaia"],
+    [`<path d="M3 9h4M11 9h4M9 3v4M9 11v4" stroke="#ff5c7a" stroke-width="2"/>`, "doesn't match", "Doesn't move as Gaia predicts"],
+    [`<path d="M3 9h4M11 9h4M9 3v4M9 11v4" stroke="#9aa4b8" stroke-width="2"/>`, "not scored", "No result: measured in too few visits, or a typed position (no accuracy score)"],
+  ],
+  flags: [
+    [`<rect x="4" y="4" width="10" height="10" rx="2" fill="#ff0000"/>`, "saturated", "Pixel saturated"],
+    [`<rect x="4" y="4" width="10" height="10" rx="2" fill="#ff8c00"/>`, "bad pixel", "Cosmic ray, hot, bad or missing pixel"],
+    [`<rect x="4" y="4" width="10" height="10" rx="2" fill="#286eff"/>`, "other", "Other flags: halo, ghost, crosstalk"],
+  ],
+};
+
 function buildLayerControls() {
   el.layerList.replaceChildren();
+  let group = null;
   for (const L of LAYERS) {
+    if (L.group !== group) {
+      group = L.group;
+      const G = LAYER_GROUPS.find((x) => x.key === group);
+      const head = document.createElement("div");
+      head.className = "layer-group";
+      head.textContent = G?.label || group;
+      if (G?.note) {
+        const n = document.createElement("span");
+        n.className = "layer-group-note";
+        n.textContent = ` · ${G.note}`;
+        head.append(n);
+      }
+      el.layerList.append(head);
+    }
     const label = document.createElement("label");
     label.className = "check layer";
     const box = document.createElement("input");
@@ -1067,12 +1114,16 @@ function buildLayerControls() {
     }
     label.append(box, sw, text);
     el.layerList.append(label);
-    if (L.key === "flags") {
+    if (SUB_LEGENDS[L.key]) {
       const legend = document.createElement("div");
-      legend.className = "flag-legend muted";
-      legend.innerHTML = `<span><i style="background:#ff0000"></i>saturated</span>
-        <span><i style="background:#ff8c00"></i>cosmic ray, hot or bad pixel</span>
-        <span><i style="background:#286eff"></i>other flagged</span>`;
+      legend.className = "sub-legend muted";
+      for (const [swatch, text, tip] of SUB_LEGENDS[L.key]) {
+        const row = document.createElement("span");
+        row.title = tip || text;
+        row.innerHTML = `<svg viewBox="0 0 18 18" width="14" height="14" aria-hidden="true">${swatch}</svg>`;
+        row.append(text);
+        legend.append(row);
+      }
       el.layerList.append(legend);
     }
   }
@@ -1387,7 +1438,8 @@ function syncUI() {
   for (const box of el.layerList.querySelectorAll("input[data-layer]")) box.checked = state.layers.has(box.dataset.layer);
   for (const c of el.layerList.querySelectorAll("[data-count-for]")) {
     const key = c.dataset.countFor;
-    c.textContent = ["gaia", "simbad", "vsx", "asteroids"].includes(key) ? ` (${overlays.filter((o) => o.layer === key).length})` : "";
+    c.textContent = ["gaia", "simbad", "vsx", "asteroids"].includes(key) ? ` (${overlays.filter((o) => o.layer === key).length})`
+      : key === "field_stars" ? ` (${fieldStars.length})` : "";
   }
   el.play.textContent = state.playing ? "⏸ Pause" : state.mode === "blink" ? "▶ Blink" : "▶ Play";
   el.speed.value = state.speed;
@@ -1530,7 +1582,7 @@ async function openTarget(key, opts = {}) {
   setPlaying(false);
   const t = targetByKey(key);
   state.target = key;
-  manifest = null; fields = null; overlays = [];
+  manifest = null; fields = null; overlays = []; fieldStars = []; fieldScores = new Map();
   markerInfo = new Map();
   if (el.markers) el.markers.replaceChildren();
   closeInfo();
@@ -1589,6 +1641,15 @@ async function openFov(fov, opts, token) {
     return;
   }
   if (token !== loadToken) return;
+  // objects.json is optional: older fields and failed builds may not have it.
+  const base = `${targetBase.get(state.target) || REAL_DIR}/${state.target}/fov${fov}`;
+  const [objs, scores] = await Promise.all([
+    fetchJSON(`${base}/objects.json`).then((d) => (Array.isArray(d?.objects) ? d.objects : [])).catch(() => []),
+    isLiveKey(state.target) ? new Map() : loadFieldScores(state.target),
+  ]);
+  if (token !== loadToken) return;
+  fieldStars = objs;
+  fieldScores = scores;
 
   manifest = m;
   state.fov = fov;

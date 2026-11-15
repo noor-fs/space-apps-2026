@@ -153,6 +153,16 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
 .cat-vsx { stroke: #c792ff; }
 .cat-vsx .dashed { stroke-dasharray: 0.9 0.6; }
 .cat-asteroids { stroke: #ff6b6b; }
+/* Field stars: Gaia prediction (blue square) and SPHEREx measurement (cross, colored by agreement). */
+.fs-expected { stroke: rgba(92, 200, 255, 0.85); }
+.fs-measured { stroke: #9aa4b8; }
+.fs-measured.fs-agrees { stroke: #4cc38a; }
+.fs-measured.fs-tension { stroke: #e0a040; }
+.fs-measured.fs-disagrees { stroke: #ff5c7a; }
+.on-light .fs-expected { stroke: #0b5fa8; }
+.on-light .fs-measured.fs-agrees { stroke: #1d7a4c; }
+.on-light .fs-measured.fs-tension { stroke: #9a6200; }
+.on-light .fs-measured.fs-disagrees { stroke: #b0213d; }
 /* On the (mostly white) difference image, use dark markers. */
 .on-light .crosshair { stroke: rgba(20, 120, 60, 0.7); }
 .on-light .cat-gaia { stroke: #2b3242; }
@@ -329,8 +339,13 @@ a { color: var(--accent); }
 .layer .sw { display: inline-grid; place-items: center; width: 20px; flex: none; }
 .layer .count { font-size: 13px; }
 .layer small { font-size: 12px; }
-.flag-legend { display: flex; flex-direction: column; gap: 2px; margin: 0 0 2px 50px; font-size: 12px; }
-.flag-legend i { display: inline-block; width: 9px; height: 9px; margin-right: 6px; border-radius: 2px; }
+.layer-group { margin: 10px 0 2px; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text); }
+.layer-group:first-child { margin-top: 0; }
+.layer-group-note { font-weight: 400; letter-spacing: 0; text-transform: none; color: var(--muted); }
+/* Sub-legend: one wrapping row of small chips under its layer, full width (no indent). */
+.sub-legend { display: flex; flex-wrap: wrap; gap: 4px 10px; margin: 2px 0 6px; font-size: 12px; }
+.sub-legend span { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; cursor: default; }
+.sub-legend svg { flex: none; }
 
 /* ---------- shared bits ---------- */
 .small { font-size: 13px; }
@@ -429,6 +444,33 @@ button.wide { width: 100%; margin-top: 8px; }
   background: var(--panel); color: var(--text); font-size: 12px; font-weight: 400; line-height: 1.4;
   white-space: normal; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
 }
+/* Info panel: result box (colored like the marker), catalog box, collapsible type text. */
+.info-chips { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 6px 0 10px; }
+.info-chips .chip { margin: 0; }
+.chip-accent { border-color: var(--accent); color: var(--accent); }
+.result-box, .catalog-box { margin: 10px 0; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--panel-2); }
+/* --tone is deeper than the marker colors (the markers stay bright on the dark image). */
+.result-box { --tone: #8f98ab; border: 1px solid var(--tone); border-left-width: 4px;
+  background: color-mix(in srgb, var(--tone) 10%, var(--panel)); }
+.result-agrees { --tone: #3fa877; }
+.result-tension { --tone: #c98a2e; }
+.result-disagrees { --tone: #c9475e; }
+.result-label { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.result-head { display: flex; align-items: center; gap: 8px; margin: 4px 0 2px; font-size: 18px; font-weight: 700; color: var(--tone); }
+.result-mark { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%;
+  background: var(--tone); color: #0b0f17; font-size: 14px; }
+.result-sub { margin-top: 10px; font-size: 12px; font-weight: 600; color: var(--text); }
+.offset-chart { display: flex; flex-direction: column; gap: 4px; margin: 4px 0 6px; }
+.offset-row { display: grid; grid-template-columns: 136px 1fr 92px; align-items: center; gap: 8px; font-size: 12px; padding: 1px 4px; border-radius: 4px; }
+.offset-row.current { background: rgba(255, 255, 255, 0.07); font-weight: 600; }
+.offset-label small { margin-left: 8px; color: var(--muted); font-weight: 400; }
+.offset-track { position: relative; height: 10px; border-radius: 5px; background: rgba(255, 255, 255, 0.06); }
+.offset-bar { position: absolute; left: 0; top: 2px; bottom: 2px; border-radius: 3px; background: var(--tone); }
+.offset-err { position: absolute; top: 4px; height: 2px; background: var(--text); opacity: 0.7; }
+.offset-value { text-align: right; color: var(--muted); }
+.callout-warn { padding: 6px 10px; border-radius: 6px; background: #d99a3a; color: #1d1405; font-weight: 600; }
+.type-about { margin-top: 8px; }
+.type-about summary { cursor: pointer; font-size: 13px; color: var(--accent); }
 .method-section h4 { margin: 14px 0 2px; font-size: 14px; }
 .method-section p { margin: 0; }
 button.verdict-chip:hover { border-color: var(--accent); }

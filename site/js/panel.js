@@ -25,9 +25,28 @@ const fmt = (x, d = 2) => Number(x).toFixed(d);
 const typeEntry = (explanations, type) => explanations?.types?.[type] || null;
 const typeTitle = (explanations, type) => typeEntry(explanations, type)?.title || (type || "unknown").replace(/_/g, " ");
 
+/**
+ * A field star's result in words, from the scoreboard (Noor): role says whether it was scored,
+ * agreement is the motion test against Gaia (each star's constant offset removed first).
+ */
+function fieldStarResult(score) {
+  if (!score) return "not scored";
+  if (score.role === "blended") return "blended with a neighbor, so measured as one light center (not scored)";
+  if (score.role === "not_scored" || !score.agreement) return "measured in too few visits to test (not scored)";
+  const said = { agrees: "moves as Gaia predicts", tension: "slight tension with Gaia", disagrees: "doesn't move as Gaia predicts" }[score.agreement]
+    || score.agreement;
+  return score.role === "reference" ? `${said} (reference star: it sets the error bars, so it isn't scored)` : said;
+}
+
 /** One-line hover text for any marker. */
 export function tipText(info, explanations) {
   switch (info.kind) {
+    case "field_star": {
+      const o = info.overlay;
+      const g = typeof info.star.g_mag === "number" ? ` · G ${fmt(info.star.g_mag, 1)}` : "";
+      const name = o?.label || info.star.name;
+      return `${name} · ${o ? typeTitle(explanations, o.type) : "star"}${g} · SPHEREx vs Gaia: ${fieldStarResult(info.score)} (click for details)`;
+    }
     case "catalog": {
       const o = info.obj;
       const g = typeof o.g_mag === "number" ? ` · G ${fmt(o.g_mag, 1)}` : "";
@@ -272,30 +291,114 @@ export function renderCredits(container, credits) {
   container.append(list);
 }
 
-/** Fill the panel body for a clicked catalog marker. */
-export function renderInfo(body, info, explanations) {
+/** Plain-language result of a field star's motion test, for the bright box. */
+function fieldStarStory(score, nVisits) {
+  const visits = `${nVisits} visit${nVisits === 1 ? "" : "s"}`;
+  if (!score) {
+    return { cls: "none", mark: "–", head: "Not tested",
+      text: "The accuracy test covers the five challenge targets' fields; this field isn't one of them." };
+  }
+  if (score.role === "blended") {
+    return { cls: score.agreement || "none", mark: "–", head: "Blended with a neighbor",
+      text: "Another Gaia star sits within half a pixel, so SPHEREx sees the two as one light center. Not counted in the accuracy score." };
+  }
+  if (score.role === "not_scored" || !score.agreement) {
+    return { cls: "none", mark: "–", head: "Too few visits to test",
+      text: "The motion test needs this star measured in at least two visits without saturation." };
+  }
+  const stories = {
+    agrees: { mark: "✓", head: "Moves as Gaia predicts",
+      text: `Across ${visits}, SPHEREx's positions follow Gaia's prediction within the error bars.` },
+    tension: { mark: "~", head: "Slight tension with Gaia",
+      text: `Across ${visits}, SPHEREx's positions mostly follow Gaia, but change between visits a little more than the error bars allow.` },
+    disagrees: { mark: "✗", head: "Doesn't move as Gaia predicts",
+      text: `Across ${visits}, SPHEREx's position changes between visits by more than Gaia's motion and the error bars allow.` },
+  };
+  const s = { cls: score.agreement, ...(stories[score.agreement] || { mark: "?", head: score.agreement, text: "" }) };
+  if (score.role === "reference") {
+    s.text += " This is a reference star: it helps set the error bars, so it isn't counted in the accuracy score.";
+  }
+  return s;
+}
+
+/**
+ * Offset from Gaia per visit, one row each: distance in pixels as a bar with its error.
+ * Equal bars = a steady offset (allowed); bars that change = what the motion test looks at.
+ */
+function offsetChart(star, currentN, visitDates) {
+  const rows = (star.visits || []).map((v) => {
+    if (!Array.isArray(v.measured_px) || !Array.isArray(v.expected_px)) return { n: v.n, d: null };
+    const dx = v.measured_px[0] - v.expected_px[0], dy = v.measured_px[1] - v.expected_px[1];
+    const d = Math.hypot(dx, dy);
+    const e = Array.isArray(v.measured_err_px) ? v.measured_err_px : [0, 0];
+    const err = d > 0 ? Math.hypot(dx * e[0], dy * e[1]) / d : Math.hypot(e[0], e[1]);
+    return { n: v.n, d, err, saturated: v.saturated };
+  });
+  const max = Math.max(0.3, ...rows.filter((r) => r.d != null).map((r) => r.d + r.err));
+  const wrap = h("div", { class: "offset-chart" });
+  for (const r of rows) {
+    const date = visitDates.get(r.n);
+    const row = h("div", { class: `offset-row${r.n === currentN ? " current" : ""}` },
+      h("span", { class: "offset-label" }, `Visit ${r.n}`, date ? h("small", {}, ` ${date}`) : null));
+    const track = h("span", { class: "offset-track" });
+    if (r.d != null) {
+      const pct = (x) => `${Math.max(0, Math.min(100, (x / max) * 100))}%`;
+      track.append(h("span", { class: "offset-bar", style: `width:${pct(r.d)}` }));
+      track.append(h("span", { class: "offset-err", style: `left:${pct(r.d - r.err)};width:${pct(2 * r.err)}` }));
+    }
+    row.append(track, h("span", { class: "offset-value" },
+      r.d == null ? "not measured" : `${fmt(r.d)} px${r.saturated ? " (saturated)" : ""}`));
+    wrap.append(row);
+  }
+  return wrap;
+}
+
+/** "What am I looking at?" panel for a clicked catalog object or field star. */
+export function renderInfo(body, info, explanations, manifest) {
   const o = info.obj;
   const entry = typeEntry(explanations, o.type);
+  const fs = info.fieldStar;
   body.replaceChildren();
 
+  // ---- header: name, chips, brightness
   body.append(h("h4", { class: "info-title" }, o.label || o.name || "Unnamed object"));
   if (o.name && o.name !== o.label) body.append(h("div", { class: "muted info-sub" }, o.name));
+  const chips = h("div", { class: "info-chips" }, h("span", { class: "chip" }, typeTitle(explanations, o.type)));
+  if (fs) chips.append(h("span", { class: "chip chip-accent" }, "Field star"));
+  if (typeof o.g_mag === "number") chips.append(h("span", { class: "muted small" }, `G ${fmt(o.g_mag, 1)}`));
+  body.append(chips);
 
-  body.append(h("div", { class: "chip" }, typeTitle(explanations, o.type)));
-  body.append(entry?.text
-    ? h("p", {}, entry.text)
-    : h("p", { class: "muted" }, "No explanation for this type yet."));
+  // ---- SPHEREx vs Gaia: the result first, in a box colored like the marker
+  if (fs) {
+    const visitDates = new Map((manifest?.visits || []).map((v) => [v.n, v.date_mid]));
+    const nVisits = fs.score?.n_visits ?? (fs.star.visits || []).filter((v) => Array.isArray(v.measured_px)).length;
+    const story = fieldStarStory(fs.score, nVisits);
+    const box = h("div", { class: `result-box result-${story.cls}` });
+    box.append(h("div", { class: "result-label" }, "SPHEREx vs Gaia"));
+    const head = h("div", { class: "result-head" }, h("span", { class: "result-mark", "aria-hidden": "true" }, story.mark), story.head);
+    if (fs.score?.chi2 != null) head.title = `χ² = ${fmt(fs.score.chi2, 1)} for ${fs.score.dof} degrees of freedom (p = ${fs.score.p_value})`;
+    box.append(head, h("p", {}, story.text));
 
-  const sources = (entry?.sources || []).map((s) => {
-    const url = safeUrl(s.url);
-    return url ? h("a", { href: url, target: "_blank", rel: "noopener" }, s.label || url) : h("span", {}, s.label || "");
-  });
-  if (sources.length) {
-    const p = h("p", { class: "info-sources muted" }, "Sources: ");
-    sources.forEach((s, i) => { if (i) p.append(", "); p.append(s); });
-    body.append(p);
+    box.append(h("div", { class: "result-sub" }, "Distance from Gaia's prediction, per visit"));
+    box.append(offsetChart(fs.star, fs.visit?.n ?? null, visitDates));
+    box.append(h("p", { class: "muted small" },
+      "A steady distance in every visit is normal (a nearby star or the star's color can cause it). Only changes between visits count against the star."));
+
+    const v = fs.visit;
+    if (v?.n_frames != null) {
+      box.append(h("p", { class: "small" }, `This visit: measured in ${v.n_measured} of ${v.n_frames} single images.`));
+    } else if (!v) {
+      box.append(h("p", { class: "small muted" }, "Open a visit stack to highlight its row."));
+    }
+    const crowd = fs.star.crowded_by || [];
+    if (crowd.length) {
+      box.append(h("p", { class: "callout-warn small" },
+        `⚠ Crowded: ${crowd.length} other Gaia star${crowd.length > 1 ? "s sit" : " sits"} within 2 px of this star and may pull its measured position.`));
+    }
+    body.append(box);
   }
 
+  // ---- what the catalog says (the expected side)
   const rows = [];
   rows.push(["Catalog", o.source || "—"]);
   if (typeof o.g_mag === "number") rows.push(["Brightness", `G = ${fmt(o.g_mag, 2)} mag`]);
@@ -306,13 +409,23 @@ export function renderInfo(body, info, explanations) {
     rows.push(["Proper motion", o.pmra_mas_yr == null || o.pmdec_mas_yr == null
       ? "Unknown, so the marker stays fixed"
       : `${fmt(o.pmra_mas_yr, 1)} (RA), ${fmt(o.pmdec_mas_yr, 1)} (Dec) mas/yr`]);
-    rows.push(["Catalog position", `RA ${fmt(o.ra, 5)}°, Dec ${fmt(o.dec, 5)}° (epoch ${o.epoch ?? "?"})`]);
+    if (typeof o.ra === "number") rows.push(["Catalog position", `RA ${fmt(o.ra, 5)}°, Dec ${fmt(o.dec, 5)}° (epoch ${o.epoch ?? "?"})`]);
   }
-  rows.push(["In this field", `column ${fmt(info.px[0], 1)}, row ${fmt(info.px[1], 1)}`]);
+  if (Array.isArray(info.px)) rows.push(["In this field", `column ${fmt(info.px[0], 1)}, row ${fmt(info.px[1], 1)}`]);
+  const cat = h("div", { class: "catalog-box" }, h("div", { class: "result-label" }, fs ? "Expected (catalog)" : "Catalog"));
   const dl = h("dl", { class: "info-rows" });
   for (const [k, v] of rows) dl.append(h("dt", {}, k), h("dd", {}, v));
-  body.append(dl);
-
+  cat.append(dl);
   const url = safeUrl(o.url);
-  if (url) body.append(h("a", { class: "info-link", href: url, target: "_blank", rel: "noopener" }, `Open catalog page ↗`));
+  if (url) cat.append(h("a", { class: "info-link", href: url, target: "_blank", rel: "noopener" }, "Open catalog page ↗"));
+  body.append(cat);
+
+  // ---- what this type of object is: open when there's no measurement to lead with
+  const about = h("details", { class: "type-about" });
+  if (!fs) about.open = true;
+  about.append(h("summary", {}, `What is a ${typeTitle(explanations, o.type).toLowerCase()}?`));
+  about.append(entry?.text ? h("p", {}, entry.text) : h("p", { class: "muted" }, "No explanation for this type yet."));
+  const src = sourcesLine(entry?.sources);
+  if (src) about.append(src);
+  body.append(about);
 }
