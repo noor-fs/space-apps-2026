@@ -41,6 +41,9 @@ FULL_FRAMES = int(os.environ.get("SPX_FULL_FRAMES", "0")) or None  # 0 = every f
 CACHE_CAP_BYTES = float(os.environ.get("SPX_CACHE_CAP_GB", "5")) * 1e9
 MAX_QUEUE = int(os.environ.get("SPX_MAX_QUEUE", "20"))
 BUILD_TIMEOUT_S = int(os.environ.get("SPX_BUILD_TIMEOUT_MIN", "60")) * 60
+# A build nobody has asked about for this long pauses (downloads kept) and resumes on the next request. 0 = off
+ABANDON_S = float(os.environ.get("SPX_ABANDON_MIN", "0")) * 60
+LEAVE_GRACE_S = 15  # after /api/leave, how long another viewer has to show they are still watching
 
 for folder in (DATA, STAGING):
     folder.mkdir(parents=True, exist_ok=True)
@@ -52,7 +55,7 @@ class Job:
     query: str
     args: list  # how build_target.py is told where the field is
     size: int
-    state: str = "queued"  # queued, running, preview, done, failed
+    state: str = "queued"  # queued, running, preview, done, failed, paused
     stage: str = "waiting"
     done: int = 0
     total: int = 0
@@ -60,6 +63,11 @@ class Job:
     error: str | None = None
     frames_found: int | None = None
     updated: float = dataclass_field(default_factory=time.time)
+    last_seen: float = dataclass_field(default_factory=time.time)  # last lookup or status request
+    left_at: float | None = None  # when a viewer called /api/leave
+    paused: bool = False
+    pause_requested: bool = False
+    process: subprocess.Popen | None = None  # the running build
 
 
 jobs: dict[str, Job] = {}
@@ -103,6 +111,54 @@ def enqueue(job, phase):
         lock.notify()
 
 
+def touch(job):
+    """Someone asked about this field: keep it alive, and resume it if it was paused."""
+    with lock:  # the pause thread checks and pauses under the same lock
+        job.last_seen, job.left_at = time.time(), None
+        if job.paused:
+            resume(job)
+
+
+def resume(job):
+    job.paused, job.stage = False, "waiting"
+    if job.state == "paused":
+        job.state = "queued"
+    enqueue(job, job.phase)
+
+
+def mark_paused(job):
+    """A preview already built stays served; only the pending build waits."""
+    job.paused, job.stage = True, "paused"
+    if job.state != "preview":
+        job.state = "paused"
+
+
+def abandoned(job, now):
+    if job.left_at is not None and now - job.left_at >= LEAVE_GRACE_S:
+        return True
+    return now - job.last_seen >= ABANDON_S
+
+
+def pause_abandoned():
+    """Every few seconds, pause the queued and running builds nobody is waiting for.
+
+    Downloads are cached as they arrive, so a resumed build only redoes the processing.
+    """
+    while True:
+        time.sleep(5)
+        now = time.time()
+        with lock:
+            for entry in list(queue):
+                job = jobs[entry[2]]
+                if abandoned(job, now):
+                    queue.remove(entry)
+                    mark_paused(job)
+            running = next((job for job in jobs.values() if job.process is not None), None)
+        if running is not None and not running.pause_requested and abandoned(running, now):
+            running.pause_requested = True
+            running.process.kill()
+
+
 def worker():
     while True:
         with lock:
@@ -133,6 +189,7 @@ def run_build(job):
     job.stage, job.done, job.total, job.error = "finding images", 0, 0, None
     process = subprocess.Popen(command, cwd=WORK, env=environment, stdout=subprocess.PIPE,
                                stderr=subprocess.STDOUT, text=True, bufsize=1)
+    job.process = process
     timed_out = threading.Event()
     timer = threading.Timer(BUILD_TIMEOUT_S, lambda: (timed_out.set(), process.kill()))
     timer.start()
@@ -147,10 +204,12 @@ def run_build(job):
             tail = (tail + [line])[-15:]
         read_progress(job, line, budget)
     process.wait()
+    job.process = None
     timer.cancel()
     log.close()
 
     built = stage_root / "data" / job.key
+    paused, job.pause_requested = job.pause_requested, False
     if process.returncode == 0 and (built / "fields.json").exists():
         swap_in(built, DATA / job.key)
         shutil.rmtree(stage_root, ignore_errors=True)
@@ -161,6 +220,12 @@ def run_build(job):
             enqueue(job, "full")
         return
     shutil.rmtree(stage_root, ignore_errors=True)
+    if paused:
+        with lock:
+            mark_paused(job)
+            if not abandoned(job, time.time()):  # someone asked again while the build was stopping
+                resume(job)
+        return
     if job.frames_found == 0:
         message = "SPHEREx has no images of this position yet."
     elif any("Unable to find coordinates" in line or "NameResolveError" in line for line in tail):
@@ -249,7 +314,7 @@ def health():
     with lock:
         waiting = len(queue)
     running = [k for k, j in jobs.items() if j.stage not in ("waiting", "done", "failed", "preview ready",
-                                                             "full build failed")]
+                                                             "full build failed", "paused")]
     return {"ok": True, "queued": waiting, "running": running, "sizes_px": list(SIZES)}
 
 
@@ -270,6 +335,8 @@ def lookup(q: str = Query(..., max_length=100), size: int = Query(SIZES[0])):
         job = Job(key, q.strip(), args, size)
         jobs[key] = job
         enqueue(job, "preview")
+    else:
+        touch(job)
     return status(job)
 
 
@@ -277,9 +344,20 @@ def lookup(q: str = Query(..., max_length=100), size: int = Query(SIZES[0])):
 def get_status(key: str):
     if key not in jobs:
         raise HTTPException(404, "No such field. Start it with /api/lookup?q=...")
+    touch(jobs[key])
     return status(jobs[key])
+
+
+@app.get("/api/leave/{key}")
+def leave(key: str):
+    """A viewer moved on: the build pauses unless someone else asks for it within LEAVE_GRACE_S."""
+    if key in jobs and ABANDON_S > 0:
+        jobs[key].left_at = time.time()
+    return {"ok": True}
 
 
 restore_jobs()
 threading.Thread(target=worker, daemon=True).start()
+if ABANDON_S > 0:
+    threading.Thread(target=pause_abandoned, daemon=True).start()
 app.mount("/data", StaticFiles(directory=DATA), name="data")

@@ -75,7 +75,7 @@ Shared context for the whole team's agents: project descriptions, the demo pitch
 | Scoreboard | "How accurate is this?": target motion vs catalog, target error bars, and every field star scored twice (does it move as Gaia predicts; is it where Gaia predicts, allowing for crowding), with crowded and uncrowded stars reported separately. Writes `data/scoreboard.json`: headline sentences for the site and a per-star label for the field-star hover text | Noor | Done (pushed); re-run whenever target files change |
 | URL state | Every view is a shareable link | Yara K | Per plan |
 | Field sizes 101 / 201 px | Wider fields | Yara T | Code supports it; only 51 px built |
-| Live lookup of any position | Server runs the whole pipeline on demand; quick 120-image preview, then full build | Yara T | Works locally; **not deployed** (hosting undecided) |
+| Live lookup of any position | Server runs the whole pipeline on demand; quick 120-image preview, then full build | Yara T | **Live** on a public HTTPS server (Google Cloud VM), deployed 2026-11-15; tested end to end. The site's hook-up is Yara K's next step (check before claiming the site uses it) |
 | Objects in no catalog | Flag detections with no catalog match | — | **Not built** |
 | Public deployment of the site | | Yara K | **Unknown** to this brief; check before claiming |
 
@@ -134,7 +134,7 @@ Motion in milliarcseconds per year (mas/yr). Source: `data/<target>/fov51/manife
 - **Self-correcting:** a test with 4× more images showed the error bars were too small (frames in one visit share an error). The fit was changed; the "moves unexpectedly" false alarm on Epsilon Indi B went away.
 - **Resilience:** builds keep working when IRSA or the ESA Gaia archive is down (fallback services, checked to give identical values).
 
-**Live lookup timing (local test, WISE 0855 field):** preview 5.4 min, full build (258 images) 5.0 min.
+**Live lookup, first test on the public server (2026-11-15):** Epsilon Indi B built from scratch: the archive search found 487 images, the 120-image preview gave "moves as expected" (+3891 ± 125, −2539 ± 105 mas/yr), and the full build (461 usable images) gave exactly the pre-built result (+3895 ± 102, −2512 ± 76). Expect roughly 5–15 minutes per new field; one field builds at a time.
 
 ## 7. Limits and honest caveats
 
@@ -145,7 +145,7 @@ Motion in milliarcseconds per year (mas/yr). Source: `data/<target>/fov51/manife
 - **Saturated targets** (R Draconis, partly Barnard's Star) give poor brightness and no R Dra motion.
 - **SPHEREx pixels are 6.15″:** binaries like RW Aur A+B (1.5″ apart) are one blob.
 - **Not built:** flagging objects with no catalog match; fields larger than 51 px for the targets.
-- **Live lookup isn't public yet:** hosting not decided. A brand-new field from scratch is untested because IRSA was down.
+- **Live lookup limits:** a new field takes roughly 5–15 minutes, and one field builds at a time, so a second user waits in a queue. Live fields are 51 px only and have no catalog labels (`overlays.json` is made for the five targets only). The server runs on a 90-day cloud trial (from 2026-11-15).
 - **A Gaia data-quality trap found:** SIMBAD (and Wikipedia) swap the Gaia IDs of RW Aur A and B; verified with ALMA positions (Rodriguez et al. 2018).
 
 ## 8. Standout features: why this project should win
@@ -157,7 +157,7 @@ Each point says what's special and the evidence for it. Lead with the first thre
 3. **It tells you how far to trust it.** Every Gaia star in the field (down to G = 17) is measured the same way as the target and scored against Gaia, so accuracy is shown, not asserted: 65 of 73 stars the tool was never tuned on move exactly as Gaia predicts, with 95% of measurements within 2σ (the textbook value), and all 14 uncrowded stars pass. The scoreboard also reports its own weak spots: crowded stars and why they fail.
 4. **It goes beyond what the challenge expected.** Our own early estimate put Epsilon Indi B's motion below the uncertainty; the tool detects it (~1.1 pixel over 1.4 years). WISE 0855, too faint for single images, is measured by fitting SPHEREx's own PSF model across a whole visit, and matches the published motion.
 5. **It knows the difference between moving, changing and unmeasurable.** Six verdicts with explicit rules: RW Aurigae is called a brightness change (its light center wobbles 0.07 px because it's an unresolved binary, below the 0.25 px motion threshold); R Draconis is called saturated rather than given a false "no motion".
-6. **Any point in the sky, not five demos.** The live-lookup server runs the full pipeline for a typed position or name, with a quick preview first (~5 min per new field in local tests). The five targets are the validation set. (Say "live" only if it's deployed at demo time.)
+6. **Any point in the sky, not five demos.** The live-lookup server runs the full pipeline for a typed position or name, with a quick preview first (roughly 5–15 min per new field). It is deployed on a public server and was tested by building Epsilon Indi B from scratch, which reproduced the pre-built result exactly. The five targets are the validation set.
 7. **Every image is inspectable.** Individual exposures with time, detector, wavelength and quality-flag overlays; color composites where brown dwarfs show up red; catalog overlays from Gaia, SIMBAD and VSX; shareable URLs for any view.
 8. **Built for new data and bad days.** Pulls every public release automatically; keeps working when the archive or Gaia servers are down (fallbacks checked to give identical values). IRSA was down for hours during the event and builds continued.
 9. **Careful science.** Catalog positions moved to each image's date (WISE 0855 is ~20 px from the challenge's 2010-epoch coordinates by 2026); caught that SIMBAD swaps RW Aur A and B, verified with ALMA positions; every method decision recorded with its measured effect.
