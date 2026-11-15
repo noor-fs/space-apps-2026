@@ -35,7 +35,7 @@ The five challenge targets are pre-built: **Epsilon Indi B, Barnard's Star, WISE
 The tool measures each object's position in every single image and tests it against the catalog prediction for that date.
 
 - **Targets.** Epsilon Indi B, WISE 0855 and Barnard's Star show the motion their catalogs predict. Barnard's Star is the weakest match, 2.3 sigma off in RA. WISE 0855 is too faint for single images, so it is measured by fitting SPHEREx's own model of a star's image across each visit. RW Aurigae is correctly called a brightness change, not motion. R Draconis saturates the detector and is reported as not measurable, rather than "no motion".
-- **Stars the tool was never tuned on.** 65 of 73 Gaia field stars move as Gaia predicts. All the stars with no close neighbor pass. The 8 that fail have close neighbors that blend their light, and they are listed in [`data/scoreboard.json`](data/scoreboard.json).
+- **Stars the tool was never tuned on.** In 4 of the 5 fields, 65 of 73 Gaia field stars move as Gaia predicts, and all the stars with no close neighbor pass. R Draconis's field is left out of these totals because the bright star's glow dominates it. The 8 that fail have close neighbors that blend their light, and they are listed in [`data/scoreboard.json`](data/scoreboard.json).
 - **Honest error bars.** Our error bars are slightly too small: the real scatter is about 1.4 times the error bar.
 - **No discoveries are claimed.** Every result is for a known object. The tool reproduces known motions and brightness changes, and measures how far to trust them.
 
@@ -64,7 +64,7 @@ data/                  ──> site/           (the website only reads data/)
 4. **Catalogs and text** (`catalogs/`): catalog markers, explanation text, credits and reference spectra. See [`catalogs/README.md`](catalogs/README.md).
 5. **Scoring** (`scoring/`): checks the measurements against the catalogs. See [`scoring/README.md`](scoring/README.md).
 
-To rebuild a target (needs the Python packages in `requirements.txt`):
+To rebuild a target (needs the Python packages in `requirements.txt`; the catalog scripts need a few more, listed in [`catalogs/README.md`](catalogs/README.md), and the server has its own `server/requirements.txt`):
 
 ```
 python scripts/build_target.py epsilon_indi_b --name "Epsilon Indi B"
@@ -74,7 +74,9 @@ python scoring/build_scoreboard.py            # then re-score
 
 ### Live lookup (experimental)
 
-`server/` runs the same pipeline on request for any name or sky position, and returns files in the same layout as `data/`. A new field takes several minutes to build. Run it locally with `python -m uvicorn server.app:app --port 8000`.
+Type any name or sky position outside the five targets into the site's search box, and a hosted server builds that field from the SPHEREx archive on request. The site shows a quick preview first and the full build when it is ready. A new field takes several minutes, and builds run one at a time, so you may have to wait in line.
+
+The server code is in `server/`. It runs the same pipeline and returns files in the same layout as `data/`. To run your own copy (needs `server/requirements.txt`): `python -m uvicorn server.app:app --port 8000`.
 
 ## Repository layout
 
@@ -88,6 +90,7 @@ python scoring/build_scoreboard.py            # then re-score
 | `scoring/` | The accuracy checks and the scoreboard |
 | `results/` | Measurement tables and build logs behind each target's numbers |
 | `server/` | The live lookup server |
+| `fake_data/` | Fake test files in the same layout as `data/`, made by `site/script.py`. The site uses them only where `data/` has no real file |
 
 ## Limits
 
@@ -106,6 +109,3 @@ Built with Python (Astropy, astroquery, photutils, reproject, NumPy, SciPy, Fast
 ## The challenge
 
 [Planet X and SPHEREx](https://www.spaceappschallenge.org/), NASA Space Apps Challenge 2026: build a public web tool that shows SPHEREx images of a patch of sky over time, so anyone can spot moving objects.
- before the hackathon begins.*
- before the hackathon begins.*
- before the hackathon begins.*
