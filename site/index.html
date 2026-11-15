@@ -21,6 +21,7 @@
     </form>
     <nav class="about-links" aria-label="About">
       <button type="button" data-dialog="how">How it works</button>
+      <button type="button" data-dialog="methodology">How we measure</button>
       <button type="button" data-dialog="limits">Limits</button>
       <button type="button" data-dialog="credits">Credits</button>
     </nav>
@@ -33,7 +34,7 @@
       <div class="title-row">
         <div class="title-main">
           <h2 id="target-name">&nbsp;</h2>
-          <span id="verdict-chip" class="chip verdict-chip" hidden></span>
+          <button type="button" id="verdict-chip" class="chip verdict-chip" hidden></button>
         </div>
         <div class="field-size" title="How much sky the image covers (not zoom)">
           <span class="muted small">Field</span>
@@ -85,7 +86,10 @@
 
       <!-- brightness mode view -->
       <section id="brightness-view" class="chart-panel" aria-labelledby="brightness-heading" hidden>
-        <h3 id="brightness-heading">Target brightness over time</h3>
+        <div class="card-head">
+          <h3 id="brightness-heading">Target brightness over time</h3>
+          <a href="#" class="about-link small" data-about="methodology" data-section="Brightness">How is this measured?</a>
+        </div>
         <p id="brightness-note" class="note-line" hidden></p>
         <div id="brightness-chart" class="chart-box"></div>
         <details class="table-toggle"><summary>Show as a table</summary><div id="brightness-table"></div></details>

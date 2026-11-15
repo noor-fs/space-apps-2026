@@ -50108,6 +50108,15 @@
   }
  ],
  "verdict": "saturated",
+ "verdict_evidence": {
+  "motion_from": "single_images",
+  "motion_measurable": false,
+  "motion_sigma": null,
+  "shift_px": null,
+  "catalog_difference_sigma": null,
+  "brightness_change_sigma": null,
+  "saturated_share": 0.96
+ },
  "measured_motion_mas_yr": null,
  "catalog_motion_mas_yr": {
   "ra": -21,

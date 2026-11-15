@@ -2,7 +2,7 @@
 import { TARGETS, TEST_TARGETS, targetByKey, findTargetByName } from "./targets.js";
 import { skyToPx, inField, parseCoords, fieldArcmin } from "./sky.js";
 import { LAYERS, DEFAULT_LAYERS, drawMarkers } from "./markers.js";
-import { tipText, renderInfo, renderEntry, renderTargetPanel, renderCredits, safeUrl } from "./panel.js";
+import { tipText, renderInfo, renderEntry, renderTargetPanel, renderCredits, renderMethodology, renderVerdictPopup, safeUrl } from "./panel.js";
 import { loadF32, autoRange, drawData, COLORMAP_NAMES, defaultK, difference, diffLimit, drawDifference } from "./render.js";
 import { drawChart, drawTable } from "./charts.js";
 
@@ -989,18 +989,40 @@ function renderTargetInfo() {
   if (verdict) {
     el.verdictChip.textContent = explanations?.verdicts?.[verdict]?.title || verdict.replace(/_/g, " ");
     el.verdictChip.className = `chip verdict-chip verdict-${verdict}`;
-    el.verdictChip.title = "Verdict: open “About” below for details";
+    el.verdictChip.title = "How was this verdict decided?";
   }
 }
 
-function openAbout(which) {
-  if (which === "credits") renderCredits(el.aboutBody, credits);
+// which: "verdict" (the current target's), "how", "limits", "credits", "methodology" or any other
+// explanations.about key. section: scroll to that heading.
+function openAbout(which, { section = null } = {}) {
+  // Opened from the verdict popup: offer the way back to it.
+  const fromVerdict = el.aboutDialog.open && el.aboutBody.dataset.view === "verdict";
+  if (which === "verdict") renderVerdictPopup(el.aboutBody, manifest, explanations);
+  else if (which === "credits") renderCredits(el.aboutBody, credits);
   else if (which === "limits") renderEntry(el.aboutBody, explanations?.about?.limits, "What this tool can't tell you");
-  else renderEntry(el.aboutBody, explanations?.about?.how_it_works, "How this works");
+  else if (which === "methodology") renderMethodology(el.aboutBody, explanations);
+  else if (which === "how") renderEntry(el.aboutBody, explanations?.about?.how_it_works, "How this works");
+  else renderEntry(el.aboutBody, explanations?.about?.[which], which.replace(/_/g, " "));
+  el.aboutBody.dataset.view = which;
+  if (fromVerdict && which !== "verdict") {
+    const back = document.createElement("a");
+    back.href = "#";
+    back.className = "about-link back-link small";
+    back.dataset.about = "verdict";
+    back.textContent = "← Back to the verdict";
+    el.aboutBody.prepend(back);
+  }
   const h = el.aboutBody.querySelector("h3");
   if (h) h.id = "about-title";
-  if (typeof el.aboutDialog.showModal === "function") el.aboutDialog.showModal();
-  else el.aboutDialog.setAttribute("open", "");
+  // Links inside the open dialog re-render it; showModal() on an open dialog throws in some browsers.
+  if (!el.aboutDialog.open) {
+    if (typeof el.aboutDialog.showModal === "function") el.aboutDialog.showModal();
+    else el.aboutDialog.setAttribute("open", "");
+  }
+  const target = section && [...el.aboutBody.querySelectorAll("h4")].find((x) => x.textContent === section);
+  if (target) target.scrollIntoView({ block: "start" });
+  else el.aboutDialog.scrollTop = 0;
 }
 
 // ---------------------------------------------------------------- layers
@@ -1402,6 +1424,27 @@ function setupControls() {
   el.searchForm.addEventListener("submit", (e) => { e.preventDefault(); search(el.searchInput.value); });
   $("info-close").addEventListener("click", closeInfo);
   for (const b of document.querySelectorAll("[data-dialog]")) b.addEventListener("click", () => openAbout(b.dataset.dialog));
+  el.verdictChip.addEventListener("click", () => openAbout("verdict"));
+  // Close the popup on a click outside it (on the backdrop). The backdrop's clicks reach the dialog
+  // element itself, as do clicks on its padding, so compare against its box. Only when the press
+  // also started outside: selecting text inside and releasing outside shouldn't close it.
+  const outsideDialog = (e) => {
+    const r = el.aboutDialog.getBoundingClientRect();
+    return e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom;
+  };
+  let pressedOutside = false;
+  el.aboutDialog.addEventListener("pointerdown", (e) => { pressedOutside = e.target === el.aboutDialog && outsideDialog(e); });
+  el.aboutDialog.addEventListener("click", (e) => {
+    if (pressedOutside && e.target === el.aboutDialog && outsideDialog(e)) el.aboutDialog.close();
+    pressedOutside = false;
+  });
+  // Links to explanation entries, including ones inside text from explanations.json.
+  document.addEventListener("click", (e) => {
+    const a = e.target.closest("[data-about]");
+    if (!a) return;
+    e.preventDefault();
+    openAbout(a.dataset.about, { section: a.dataset.section || null });
+  });
   el.fingerprint.addEventListener("toggle", renderFingerprint);
 
   let resizeTimer = null;

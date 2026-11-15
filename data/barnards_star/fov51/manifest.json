@@ -7914,6 +7914,15 @@
   }
  ],
  "verdict": "moves_as_expected",
+ "verdict_evidence": {
+  "motion_from": "single_images",
+  "motion_measurable": true,
+  "motion_sigma": 49.0,
+  "shift_px": 1.87,
+  "catalog_difference_sigma": 1.8,
+  "brightness_change_sigma": 0.0,
+  "saturated_share": 0.93
+ },
  "measured_motion_mas_yr": {
   "ra": -1369,
   "ra_err": 248,

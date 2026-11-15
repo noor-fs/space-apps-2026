@@ -5270,6 +5270,15 @@
   }
  ],
  "verdict": "moves_as_expected",
+ "verdict_evidence": {
+  "motion_from": "visit_fits",
+  "motion_measurable": true,
+  "motion_sigma": 7.0,
+  "shift_px": 1.35,
+  "catalog_difference_sigma": 0.2,
+  "brightness_change_sigma": null,
+  "saturated_share": 0.0
+ },
  "measured_motion_mas_yr": {
   "ra": -8350,
   "ra_err": 1174,

@@ -14,6 +14,7 @@ from astropy.stats import sigma_clipped_stats
 from astropy.time import Time
 from astropy.visualization import make_lupton_rgb
 from PIL import Image
+from scipy import special, stats
 from scipy.ndimage import maximum_filter
 
 from spx.archive import IRSA
@@ -43,8 +44,41 @@ def frame_key(header):
     return f"{header['OBSID']}_D{int(header['DETECTOR'])}"
 
 
+def chi2_to_sigma(chi2_value, dof):
+    """The Gaussian sigma with the same two-sided p-value as this chi-square (3 sigma = p 0.0027).
+
+    Works in log p, so very large chi-squares give a finite sigma instead of p = 0.
+    """
+    log_p = stats.chi2.logsf(chi2_value, dof)
+    if not np.isfinite(log_p):
+        # sf underflows far in the tail; leading term of the upper incomplete gamma function there
+        a, x = dof / 2, chi2_value / 2
+        log_p = (a - 1) * np.log(x) - x - special.gammaln(a)
+    return float(-special.ndtri_exp(log_p - np.log(2)))
+
+
+def verdict_evidence(motion, motion_source, brightness, saturated_share):
+    """The numbers each verdict rule was applied to (spx/verdict.py), for the site's "Evidence" line.
+
+    Motion numbers are null when the data couldn't have detected a 1-pixel shift (not constrained),
+    the same condition that makes measured_motion_mas_yr null.
+    """
+    measurable = motion is not None and bool(motion.constrained)
+    return {
+        "motion_from": None if motion is None else ("single_images" if motion_source == "frames" else "visit_fits"),
+        "motion_measurable": measurable,
+        "motion_sigma": round(chi2_to_sigma(motion.detection_chi2, 2), 1) if measurable else None,
+        "shift_px": round(float(motion.shift_px), 2) if measurable else None,
+        "catalog_difference_sigma": (round(chi2_to_sigma(motion.catalog_chi2, 2), 1)
+                                     if measurable and motion.catalog_chi2 is not None else None),
+        "brightness_change_sigma": (round(chi2_to_sigma(brightness.chi2, brightness.dof), 1)
+                                    if brightness is not None and brightness.dof > 0 else None),
+        "saturated_share": None if saturated_share is None else round(float(saturated_share), 2),
+    }
+
+
 def export_field(data_dir, target_key, name, field, target, visits, ranges, frame_measurements,
-                 visit_measurements, motion, motion_source, verdict, uris=None):
+                 visit_measurements, motion, motion_source, verdict, uris=None, brightness=None):
     """Write data/<target_key>/fields.json and the whole fov<S>/ folder for one field size.
 
     visits: visits.build_visits output. ranges: visit_ranges of ALL frames found.
@@ -131,6 +165,9 @@ def export_field(data_dir, target_key, name, field, target, visits, ranges, fram
                  "size_px": field.size_px},
         "visits": entries,
         "verdict": verdict,
+        "verdict_evidence": verdict_evidence(
+            motion, motion_source, brightness,
+            np.mean([m.saturated for m in frame_measurements.values()]) if frame_measurements else None),
         "measured_motion_mas_yr": None if motion is None or not motion.constrained else {
             "ra": round(motion.pmra), "ra_err": round(motion.pmra_err),
             "dec": round(motion.pmdec), "dec_err": round(motion.pmdec_err)},

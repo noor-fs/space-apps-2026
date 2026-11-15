@@ -160,7 +160,7 @@ def build(target_key, label, field, target, budget, offline):
 
     uris = {f"{r['exposure']}_D{r['detector']}": str(r["uri"]) for r in frames} if "uri" in frames.colnames else None
     export_field(DATA_DIR / target_key, target_key, label, field, target, visits, ranges, measurements,
-                 visit_fits, motion, motion_source, result, uris)
+                 visit_fits, motion, motion_source, result, uris, brightness=brightness)
     export_objects(DATA_DIR / target_key / f"fov{field.size_px}" / "objects.json", target_key, field, visits, ranges,
                    object_results, frame_measurements, objects, catalog, references)
     results = RESULTS_DIR / target_key

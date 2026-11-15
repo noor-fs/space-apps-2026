@@ -409,6 +409,29 @@ button.wide { width: 100%; margin-top: 8px; }
 .verdict { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
 .verdict-head { display: flex; align-items: center; gap: 6px; }
 .verdict .chip { margin: 0; }
+.verdict-popup { margin-top: 0; padding-top: 0; border-top: 0; }
+.evidence { margin-top: 10px; padding: 10px 12px; background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px; }
+.evidence h4 { margin: 0 0 4px; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.evidence p { margin: 4px 0; }
+.evidence-sub { margin-top: 8px !important; }
+.evidence-list { list-style: none; margin: 2px 0 6px; padding: 0; }
+.evidence-list li { display: flex; gap: 6px; margin: 2px 0; }
+.evidence-list .mark { flex: none; width: 1em; font-weight: 700; }
+.evidence-list .met .mark { color: #4cc38a; }
+.evidence-list .not-met .mark { color: var(--muted); }
+.back-link { display: inline-block; margin-bottom: 6px; }
+.term { position: relative; color: var(--accent); border-bottom: 1px dotted var(--accent); cursor: help; }
+.term:hover::after, .term:focus::after {
+  content: attr(data-tip);
+  position: absolute; left: 50%; bottom: calc(100% + 6px); transform: translateX(-50%);
+  width: max-content; max-width: min(280px, 80vw); z-index: 20;
+  padding: 8px 10px; border-radius: 6px; border: 1px solid var(--border);
+  background: var(--panel); color: var(--text); font-size: 12px; font-weight: 400; line-height: 1.4;
+  white-space: normal; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+.method-section h4 { margin: 14px 0 2px; font-size: 14px; }
+.method-section p { margin: 0; }
+button.verdict-chip:hover { border-color: var(--accent); }
 
 .fingerprint summary { cursor: pointer; display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px; }
 .fingerprint summary .muted { font-size: 13px; }
