@@ -2,7 +2,8 @@
 import { TARGETS, targetByKey, findTargetByName } from "./targets.js";
 import { skyToPx, inField, parseCoords, fieldArcmin } from "./sky.js";
 import { LAYERS, LAYER_GROUPS, DEFAULT_LAYERS, drawMarkers } from "./markers.js";
-import { tipText, renderInfo, renderEntry, renderTargetPanel, renderCredits, renderMethodology, renderVerdictPopup, safeUrl } from "./panel.js";
+import { tipText, renderInfo, renderEntry, renderTargetPanel, renderCredits, renderMethodology, renderVerdictPopup, safeUrl,
+  fieldVerdict, renderFieldPopup, renderAccuracy } from "./panel.js";
 import { loadF32, autoRange, drawData, COLORMAP_NAMES, defaultK, difference, diffLimit, drawDifference } from "./render.js";
 import { drawChart, drawTable } from "./charts.js";
 
@@ -54,7 +55,8 @@ const el = {
   brightnessView: $("brightness-view"), brightnessNote: $("brightness-note"),
   brightnessChart: $("brightness-chart"), brightnessTable: $("brightness-table"),
   thumbsPanel: $("thumbs-panel"), thumbs: $("thumbs"), thumbsCount: $("thumbs-count"),
-  intro: $("target-intro"), introTitle: $("target-intro-title"), introBody: $("target-intro-body"),
+  intro: $("target-intro"), introBody: $("target-intro-body"), aboutToggle: $("about-toggle"),
+  fieldChip: $("field-chip"), fieldSize: $("field-size"),
   fingerprint: $("fingerprint"), fpNote: $("fingerprint-note"), fpLegend: $("fingerprint-legend"),
   fpChart: $("fingerprint-chart"), fpTable: $("fingerprint-table"),
   controls: $("controls"), fovButtons: $("fov-buttons"), modeButtons: $("mode-buttons"), modeNote: $("mode-note"),
@@ -95,6 +97,9 @@ const state = {
 let fields = null, manifest = null, overlays = [], explanations = {}, credits = [];
 // Field stars of the open field (objects.json) and the scoreboard's per-star agreement, by name.
 let fieldStars = [], fieldScores = new Map();
+// The open field's scoring entry (Noor's checks: scoreboard.json targets[], or a live field's
+// score.json), and the whole scoreboard for the "How accurate?" dialog.
+let fieldEntry = null, scoreboard = null;
 let markerInfo = new Map();
 const view = { cx: 0, cy: 0 }; // image point (pixel units, 0..S) at the viewport center
 let loadToken = 0, drawSeq = 0, timer = null;
@@ -178,17 +183,20 @@ function loadImage(url) {
 
 const loadOverlays = (key) => fetchJSONFirst(`${key}/overlays.json`).then((a) => (Array.isArray(a) ? a : [])).catch(() => []);
 
-/** Per-star agreement for one target from Noor's scoreboard.json; empty for fields it doesn't cover. */
-const loadFieldScores = (key) => fetchJSONFirst("scoreboard.json")
-  .then((s) => new Map(((s?.targets || []).find((t) => t.target_key === key)?.field_stars?.objects || []).map((o) => [o.name, o])))
-  .catch(() => new Map());
+/** One target's entry in Noor's scoreboard.json; null for fields it doesn't cover. */
+const loadFieldEntry = (key) => fetchJSONFirst("scoreboard.json")
+  .then((s) => (s?.targets || []).find((t) => t.target_key === key) || null)
+  .catch(() => null);
 
-/** The same per-star agreement for a server-built field, from its own score.json (same checks,
- *  run by the server after each build). Not cached: the full build replaces the preview's file. */
-const loadLiveFieldScores = (key) => fetch(`${LIVE_DATA}/${key}/score.json`)
+/** The same entry for a server-built field, from its own score.json (same checks, run by the
+ *  server after each build). Not cached: the full build replaces the preview's file. */
+const loadLiveFieldEntry = (key) => fetch(`${LIVE_DATA}/${key}/score.json`)
   .then((r) => (r.ok ? r.json() : null))
-  .then((s) => new Map((s?.target?.field_stars?.objects || []).map((o) => [o.name, o])))
-  .catch(() => new Map());
+  .then((s) => s?.target || null)
+  .catch(() => null);
+
+/** Per-star agreement by name, for the field-star markers and their info panel. */
+const starScores = (entry) => new Map((entry?.field_stars?.objects || []).map((o) => [o.name, o]));
 
 /** One CSV line -> [wavelength, flux, source]. The source may be quoted and contain commas. */
 function parseSpectrumLine(line) {
@@ -993,46 +1001,68 @@ async function renderFingerprint() {
 
 // ---------------------------------------------------------------- panels
 /**
- * "About <target>" box above the mode tabs: description, verdict and motion.
- * Shown even before a target's images exist (then without the verdict).
+ * About box under the title (opened by the About button): description and both verdicts.
+ * The button shows even before a target's images exist (then the box has no verdicts).
  */
 function renderIntro() {
-  const name = displayName(state.target);
-  el.introTitle.textContent = `About ${explanations?.targets?.[state.target]?.title || name}`;
-  renderTargetPanel(el.introBody, { key: state.target, manifest, explanations });
-  el.intro.hidden = false;
+  renderTargetPanel(el.introBody, { key: state.target, manifest, explanations, fieldEntry });
+  el.aboutToggle.hidden = !state.target;
+}
+
+function setIntroOpen(open) {
+  el.intro.hidden = !open;
+  el.aboutToggle.setAttribute("aria-expanded", String(open));
+}
+
+/** A verdict chip's text: a muted lead word ("Target", "Field") and the verdict. */
+function chipText(chip, lead, text) {
+  const l = document.createElement("span");
+  l.className = "chip-lead";
+  l.textContent = lead;
+  chip.replaceChildren(l, " ", text);
 }
 
 function renderTargetInfo() {
   renderIntro();
-  if (!manifest) { el.verdictChip.hidden = true; return; }
+  if (!manifest) { el.verdictChip.hidden = el.fieldChip.hidden = true; return; }
   const verdict = manifest.verdict;
   el.verdictChip.hidden = !verdict;
   if (verdict) {
-    el.verdictChip.textContent = explanations?.verdicts?.[verdict]?.title || verdict.replace(/_/g, " ");
+    // Coordinate fields (server keys "c_...") have no named object, only a center position.
+    const lead = String(manifest.target_key || state.target).startsWith("c_") ? "Center" : "Target";
+    chipText(el.verdictChip, lead, explanations?.verdicts?.[verdict]?.title || verdict.replace(/_/g, " "));
     el.verdictChip.className = `chip verdict-chip verdict-${verdict}`;
-    el.verdictChip.title = "How was this verdict decided?";
   }
+  const fv = fieldVerdict(fieldEntry);
+  chipText(el.fieldChip, "Field", fv.title);
+  el.fieldChip.className = `chip verdict-chip field-${fv.state}`;
+  el.fieldChip.hidden = false;
 }
 
 // which: "verdict" (the current target's), "how", "limits", "credits", "methodology" or any other
 // explanations.about key. section: scroll to that heading.
 function openAbout(which, { section = null } = {}) {
-  // Opened from the verdict popup: offer the way back to it.
-  const fromVerdict = el.aboutDialog.open && el.aboutBody.dataset.view === "verdict";
+  // Opened from a verdict popup (target or field): offer the way back to it.
+  const backTo = el.aboutDialog.open && ["verdict", "field"].includes(el.aboutBody.dataset.view) ? el.aboutBody.dataset.view : null;
   if (which === "verdict") renderVerdictPopup(el.aboutBody, manifest, explanations);
+  else if (which === "field") renderFieldPopup(el.aboutBody, fieldEntry, manifest);
+  else if (which === "accuracy") {
+    // A field the scoreboard doesn't cover (a searched position) is pointed to its own Field chip.
+    const covered = (scoreboard?.targets || []).some((t) => t.target_key === state.target);
+    renderAccuracy(el.aboutBody, scoreboard, { explanations, liveName: manifest && !covered ? manifest.name || displayName(state.target) : null });
+  }
   else if (which === "credits") renderCredits(el.aboutBody, credits);
   else if (which === "limits") renderEntry(el.aboutBody, explanations?.about?.limits, "What this tool can't tell you");
   else if (which === "methodology") renderMethodology(el.aboutBody, explanations);
   else if (which === "how") renderEntry(el.aboutBody, explanations?.about?.how_it_works, "How this works");
   else renderEntry(el.aboutBody, explanations?.about?.[which], which.replace(/_/g, " "));
   el.aboutBody.dataset.view = which;
-  if (fromVerdict && which !== "verdict") {
+  if (backTo && which !== backTo) {
     const back = document.createElement("a");
     back.href = "#";
     back.className = "about-link back-link small";
-    back.dataset.about = "verdict";
-    back.textContent = "← Back to the verdict";
+    back.dataset.about = backTo;
+    back.textContent = backTo === "field" ? "← Back to the field check" : "← Back to the verdict";
     el.aboutBody.prepend(back);
   }
   const h = el.aboutBody.querySelector("h3");
@@ -1067,7 +1097,7 @@ const SUB_LEGENDS = {
     [`<path d="M3 9h4M11 9h4M9 3v4M9 11v4" stroke="#4cc38a" stroke-width="2"/>`, "matches", "SPHEREx position moves as Gaia predicts"],
     [`<path d="M3 9h4M11 9h4M9 3v4M9 11v4" stroke="#e0a040" stroke-width="2"/>`, "tension", "Slight tension with Gaia"],
     [`<path d="M3 9h4M11 9h4M9 3v4M9 11v4" stroke="#ff5c7a" stroke-width="2"/>`, "doesn't match", "Doesn't move as Gaia predicts"],
-    [`<path d="M3 9h4M11 9h4M9 3v4M9 11v4" stroke="#9aa4b8" stroke-width="2"/>`, "not scored", "No result: measured in too few visits, or a typed position (no accuracy score)"],
+    [`<path d="M3 9h4M11 9h4M9 3v4M9 11v4" stroke="#9aa4b8" stroke-width="2"/>`, "not scored", "No result: measured in too few visits, or the field isn't scored yet"],
   ],
   flags: [
     [`<rect x="4" y="4" width="10" height="10" rx="2" fill="#ff0000"/>`, "saturated", "Pixel saturated"],
@@ -1322,6 +1352,7 @@ function buildTargetButtons() {
 
 function buildFieldControls() {
   el.fovButtons.replaceChildren();
+  el.fieldSize.hidden = fields.length <= 1; // nothing to choose with one size
   for (const sz of fields) {
     const b = document.createElement("button");
     b.type = "button";
@@ -1482,6 +1513,17 @@ function setupControls() {
   $("info-close").addEventListener("click", closeInfo);
   for (const b of document.querySelectorAll("[data-dialog]")) b.addEventListener("click", () => openAbout(b.dataset.dialog));
   el.verdictChip.addEventListener("click", () => openAbout("verdict"));
+  el.fieldChip.addEventListener("click", () => openAbout("field"));
+  el.aboutToggle.addEventListener("click", () => setIntroOpen(el.intro.hidden));
+  // Target names in the "How accurate?" table open that target.
+  el.aboutBody.addEventListener("click", (e) => {
+    const a = e.target.closest("[data-open-target]");
+    if (!a) return;
+    e.preventDefault();
+    el.aboutDialog.close();
+    hideSearchMessage();
+    openTarget(a.dataset.openTarget, { push: true });
+  });
   // Close the popup on a click outside it (on the backdrop). The backdrop's clicks reach the dialog
   // element itself, as do clicks on its padding, so compare against its box. Only when the press
   // also started outside: selecting text inside and releasing outside shouldn't close it.
@@ -1587,7 +1629,7 @@ async function openTarget(key, opts = {}) {
   setPlaying(false);
   const t = targetByKey(key);
   state.target = key;
-  manifest = null; fields = null; overlays = []; fieldStars = []; fieldScores = new Map();
+  manifest = null; fields = null; overlays = []; fieldStars = []; fieldScores = new Map(); fieldEntry = null;
   markerInfo = new Map();
   if (el.markers) el.markers.replaceChildren();
   closeInfo();
@@ -1608,8 +1650,9 @@ async function openTarget(key, opts = {}) {
   if (!sizes) {
     state.fov = null;
     el.controls.hidden = true;
-    el.modeBar.hidden = el.player.hidden = el.verdictChip.hidden = true;
+    el.modeBar.hidden = el.player.hidden = el.verdictChip.hidden = el.fieldChip.hidden = true;
     el.fovButtons.replaceChildren();
+    el.fieldSize.hidden = true;
     el.fieldInfo.textContent = "";
     el.viewport.hidden = false;
     el.brightnessView.hidden = true;
@@ -1648,13 +1691,14 @@ async function openFov(fov, opts, token) {
   if (token !== loadToken) return;
   // objects.json is optional: older fields and failed builds may not have it.
   const base = `${targetBase.get(state.target) || REAL_DIR}/${state.target}/fov${fov}`;
-  const [objs, scores] = await Promise.all([
+  const [objs, entry] = await Promise.all([
     fetchJSON(`${base}/objects.json`).then((d) => (Array.isArray(d?.objects) ? d.objects : [])).catch(() => []),
-    isLiveKey(state.target) ? loadLiveFieldScores(state.target) : loadFieldScores(state.target),
+    isLiveKey(state.target) ? loadLiveFieldEntry(state.target) : loadFieldEntry(state.target),
   ]);
   if (token !== loadToken) return;
   fieldStars = objs;
-  fieldScores = scores;
+  fieldEntry = entry;
+  fieldScores = starScores(entry);
 
   manifest = m;
   state.fov = fov;
@@ -1870,6 +1914,7 @@ function openFromUrl() {
 
 // ---------------------------------------------------------------- start
 fetchJSONFirst("explanations.json").then((j) => { explanations = j || {}; renderTargetInfo(); }).catch(() => {});
+fetchJSONFirst("scoreboard.json").then((s) => { scoreboard = s; }).catch(() => {});
 fetchJSONFirst("credits.json").then((j) => { credits = Array.isArray(j) ? j : []; }).catch(() => {});
 buildLayerControls();
 buildTargetButtons();
