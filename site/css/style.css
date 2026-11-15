@@ -738,9 +738,9 @@ button.verdict-chip:hover { border-color: var(--accent); }
   min-width: 24px;
   padding: 1px 7px;
   border-radius: 999px;
-  background: #ff5c7a;
-  color: #1a0710;
-  font-weight: 800;
+  background: #9e2a40;
+  color: #fff;
+  font-weight: 700;
   text-align: center;
 }
 .off-label { flex: 1; }
@@ -756,15 +756,16 @@ button.verdict-chip:hover { border-color: var(--accent); }
   padding: 10px 12px;
   background: var(--panel-2);
   border: 1px solid var(--border);
-  border-top: 2px solid #b48cff;
   border-radius: 8px;
 }
 .headline-card p { margin: 4px 0 0; font-size: 14px; line-height: 1.5; }
 .headline-card strong { color: var(--text); }
-.headline-card.kind-target { border-top-color: #ffd84d; }
-.headline-card.kind-field { border-top-color: #4cc38a; }
-.headline-card.kind-pos { border-top-color: #b48cff; }
-.headline-card.kind-pos .verdict-kind { color: #b48cff; }
+/* toned down: no colored border, only a small muted dot and label carry the kind's color */
+.headline-card .verdict-kind { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; }
+.headline-card .verdict-kind::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.headline-card.kind-target .verdict-kind { color: #cdb35a; }
+.headline-card.kind-field .verdict-kind { color: #5fa983; }
+.headline-card.kind-pos .verdict-kind { color: #9d88cc; }
 .acc-card { margin: 14px 0; padding: 12px 14px; background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px; }
 .acc-card h4 { margin: 0 0 6px; font-size: 15px; color: var(--text); }
 .acc-card > p { margin: 4px 0; }
@@ -1002,6 +1003,34 @@ button.verdict-chip:hover { border-color: var(--accent); }
 .filter-body { padding: 2px 10px 10px; }
 .filter-body .side-hint { margin: 8px 0 0; }
 .side-section .match-count { margin-top: 8px; }
+
+/* ---------- share: the view's address, fading out on the right, with a copy button ---------- */
+/* right column: the share card on its own, then the settings panel */
+.side-col { display: flex; flex-direction: column; gap: 12px; align-self: start; min-width: 0; }
+.share-card { padding: 12px 14px; background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); }
+.side-col:has(> .controls[hidden]) > .share-card { display: none; } /* only once a field is open */
+.share-heading { margin: 0 0 8px; font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); } /* same as the settings headings */
+.share-row { display: flex; gap: 6px; align-items: stretch; }
+.share-field { flex: 1; min-width: 0; background: var(--panel-2); border: 1px solid var(--border); border-radius: 6px; }
+.share-field input {
+  width: 100%;
+  padding: 6px 10px;
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  font: 12.5px/1.4 ui-monospace, SFMono-Regular, Consolas, monospace;
+  -webkit-mask-image: linear-gradient(to right, #000 65%, transparent);
+  mask-image: linear-gradient(to right, #000 65%, transparent);
+}
+.share-field input:focus { outline: none; }
+.share-field:focus-within { border-color: var(--accent); }
+.share-copy { flex: none; display: grid; place-items: center; width: 32px; padding: 0; border-radius: 6px; color: var(--accent); border-color: rgba(110, 168, 255, 0.45); }
+.share-copy:hover { border-color: var(--accent); }
+.share-copy .icon-check { display: none; }
+/* copied: grey until the link changes */
+.share-copy.copied { color: var(--muted); border-color: var(--border); }
+.share-copy.copied .icon-copy { display: none; }
+.share-copy.copied .icon-check { display: block; }
 
 /* ---------- layers: one dropdown per group, same look as the filters ---------- */
 .layer-list { gap: 0; }

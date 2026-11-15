@@ -2197,8 +2197,49 @@ function writeUrl(push = false) {
     if (state.wl) p.set("wl", `${state.wl[0]}-${state.wl[1]}`);
   }
   const url = `${location.pathname}?${p.toString().replace(/%2C/g, ",")}`;
-  if (url === `${location.pathname}${location.search}`) return;
-  history[push ? "pushState" : "replaceState"](null, "", url);
+  if (url !== `${location.pathname}${location.search}`) history[push ? "pushState" : "replaceState"](null, "", url);
+  updateShareUrl();
+}
+
+// ---------------------------------------------------------------- share box
+// Looked up on each call (not module constants): writeUrl may run before this part of the file has.
+function updateShareUrl() {
+  const input = document.getElementById("share-url");
+  if (!input || input.value === location.href) return;
+  input.value = location.href;
+  setShareCopied(false); // a new link hasn't been copied yet: the button goes back to blue
+}
+
+function setShareCopied(copied) {
+  const button = document.getElementById("share-copy");
+  if (!button) return;
+  button.classList.toggle("copied", copied);
+  button.setAttribute("aria-label", copied ? "Copied" : "Copy link");
+  button.title = copied ? "Copied" : "Copy link";
+}
+
+async function copyShareUrl() {
+  const shareInput = document.getElementById("share-url");
+  updateShareUrl();
+  try {
+    await navigator.clipboard.writeText(shareInput.value);
+  } catch {
+    // Older browsers or no clipboard permission: select the text and copy it the old way.
+    shareInput.select();
+    document.execCommand("copy");
+  }
+  setShareCopied(true);
+}
+
+{
+  const input = document.getElementById("share-url");
+  const button = document.getElementById("share-copy");
+  if (input && button) {
+    button.addEventListener("click", copyShareUrl);
+    input.addEventListener("focus", () => input.select());
+    window.addEventListener("popstate", updateShareUrl);
+    updateShareUrl();
+  }
 }
 
 let urlTimer = null;
