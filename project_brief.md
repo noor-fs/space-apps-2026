@@ -72,7 +72,7 @@ Shared context for the whole team's agents: project descriptions, the demo pitch
 | Asteroid layer | Known asteroids on individual images | Amna | In progress (unblocked 2026-11-15) |
 | Infrared fingerprint | Target brightness vs wavelength over reference spectra | Yara K / Amna | Built; thin for saturated or faint targets |
 | Every star in the field measured | `objects.json`: expected and measured positions per visit for every Gaia star G ≤ 17 | Yara T | Done, all five targets |
-| Scoreboard | "How accurate is this?": motion, error bars, field-star agreement | Noor | Built; see results |
+| Scoreboard | "How accurate is this?": target motion vs catalog, target error bars, and every field star scored twice (does it move as Gaia predicts; is it where Gaia predicts, allowing for crowding), with crowded and uncrowded stars reported separately. Writes `data/scoreboard.json`: headline sentences for the site and a per-star label for the field-star hover text | Noor | Done (pushed); re-run whenever target files change |
 | URL state | Every view is a shareable link | Yara K | Per plan |
 | Field sizes 101 / 201 px | Wider fields | Yara T | Code supports it; only 51 px built |
 | Live lookup of any position | Server runs the whole pipeline on demand; quick 120-image preview, then full build | Yara T | Works locally; **not deployed** (hosting undecided) |
@@ -91,7 +91,7 @@ Five people. Who owns which part (for coordination; ask the owner before describ
 | The website | Yara K |
 | Overlays, explanation text, credits, reference spectra, asteroid layer | Amna |
 | Scoring and matching: the accuracy scoreboard | Noor |
-| _(fifth member: add name and part)_ | |
+| Demo video and project write-up | Sifna |
 
 Repo: GitHub `noor-fs/space-apps-2026`.
 
@@ -128,7 +128,8 @@ Motion in milliarcseconds per year (mas/yr). Source: `data/<target>/fov51/manife
 - **WISE 0855:** the faintest target. Simple centroids gave "too faint"; the joint PSF fit turned it into a ~7σ motion detection matching the published value. Visits fitted at S/N 16–30.
 - **RW Aurigae:** correctly called a brightness change, not motion. Its light center shifts 0.07 px because it's an unresolved binary, which is why a 0.25 px minimum shift is required before calling motion.
 - **R Draconis:** honestly reported as saturated instead of a false "no motion" (an earlier version made that mistake; it was found and fixed).
-- **Field stars:** in the Epsilon Indi B field, 9 of 9 Gaia stars down to G = 17 recovered; of 6 stars the tool was not tuned on, 5 agree with Gaia, 1 shows mild tension, 0 disagree. Across the other fields: Barnard's Star 42/42, RW Aur 21/21, WISE 0855 5/5 stars recovered in every visit.
+- **Field stars (the tool checked on stars it was never tuned on):** 100 of 100 Gaia stars down to G = 17 recovered in the four scored fields. Of the 73 stars not used to set the error bars, **65 move exactly as Gaia predicts**: 81% of their measurements fall within 1σ and 95% within 2σ, against 68% and 95% for honest error bars. **All 14 stars with no close neighbor pass.** The 8 that don't are all crowded (see Limits). Source: `data/scoreboard.json`.
+- **Positions vs Gaia:** allowing for crowding (a constant per-star offset measured on the reference stars, `absolute_floor_px`), 75% of field-star positions fall within 1σ of Gaia and 89% within 2σ; for stars with no close neighbor, 81% and 98%.
 - **Positions:** measured targets sit within 0.61″ (≤ 0.1 pixel) of catalog positions (scoreboard).
 - **Self-correcting:** a test with 4× more images showed the error bars were too small (frames in one visit share an error). The fit was changed; the "moves unexpectedly" false alarm on Epsilon Indi B went away.
 - **Resilience:** builds keep working when IRSA or the ESA Gaia archive is down (fallback services, checked to give identical values).
@@ -137,7 +138,9 @@ Motion in milliarcseconds per year (mas/yr). Source: `data/<target>/fov51/manife
 
 ## 7. Limits and honest caveats
 
-- **Error bars are slightly too small:** 56% of field-star positions within 1σ and 92% within 2σ, against 68% and 95% for honest error bars (real scatter ~1.1× the error bar). After accounting for crowding, uncrowded stars reach 89% / 99%. Say "calibrated and checked", not "exact".
+- **Crowding shifts positions, not motion.** 59 of the 73 scored field stars have another Gaia star within 2 pixels. Their measured light center sits a constant fraction of a pixel from Gaia's position, which is why positions need the crowding allowance (75% / 89% within 1σ / 2σ, against 68% / 95%). Motion is unaffected on average (95% within 2σ). Say "calibrated and checked", not "exact".
+- **8 crowded field stars fail the motion test** (7 in Barnard's Star's field, 1 in WISE 0855's). Most sit next to much brighter stars, and their offsets flip between the two orientations SPHEREx views them from, six months apart. Likely cause: neighbors are fitted with a round Gaussian, while SPHEREx's real PSF is asymmetric. Fix (future work): measure crowded stars with SPHEREx's own PSF model, as already done for WISE 0855. They are not discoveries.
+- **R Draconis's field is left out of the field-star totals:** the target's glow dominates it (crowding allowance 0.14 / 0.40 px). It is still scored in its own entry.
 - **Barnard's Star RA motion is 2.3σ from Gaia.** Within the 3σ rule, but the weakest agreement.
 - **Saturated targets** (R Draconis, partly Barnard's Star) give poor brightness and no R Dra motion.
 - **SPHEREx pixels are 6.15″:** binaries like RW Aur A+B (1.5″ apart) are one blob.
@@ -151,7 +154,7 @@ Each point says what's special and the evidence for it. Lead with the first thre
 
 1. **It solves the problem that makes SPHEREx hard to blink.** Every image is at a different wavelength, so naive blinking shows color, not motion. The tool compares like with like: visit stacks, a wavelength filter that blinks only images at the same wavelength across visits, and a difference view scaled so static stars cancel. This is the challenge's "creative use of the 102 bands", built into the core rather than added on.
 2. **It doesn't just show motion, it measures it, and checks itself against catalogs.** For each object, the SPHEREx-measured position sits next to the catalog prediction for that date, with an error circle, and a verdict says what's going on. 4 of 4 measurable targets match their catalog motions (section 6).
-3. **It tells you how far to trust it.** Every Gaia star in the field (down to G = 17) is measured the same way as the target and scored against Gaia, so accuracy is shown, not asserted. The scoreboard reports its own weak spots (error bars ~1.1× too small).
+3. **It tells you how far to trust it.** Every Gaia star in the field (down to G = 17) is measured the same way as the target and scored against Gaia, so accuracy is shown, not asserted: 65 of 73 stars the tool was never tuned on move exactly as Gaia predicts, with 95% of measurements within 2σ (the textbook value), and all 14 uncrowded stars pass. The scoreboard also reports its own weak spots: crowded stars and why they fail.
 4. **It goes beyond what the challenge expected.** Our own early estimate put Epsilon Indi B's motion below the uncertainty; the tool detects it (~1.1 pixel over 1.4 years). WISE 0855, too faint for single images, is measured by fitting SPHEREx's own PSF model across a whole visit, and matches the published motion.
 5. **It knows the difference between moving, changing and unmeasurable.** Six verdicts with explicit rules: RW Aurigae is called a brightness change (its light center wobbles 0.07 px because it's an unresolved binary, below the 0.25 px motion threshold); R Draconis is called saturated rather than given a false "no motion".
 6. **Any point in the sky, not five demos.** The live-lookup server runs the full pipeline for a typed position or name, with a quick preview first (~5 min per new field in local tests). The five targets are the validation set. (Say "live" only if it's deployed at demo time.)
