@@ -24,6 +24,7 @@
     <nav class="about-links" aria-label="About">
       <button type="button" data-dialog="how">How it works</button>
       <button type="button" data-dialog="methodology">How we measure</button>
+      <button type="button" data-dialog="accuracy">How accurate?</button>
       <button type="button" data-dialog="limits">Limits</button>
       <button type="button" data-dialog="credits">Credits</button>
     </nav>
@@ -32,24 +33,26 @@
 
   <main class="layout">
     <section class="viewer-col" aria-label="Viewer">
-      <!-- what am I looking at: target, verdict, field size -->
+      <!-- what am I looking at: target, its two verdicts (target, field), about -->
       <div class="title-row">
         <div class="title-main">
           <h2 id="target-name">&nbsp;</h2>
-          <button type="button" id="verdict-chip" class="chip verdict-chip" hidden></button>
+          <button type="button" id="verdict-chip" class="chip verdict-chip" title="How was this verdict decided?" hidden></button>
+          <button type="button" id="field-chip" class="chip verdict-chip" title="How accurate is this field?" hidden></button>
+          <button type="button" id="about-toggle" class="about-toggle" aria-expanded="false" aria-controls="target-intro"
+                  title="What this object is, and why each verdict was given" hidden><span class="about-icon" aria-hidden="true">i</span>Details</button>
         </div>
-        <div class="field-size" title="How much sky the image covers (not zoom)">
+        <!-- only shown when a target has more than one field size -->
+        <div id="field-size" class="field-size" title="How much sky the image covers (not zoom)" hidden>
           <span class="muted small">Field</span>
           <div id="fov-buttons" class="seg seg-small" role="group" aria-label="Field size"></div>
         </div>
       </div>
-      <p id="field-info" class="muted small field-info"></p>
 
-      <!-- about this target: description from explanations.json, collapsible -->
-      <details id="target-intro" class="target-intro" hidden>
-        <summary id="target-intro-title">About this target</summary>
+      <!-- about this target: description and both verdicts, opened by the About button -->
+      <div id="target-intro" class="target-intro" hidden>
         <div id="target-intro-body"></div>
-      </details>
+      </div>
 
       <!-- how to look: the four modes -->
       <div id="mode-bar" class="mode-bar" hidden>
@@ -59,7 +62,10 @@
           <button type="button" data-mode="difference">Difference</button>
           <button type="button" data-mode="brightness">Brightness</button>
         </div>
-        <p id="mode-hint" class="mode-hint"></p>
+        <div class="hint-row">
+          <p id="mode-hint" class="mode-hint"></p>
+          <p id="field-info" class="muted small field-info"></p>
+        </div>
         <p id="mode-note" class="note-line" hidden></p>
         <div id="filter-chips" class="filter-chips" hidden></div>
       </div>
