@@ -28,7 +28,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from spx.align import align_frame  # noqa: E402
 from spx.archive import find_frames  # noqa: E402
 from spx.clean import clean_frame  # noqa: E402
-from spx.cutouts import CACHE_DIR, download_frames, field_dir, wavelength_calibration_id, wavelength_table  # noqa: E402
+from spx.cutouts import (CACHE_DIR, download_frames, field_dir, wavelength_calibration_id,  # noqa: E402
+                         wavelength_table, write_atomic)
 from spx.export import export_field, frame_key, write_results  # noqa: E402
 from spx.field import FIELD_SIZES_PX, Field, parse_coordinates  # noqa: E402
 from spx.measure import gaia_sources, measure_frame, reference_stars  # noqa: E402
@@ -75,8 +76,9 @@ def locate(args):
     match = resolve_name(args.name)
     source = None if match.source is None else {**match.source.__dict__, "ref_epoch": match.source.ref_epoch.mjd}
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps({"name": args.name, "ra": match.center.ra.deg, "dec": match.center.dec.deg,
-                                "source": source, "match_arcsec": match.match_arcsec}, indent=1))
+    text = json.dumps({"name": args.name, "ra": match.center.ra.deg, "dec": match.center.dec.deg,
+                       "source": source, "match_arcsec": match.match_arcsec}, indent=1)
+    write_atomic(path, lambda temporary: temporary.write_text(text))
     print(f"{args.name}: {match.source.catalog + ' ' + match.source.source_id if match.source else 'Sesame only'}, "
           f"center {match.center.ra.deg:.6f} {match.center.dec.deg:+.6f}")
     return match.center, match.source
@@ -96,7 +98,7 @@ def frame_list(field, offline):
             print(f"SPHEREx archive unavailable ({error}); using the frame list saved {saved}")
             return Table.read(path), "cached list (archive down)"
         path.parent.mkdir(parents=True, exist_ok=True)
-        frames.write(path, overwrite=True)
+        write_atomic(path, lambda temporary: frames.write(temporary, format="ascii.ecsv", overwrite=True))
         return frames, "archive"
     if path.exists():
         return Table.read(path), "cached list"

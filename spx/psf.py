@@ -23,7 +23,7 @@ from astropy.wcs import WCS
 from scipy.ndimage import map_coordinates
 from scipy.optimize import minimize
 
-from spx.cutouts import CACHE_DIR, _get, _without_distortion, cutout_url
+from spx.cutouts import CACHE_DIR, _get, _without_distortion, cutout_url, write_atomic
 
 OVERSAMPLE = 5
 PSF_CENTER = 16  # middle sample of the 33 x 33 array
@@ -57,7 +57,8 @@ def psf_table(header, frame_row, field):
             return None
         path.parent.mkdir(parents=True, exist_ok=True)
         with fits.open(io.BytesIO(_get(cutout_url(frame_row["uri"], field)).content)) as full:
-            fits.HDUList([fits.PrimaryHDU(), full["EPSF"].copy()]).writeto(path)
+            table = fits.HDUList([fits.PrimaryHDU(), full["EPSF"].copy()])
+            write_atomic(path, table.writeto)
     return path
 
 

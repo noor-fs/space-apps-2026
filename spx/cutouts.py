@@ -105,6 +105,17 @@ def _get(url, stream=False):
     raise ConnectionError(f"{url}: {last_error}")
 
 
+def write_atomic(path, write):
+    """Call write(temporary path), then rename it to path.
+
+    A build stopped mid-write (the server pauses abandoned builds by killing them) leaves only a
+    .part file, never a truncated file that a later build would take for a finished download.
+    """
+    temporary = path.with_name(path.name + ".part")
+    write(temporary)
+    temporary.replace(path)
+
+
 def download_frames(field, frames, budget=None, workers=WORKERS):
     """Download frames in download_order, yielding (frame, path or None, error or None) as each finishes.
 
@@ -122,7 +133,7 @@ def download_frames(field, frames, budget=None, workers=WORKERS):
         if not path.exists():
             content = fetch_slim(cutout_url(frame["uri"], field))
             fits.open(io.BytesIO(content))["IMAGE"]  # raises if IRSA sent something that isn't a cutout
-            path.write_bytes(content)
+            write_atomic(path, lambda temporary: temporary.write_bytes(content))
         return path
 
     with ThreadPoolExecutor(workers) as pool:
@@ -157,7 +168,8 @@ def wavelength_table(frame, header, field):
         path.parent.mkdir(parents=True, exist_ok=True)
         content = _get(cutout_url(frame["uri"], field)).content
         with fits.open(io.BytesIO(content)) as full:
-            fits.HDUList([fits.PrimaryHDU(), full["WCS-WAVE"].copy()]).writeto(path)
+            table = fits.HDUList([fits.PrimaryHDU(), full["WCS-WAVE"].copy()])
+            write_atomic(path, table.writeto)
     return path
 
 
