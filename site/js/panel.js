@@ -50,7 +50,8 @@ export function tipText(info, explanations) {
     case "catalog": {
       const o = info.obj;
       const g = typeof o.g_mag === "number" ? ` · G ${fmt(o.g_mag, 1)}` : "";
-      return `${o.label || o.name} · ${typeTitle(explanations, o.type)}${g} (click for details)`;
+      const measured = info.fieldStar ? " · measured field star" : "";
+      return `${o.label || o.name} · ${typeTitle(explanations, o.type)}${g}${measured} (click for details)`;
     }
     case "measured": {
       const [c, r] = info.px;
@@ -265,7 +266,7 @@ export function renderWelcome(container, explanations, board) {
   const entry = explanations?.about?.how_it_works;
   container.append(h("p", { class: "welcome-kicker" }, "SPHEREx Motion Viewer"));
   container.append(h("h3", { class: "entry-title welcome-title" }, entry?.title || "How this works"));
-  if (entry?.text) container.append(h("p", { class: "welcome-lead" }, entry.text));
+  if (entry?.text) container.append(welcomeText("p", { class: "welcome-lead" }, entry.text, explanations));
 
   const stats = welcomeStats(board);
   if (stats.length) {
@@ -275,14 +276,31 @@ export function renderWelcome(container, explanations, board) {
   if (entry?.cards?.length) {
     container.append(h("div", { class: "welcome-cards" }, ...entry.cards.map((c, i) =>
       h("div", { class: "welcome-card" }, h("span", { class: "welcome-step" }, String(i + 1)),
-        h("h4", {}, c.title), h("p", {}, c.text)))));
+        h("h4", {}, c.title), welcomeText("p", {}, c.text, explanations)))));
   }
   container.append(h("div", { class: "welcome-actions" },
     h("button", { type: "button", class: "primary", "data-close-dialog": "" }, "Start exploring"),
     h("a", { href: "#", class: "about-link", "data-about": "accuracy" }, "How accurate is it?"),
-    h("a", { href: "#", class: "about-link", "data-about": "methodology" }, "How we measure")));
+    h("a", { href: "#", class: "about-link", "data-about": "methodology" }, "How do we measure?")));
   const src = sourcesLine(entry?.sources);
   if (src) container.append(src);
+}
+
+/**
+ * Welcome text with two marks: **words** are highlighted, {v:<verdict key>} becomes that verdict's chip.
+ * Built from elements and text nodes only, never innerHTML.
+ */
+function welcomeText(tag, props, text, explanations) {
+  const el = h(tag, props);
+  for (const part of String(text).split(/(\*\*[^*]+\*\*|\{v:\w+\})/)) {
+    const em = part.match(/^\*\*([^*]+)\*\*$/);
+    const v = part.match(/^\{v:(\w+)\}$/);
+    if (em) el.append(h("strong", { class: "welcome-em" }, em[1]));
+    else if (v) el.append(h("span", { class: `chip chip-inline verdict-${v[1]}` },
+      explanations?.verdicts?.[v[1]]?.title || v[1].replace(/_/g, " ")));
+    else if (part) el.append(part);
+  }
+  return el;
 }
 
 /** The headline numbers for the welcome popup, from scoreboard.json. */

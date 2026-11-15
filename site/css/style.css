@@ -603,6 +603,9 @@ button.verdict-chip:hover { border-color: var(--accent); }
 .welcome-stat { padding: 12px 14px; background: rgba(76, 195, 138, 0.08); border: 1px solid rgba(76, 195, 138, 0.35); border-radius: 8px; }
 .welcome-stat strong { display: block; font-size: 26px; line-height: 1.1; color: #4cc38a; }
 .welcome-stat span { display: block; margin-top: 4px; font-size: 13px; color: var(--muted); line-height: 1.4; }
+.welcome-em { color: var(--text); font-weight: 600; }
+.welcome-lead .welcome-em { color: var(--accent); }
+.chip-inline { margin: 0 1px; padding: 0 7px; font-size: 12.5px; line-height: 1.5; color: var(--text); white-space: nowrap; }
 .welcome-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
 .welcome-card { position: relative; padding: 12px 14px 12px 46px; background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px; }
 .welcome-card h4 { margin: 0 0 3px; font-size: 15px; }
