@@ -1176,13 +1176,24 @@ async function renderFingerprint() {
   visitHead.textContent = "Visits";
   const visitGrid = document.createElement("div");
   visitGrid.className = "fp-examples fp-visits";
-  for (const v of vs.filter((v) => measured.some((x) => x.visit.n === v.n))) {
+  // Every visit in the selected dates is listed; one with no measured image is greyed out, with the reason.
+  const inDates = framesPassingTime();
+  for (const v of vs.filter((v) => inDates.some((x) => x.visit.n === v.n))) {
     const n = measured.filter((x) => x.visit.n === v.n).length;
     const label = document.createElement("label");
-    label.className = "fp-example";
+    label.className = n ? "fp-example" : "fp-example fp-visit-empty";
     const box = document.createElement("input");
     box.type = "checkbox";
-    box.checked = !fpVisitsOff.has(v.n);
+    box.checked = n > 0 && !fpVisitsOff.has(v.n);
+    box.disabled = n === 0;
+    if (!n) {
+      const all = inDates.filter((x) => x.visit.n === v.n);
+      const satShare = all.filter((x) => x.frame.saturated).length / all.length;
+      label.tabIndex = 0; // so keyboard users can reach the reason too
+      label.dataset.tip = satShare > 0.5
+        ? `The target is too bright to measure (saturated) in ${Math.round(100 * satShare)}% of this visit's images.`
+        : "The target couldn't be measured in any single image of this visit (too faint, or on unusable pixels).";
+    }
     box.addEventListener("change", () => {
       if (box.checked) fpVisitsOff.delete(v.n); else fpVisitsOff.add(v.n);
       renderFingerprint();
@@ -1198,7 +1209,7 @@ async function renderFingerprint() {
     nm.textContent = `Visit ${v.n}`;
     const count = document.createElement("small");
     count.className = "muted";
-    count.textContent = `${n} image${n === 1 ? "" : "s"}`;
+    count.textContent = n ? `${n} image${n === 1 ? "" : "s"}` : "none measured";
     head.append(nm, count);
     const sub = document.createElement("small");
     sub.className = "muted";
