@@ -69,7 +69,7 @@ Shared context for the whole team's agents: project descriptions, the demo pitch
 | Measured vs expected markers | SPHEREx position of the target vs catalog prediction for that date, with error circle | Yara T / Yara K | Done |
 | Verdict | One of six: moves as expected, moves unexpectedly, no motion, brightness changes, saturated, too faint | Yara T | Done |
 | Catalog overlays | Gaia, SIMBAD, VSX markers; "What am I looking at?" panel | Amna | Done for five targets |
-| Asteroid layer | Known asteroids on individual images | Amna | In progress (unblocked 2026-11-15) |
+| Asteroid layer | Known asteroids on individual images, as predicted by JPL (one request per window of at most 24 h; position at each frame from JPL's rates; brightness stored). Predictions, not detections; most are very faint (V mostly above 21) | Amna | Done for Epsilon Indi B, Barnard's Star, WISE 0855, RW Aurigae; R Draconis finishing |
 | Infrared fingerprint | Target brightness vs wavelength over reference spectra | Yara K / Amna | Built; thin for saturated or faint targets |
 | Every star in the field measured | `objects.json`: expected and measured positions per visit for every Gaia star G ≤ 17 | Yara T | Done, all five targets |
 | Scoreboard | "How accurate is this?": target motion vs catalog, target error bars, and every field star scored twice (does it move as Gaia predicts; is it where Gaia predicts, allowing for crowding), with crowded and uncrowded stars reported separately. Writes `data/scoreboard.json`: headline sentences for the site and a per-star label for the field-star hover text | Noor | Done (pushed); re-run whenever target files change |
