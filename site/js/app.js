@@ -54,7 +54,7 @@ const el = {
   infoPanel: $("info-panel"), infoBody: $("info-body"),
   brightnessView: $("brightness-view"), brightnessNote: $("brightness-note"),
   brightnessChart: $("brightness-chart"), brightnessTable: $("brightness-table"),
-  thumbsPanel: $("thumbs-panel"), thumbs: $("thumbs"), thumbsCount: $("thumbs-count"),
+  rail: $("visit-rail"), railList: $("rail-list"), railCount: $("rail-count"),
   intro: $("target-intro"), introBody: $("target-intro-body"), aboutToggle: $("about-toggle"),
   fieldChip: $("field-chip"), fieldSize: $("field-size"),
   fingerprint: $("fingerprint"), fpNote: $("fingerprint-note"), fpLegend: $("fingerprint-legend"),
@@ -63,7 +63,6 @@ const el = {
   timeRange: $("time-range"), timeOut: $("time-out"), dateFrom: $("date-from"), dateTo: $("date-to"),
   yearButtons: $("year-buttons"), wlRange: $("wl-range"), wlOut: $("wl-out"), wlPresets: $("wl-presets"),
   matchCount: $("match-count"), matchWarn: $("match-warn"),
-  flipbook: $("flipbook-controls"), visitStrip: $("visit-strip"), backToStack: $("back-to-stack"),
   pair: $("pair-controls"), pairHeading: $("pair-heading"), pickA: $("pick-a"), pickB: $("pick-b"),
   showA: $("show-a"), showB: $("show-b"),
   diffControls: $("diff-controls"), kSlider: $("k-slider"), kOut: $("k-out"),
@@ -353,8 +352,8 @@ async function render() {
   el.brightnessView.hidden = !brightness;
   el.label.hidden = brightness;
   if (!manifest) return;
-  if (brightness) { renderBrightness(); renderThumbs(); return; }
-  renderThumbs();
+  if (brightness) { renderBrightness(); renderRail(); return; }
+  renderRail();
   if (state.mode === "difference") return renderDifference();
 
   const item = currentItem();
@@ -501,12 +500,16 @@ function updateStrokes() {
 let lastScale = 0;
 function scale() {
   const W = el.viewport.clientWidth, H = el.viewport.clientHeight;
-  return (Math.min(W, H) / state.fov) * state.zoom; // 1x = whole field fits the viewer
+  const fit = Math.min(W, H) / state.fov;
+  // 1x = whole field fits the viewer, at a whole number of screen pixels per sky pixel
+  // so every sky pixel is drawn the same size (fast targets move only ~1 pixel).
+  return (fit >= 1 ? Math.floor(fit) : fit) * state.zoom;
 }
 
 function applyTransform() {
   if (!state.fov || el.viewport.hidden) return;
   const W = el.viewport.clientWidth, H = el.viewport.clientHeight;
+  clampView();
   const k = scale();
   el.stage.style.width = el.stage.style.height = `${state.fov}px`;
   el.stage.style.transform = `translate(${W / 2 - view.cx * k}px, ${H / 2 - view.cy * k}px) scale(${k})`;
@@ -515,9 +518,15 @@ function applyTransform() {
 }
 
 function centerOnTarget() { view.cx = view.cy = state.fov / 2; }
+/** No panning while the whole field fits (crosshair stays centered), and never past the field's edge. */
 function clampView() {
-  view.cx = Math.min(Math.max(view.cx, 0), state.fov);
-  view.cy = Math.min(Math.max(view.cy, 0), state.fov);
+  const k = scale(), S = state.fov;
+  const axis = (c, span) => {
+    const half = span / k / 2;
+    return !(half < S / 2) ? S / 2 : Math.min(Math.max(c, half), S - half);
+  };
+  view.cx = axis(view.cx, el.viewport.clientWidth);
+  view.cy = axis(view.cy, el.viewport.clientHeight);
 }
 
 /** Zoom to `z`, keeping the image point under viewport position (mx, my) fixed. */
@@ -553,8 +562,7 @@ function setupPanZoom() {
   vp.addEventListener("wheel", (e) => {
     if (!state.fov) return;
     e.preventDefault();
-    const p = local(e);
-    zoomAt(p.x, p.y, state.zoom * Math.exp(-e.deltaY * 0.0015));
+    zoomCenter(Math.exp(-e.deltaY * 0.0015));
   }, { passive: false });
 
   vp.addEventListener("pointerdown", (e) => {
@@ -575,7 +583,7 @@ function setupPanZoom() {
     if (tap) tap.moved = Math.max(tap.moved, Math.hypot(p.x - tap.x, p.y - tap.y));
     pointers.set(e.pointerId, p);
     const g = gesture();
-    if (last && last.dist && g.dist) zoomAt(g.x, g.y, state.zoom * (g.dist / last.dist));
+    if (last && last.dist && g.dist) zoomCenter(g.dist / last.dist);
     if (last && (last.dist == null) === (g.dist == null)) {
       const k = scale();
       view.cx -= (g.x - last.x) / k;
@@ -598,8 +606,7 @@ function setupPanZoom() {
   vp.addEventListener("pointerleave", (e) => { if (e.pointerType === "mouse" && !pointers.size) hideTooltip(); });
   vp.addEventListener("dblclick", (e) => {
     if (!state.fov || e.target.closest("button")) return;
-    const p = local(e);
-    zoomAt(p.x, p.y, state.zoom * 2);
+    zoomCenter(2);
   });
 
   new ResizeObserver(applyTransform).observe(vp);
@@ -690,7 +697,7 @@ function updateLabel(item) {
       fmtTime(f.time), `${fmtUm(f.wavelength_um)} µm`, `detector D${f.detector}`,
       f.bad_pixel_fraction != null ? `${(f.bad_pixel_fraction * 100).toFixed(1)}% bad pixels` : "",
     ],
-    link: url ? { href: url, text: "Download original FITS file from IRSA (about 65 MB)" } : null,
+    link: url ? { href: url, text: "Original FITS from IRSA (65 MB)" } : null,
     notes,
   });
 }
@@ -780,66 +787,156 @@ function openInfo(info) {
 function closeInfo() { el.infoPanel.hidden = true; }
 
 // ---------------------------------------------------------------- single-image thumbnails
-let thumbsSig = "";
-function renderThumbs() {
-  if (!manifest) { el.thumbsPanel.hidden = true; thumbsSig = ""; return; }
-  el.thumbsPanel.hidden = false;
-  // Rebuild only when something shown here changed (not on every blink tick).
-  const sig = JSON.stringify([state.target, state.fov, state.from, state.to, state.wl, state.mode, state.frame, state.a, state.b]);
-  if (sig === thumbsSig) return;
-  thumbsSig = sig;
-  el.thumbs.replaceChildren();
-  const total = allFrames().length;
-  const shown = filteredFrames();
-  el.thumbsCount.textContent = shown.length === total ? `${total} images` : `${shown.length} of ${total} images match the filters`;
-  for (const v of visits()) {
-    const frames = shown.filter((x) => x.visit.n === v.n);
-    const row = document.createElement("div");
-    row.className = "thumb-row";
-    const head = document.createElement("div");
-    head.className = "thumb-head";
-    head.textContent = `Visit ${v.n} · ${fmtDate(v.date_mid)}`;
-    row.append(head);
-    if (!frames.length) {
-      const none = document.createElement("div");
-      none.className = "muted small";
-      none.textContent = "No images in this range.";
-      row.append(none);
-    } else {
-      const strip = document.createElement("div");
-      strip.className = "thumb-strip";
-      for (const x of frames) {
-        const b = document.createElement("button");
-        b.type = "button";
-        b.className = "thumb";
-        b.title = `${fmtTime(x.frame.time)} · ${fmtUm(x.frame.wavelength_um)} µm · D${x.frame.detector}`;
-        b.setAttribute("aria-label", `Visit ${v.n}, image ${x.frame.i}, ${fmtUm(x.frame.wavelength_um)} micrometers`);
-        const current = state.mode === "flipbook" && state.frame === x.ref;
-        b.setAttribute("aria-pressed", String(current));
-        const img = document.createElement("img");
-        img.src = fovDir() + x.frame.image;
-        img.alt = "";
-        img.loading = "lazy";
-        const cap = document.createElement("span");
-        cap.textContent = `${fmtUm(x.frame.wavelength_um)} µm`;
-        b.append(img, cap);
-        if (state.mode === "blink" || state.mode === "difference") {
-          for (const [ref, tag] of [[state.a, "A"], [state.b, "B"]]) {
-            if (ref === x.ref) {
-              const t = document.createElement("span");
-              t.className = `ab ab-${tag.toLowerCase()} thumb-tag`;
-              t.textContent = tag;
-              b.append(t);
-            }
-          }
-        }
-        b.addEventListener("click", () => openFrame(x.ref));
-        strip.append(b);
-      }
-      row.append(strip);
-    }
-    el.thumbs.append(row);
+// ---------------------------------------------------------------- visit rail
+// Left of the image: one dropdown per visit (number + dates), holding its stack and its
+// single images stacked vertically. The image last clicked in the list gets a blue outline
+// (only a click sets it; playback doesn't move it).
+let railSig = "";
+const railOpen = new Set(); // visits that are open
+let railClicked = null;     // ref of the image last clicked in the list
+
+const railShownFrames = (v) => filteredFrames().filter((x) => x.visit.n === v.n);
+
+function railButton({ src, title, sub, ref, label, onClick }) {
+  const b = document.createElement("button");
+  b.type = "button";
+  b.className = "rail-item";
+  b.dataset.ref = ref;
+  b.setAttribute("aria-label", label);
+  const img = document.createElement("img");
+  img.src = src;
+  img.alt = "";
+  img.loading = "lazy";
+  const text = document.createElement("span");
+  text.className = "rail-text";
+  const t = document.createElement("span");
+  t.className = "rail-title";
+  t.textContent = title;
+  const s = document.createElement("span");
+  s.className = "rail-sub";
+  s.textContent = sub;
+  text.append(t, s);
+  b.append(img, text);
+  b.addEventListener("click", () => { railClicked = ref; onClick(); markRail(); });
+  return b;
+}
+
+/** Fill one visit's dropdown, only once it is opened (R Dra has ~2,600 single images). */
+function fillRailVisit(details, v) {
+  const body = details.querySelector(".rail-body");
+  if (body.childElementCount) return;
+  if (!state.wl && v.image) {
+    body.append(railButton({
+      src: fovDir() + v.image, ref: `v${v.n}`,
+      title: "Visit stack", sub: `${v.n_images} images combined`,
+      label: `Visit ${v.n} stack`,
+      onClick: () => openStack(v.n),
+    }));
   }
+  const frames = railShownFrames(v);
+  if (!frames.length) {
+    const none = document.createElement("p");
+    none.className = "muted small rail-none";
+    none.textContent = "No single images match the filters.";
+    body.append(none);
+  }
+  for (const x of frames) {
+    const f = x.frame;
+    body.append(railButton({
+      src: fovDir() + f.image, ref: x.ref,
+      title: `${fmtUm(f.wavelength_um)} µm · D${f.detector}`,
+      sub: fmtTime(f.time).replace(" UTC", ""),
+      label: `Visit ${v.n}, image ${f.i}, ${fmtUm(f.wavelength_um)} micrometers, detector ${f.detector}`,
+      onClick: () => openFrame(x.ref),
+    }));
+  }
+}
+
+function renderRail() {
+  if (!manifest) { el.rail.hidden = true; railSig = ""; return; }
+  el.rail.hidden = false;
+  // Rebuild only when the list itself changes; A/B tags and the outline are set in markRail.
+  const sig = JSON.stringify([state.target, state.fov, state.from, state.to, state.wl]);
+  if (sig !== railSig) {
+    railSig = sig;
+    // Start with the visit on screen open, so the list isn't all closed.
+    const cur = parseRef(railRefs().current || state.a);
+    if (!railOpen.size && cur) railOpen.add(cur.n);
+    el.railList.replaceChildren();
+    const total = allFrames().length;
+    const shown = filteredFrames().length;
+    el.railCount.textContent = shown === total ? `${total} single images` : `${shown} of ${total} single images`;
+    for (const v of visits()) {
+      const n = railShownFrames(v).length;
+      const nAll = (v.frames || []).length;
+      const d = document.createElement("details");
+      d.className = "rail-visit";
+      d.dataset.n = v.n;
+      if (state.wl ? !n : !visitPasses(v)) d.classList.add("rail-empty");
+      const s = document.createElement("summary");
+      const head = document.createElement("span");
+      head.className = "rail-vhead";
+      const name = document.createElement("span");
+      name.className = "rail-vname";
+      name.textContent = `Visit ${v.n}`;
+      const count = document.createElement("span");
+      count.className = "rail-vcount";
+      count.textContent = n === nAll ? `${nAll}` : `${n}/${nAll}`;
+      count.title = n === nAll ? `${nAll} single images` : `${n} of ${nAll} single images match the filters`;
+      head.append(name, count);
+      const dates = document.createElement("span");
+      dates.className = "rail-vdates";
+      dates.textContent = `${fmtDate(v.date_start)} – ${fmtDate(v.date_end)}`;
+      s.append(head, dates);
+      const body = document.createElement("div");
+      body.className = "rail-body";
+      d.append(s, body);
+      if (railOpen.has(v.n)) { d.open = true; fillRailVisit(d, v); }
+      d.addEventListener("toggle", () => {
+        if (d.open) { railOpen.add(v.n); fillRailVisit(d, v); markRail(); } else railOpen.delete(v.n);
+      });
+      el.railList.append(d);
+    }
+  }
+  markRail();
+}
+
+/** The ref on screen now, and the A/B picks. */
+function railRefs() {
+  if (state.mode === "flipbook") return { current: flipRef() };
+  if (state.mode === "blink") return { current: state.showB ? state.b : state.a, a: state.a, b: state.b };
+  if (state.mode === "difference") return { a: state.a, b: state.b };
+  return {};
+}
+
+function markRail() {
+  if (!manifest || el.rail.hidden) return;
+  const { a, b } = railRefs();
+  for (const it of el.railList.querySelectorAll(".rail-item")) {
+    const r = it.dataset.ref;
+    const on = r === railClicked;
+    it.classList.toggle("is-current", on);
+    if (on) it.setAttribute("aria-current", "true"); else it.removeAttribute("aria-current");
+    it.querySelector(".thumb-tag")?.remove();
+    for (const [ref, tag] of [[a, "A"], [b, "B"]]) {
+      if (!ref || ref !== r) continue;
+      const t = document.createElement("span");
+      t.className = `ab ab-${tag.toLowerCase()} thumb-tag`;
+      t.textContent = tag;
+      it.append(t);
+    }
+  }
+}
+
+/** Show a visit's stack in the flipbook. */
+function openStack(n) {
+  setPlaying(false);
+  state.mode = "flipbook";
+  state.frame = null;
+  state.visit = n;
+  normalizeSelection();
+  render();
+  scheduleUrl();
 }
 
 /** Show one single image in the main viewer (flipbook). */
@@ -1106,23 +1203,34 @@ const SUB_LEGENDS = {
   ],
 };
 
+/** One dropdown per layer group; closed, its heading shows how many of its layers are on. */
 function buildLayerControls() {
   el.layerList.replaceChildren();
-  let group = null;
+  let group = null, body = null;
   for (const L of LAYERS) {
     if (L.group !== group) {
       group = L.group;
       const G = LAYER_GROUPS.find((x) => x.key === group);
-      const head = document.createElement("div");
-      head.className = "layer-group";
-      head.textContent = G?.label || group;
+      const drop = document.createElement("details");
+      drop.className = "filter-drop layer-drop";
+      const head = document.createElement("summary");
+      head.className = "filter-head";
+      const name = document.createElement("span");
+      name.textContent = G?.label || group;
+      const on = document.createElement("output");
+      on.className = "muted";
+      on.dataset.onFor = group;
+      head.append(name, on);
+      body = document.createElement("div");
+      body.className = "filter-body layer-body";
       if (G?.note) {
-        const n = document.createElement("span");
-        n.className = "layer-group-note";
-        n.textContent = ` · ${G.note}`;
-        head.append(n);
+        const n = document.createElement("p");
+        n.className = "layer-group-note muted small";
+        n.textContent = G.note[0].toUpperCase() + G.note.slice(1);
+        body.append(n);
       }
-      el.layerList.append(head);
+      drop.append(head, body);
+      el.layerList.append(drop);
     }
     const label = document.createElement("label");
     label.className = "check layer";
@@ -1150,7 +1258,7 @@ function buildLayerControls() {
       text.append(n);
     }
     label.append(box, sw, text);
-    el.layerList.append(label);
+    body.append(label);
     if (SUB_LEGENDS[L.key]) {
       const legend = document.createElement("div");
       legend.className = "sub-legend muted";
@@ -1161,7 +1269,7 @@ function buildLayerControls() {
         row.append(text);
         legend.append(row);
       }
-      el.layerList.append(legend);
+      body.append(legend);
     }
   }
 }
@@ -1361,28 +1469,9 @@ function buildFieldControls() {
     b.addEventListener("click", () => { if (sz !== state.fov) openFov(sz, { ...currentOpts() }, ++loadToken); });
     el.fovButtons.append(b);
   }
-  el.visitStrip.replaceChildren();
-  for (const v of visits()) {
-    const b = document.createElement("button");
-    b.type = "button";
-    b.dataset.n = v.n;
-    const mid = new Date(`${v.date_mid}T00:00:00Z`);
-    b.innerHTML = `<span>Visit ${v.n}</span><small>${mid.toLocaleString("en-GB", { month: "short", year: "numeric", timeZone: "UTC" })}</small>`;
-    b.addEventListener("click", () => {
-      setPlaying(false);
-      if (state.wl) {
-        const first = filteredFrames().find((x) => x.visit.n === v.n);
-        if (first) state.frame = first.ref;
-      } else {
-        state.frame = null;
-      }
-      state.visit = v.n;
-      normalizeSelection();
-      render();
-      scheduleUrl();
-    });
-    el.visitStrip.append(b);
-  }
+  railSig = "";
+  railOpen.clear();
+  railClicked = null;
 }
 
 let pickersSig = "";
@@ -1436,17 +1525,8 @@ function syncUI() {
   el.modeNote.hidden = pairOk;
 
   const seqNow = sequence();
-  for (const b of el.visitStrip.querySelectorAll("button")) {
-    const n = +b.dataset.n;
-    b.setAttribute("aria-pressed", String(n === state.visit));
-    b.disabled = state.wl
-      ? !filteredFrames().some((x) => x.visit.n === n)
-      : !visits().some((v) => v.n === n && visitPasses(v));
-  }
   el.modeHint.textContent = modeHint();
   el.player.hidden = state.mode === "brightness";
-  el.flipbook.hidden = state.mode !== "flipbook";
-  el.backToStack.hidden = !(state.mode === "flipbook" && state.frame && !state.wl);
   el.pair.hidden = !(state.mode === "blink" || state.mode === "difference");
   el.pairHeading.textContent = state.mode === "difference" ? "Difference between" : "Blink between";
   el.showA.parentElement.hidden = state.mode !== "blink";
@@ -1472,6 +1552,11 @@ function syncUI() {
   el.displayNote.hidden = !el.displayNote.textContent;
 
   for (const box of el.layerList.querySelectorAll("input[data-layer]")) box.checked = state.layers.has(box.dataset.layer);
+  for (const o of el.layerList.querySelectorAll("[data-on-for]")) {
+    const keys = LAYERS.filter((L) => L.group === o.dataset.onFor).map((L) => L.key);
+    const n = keys.filter((k) => state.layers.has(k)).length;
+    o.textContent = n === keys.length ? (n === 1 ? "on" : "all on") : n === 0 ? "off" : `${n} of ${keys.length} on`;
+  }
   for (const c of el.layerList.querySelectorAll("[data-count-for]")) {
     const key = c.dataset.countFor;
     c.textContent = ["gaia", "simbad", "vsx", "asteroids"].includes(key) ? ` (${overlays.filter((o) => o.layer === key).length})`
@@ -1492,7 +1577,6 @@ function setupControls() {
   $("swap-ab").addEventListener("click", () => { [state.a, state.b] = [state.b, state.a]; state.k = null; render(); scheduleUrl(); });
   el.kSlider.addEventListener("input", () => { state.k = +el.kSlider.value; render(); });
   $("k-auto").addEventListener("click", () => { state.k = null; render(); });
-  el.backToStack.addEventListener("click", () => { setPlaying(false); state.frame = null; normalizeSelection(); render(); scheduleUrl(); });
   $("prev").addEventListener("click", () => { setPlaying(false); step(-1); });
   $("next").addEventListener("click", () => { setPlaying(false); step(1); });
   el.play.addEventListener("click", () => setPlaying(!state.playing));
@@ -1573,12 +1657,12 @@ function setupControls() {
 /** One line under the mode tabs saying what the current mode does. */
 function modeHint() {
   switch (state.mode) {
-    case "blink": return "Flips between two pictures, A and B (pick them below the image). Motion makes a dot jump.";
+    case "blink": return "Flips between two pictures, A and B, picked under the image. Motion makes a dot jump.";
     case "difference": return "Shows B − k × A. White = no change, blue = brighter in A, red = brighter in B. A moving object leaves a blue/red pair.";
     case "brightness": return "Charts the target's brightness over time. Pick one wavelength range under Filters first.";
     default:
       if (state.wl) return "Plays the single images in your wavelength range, from all visits, in time order.";
-      if (state.frame) return "Showing one single image. Step through this visit's images below, or go back to the visit stack.";
+      if (state.frame) return "Showing one single image. Step through this visit's images, or pick its visit stack in the list on the left.";
       return "Plays the visits in order, like a slideshow. Watch the center dot move against the crosshair.";
   }
 }
@@ -1643,7 +1727,8 @@ async function openTarget(key, opts = {}) {
   el.fieldInfo.textContent = "";
   el.label.replaceChildren();
   el.badge.hidden = true;
-  el.thumbsPanel.hidden = true;
+  el.rail.hidden = true;
+  railSig = "";
   syncUI();
 
   const sizes = await loadFields(key);

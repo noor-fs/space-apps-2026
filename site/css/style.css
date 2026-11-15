@@ -305,9 +305,6 @@ a { color: var(--accent); }
 .seg, .row { display: flex; flex-wrap: wrap; gap: 6px; }
 .seg button { flex: 1; }
 
-.visit-strip { display: grid; grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); gap: 6px; }
-.visit-strip button { display: flex; flex-direction: column; align-items: center; padding: 6px 4px; line-height: 1.2; }
-.visit-strip small { font-size: 12px; opacity: 0.8; }
 
 .pick { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
 .pick select {
@@ -787,11 +784,11 @@ button.verdict-chip:hover { border-color: var(--accent); }
 
 /* mode tabs */
 .mode-bar { margin-bottom: 10px; }
-.tabs { display: flex; gap: 4px; padding: 4px; background: var(--panel); border: 1px solid var(--border); border-radius: 10px; }
-.tabs button { flex: 1; border: none; background: transparent; padding: 8px 6px; font-weight: 600; border-radius: 7px; }
+.tabs { display: flex; gap: 3px; padding: 3px; background: var(--panel); border: 1px solid var(--border); border-radius: 10px; }
+.tabs button { flex: 1; border: none; background: transparent; padding: 3px 6px; font-size: 14px; font-weight: 600; border-radius: 7px; }
 .tabs button:hover:not(:disabled) { background: var(--panel-2); }
 .tabs button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
-.mode-hint { margin: 6px 2px 0; color: var(--muted); font-size: 14px; }
+.mode-hint { margin: 4px 2px 0; color: var(--muted); font-size: 14px; }
 .filter-chips { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 8px; }
 .filter-chip {
   padding: 3px 10px;
@@ -803,7 +800,7 @@ button.verdict-chip:hover { border-color: var(--accent); }
 }
 
 /* the image gets a bit less height now that tabs and the player sit around it */
-.viewport { max-height: calc(100vh - 330px); min-height: 300px; }
+.viewport { max-height: calc(100vh - 390px); min-height: 300px; }
 
 /* player bar under the image */
 .player {
@@ -811,16 +808,13 @@ button.verdict-chip:hover { border-color: var(--accent); }
   flex-direction: column;
   gap: 8px;
   margin-top: 8px;
-  padding: 10px 12px;
+  padding: 8px 10px;
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: var(--radius);
 }
 .player-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; }
 .player-label { font-size: 13px; color: var(--muted); }
-.player .visit-strip { display: flex; flex-wrap: wrap; gap: 6px; }
-.player .visit-strip button { flex-direction: row; gap: 6px; padding: 5px 10px; }
-.player .visit-strip small { font-size: 12px; }
 .player .pick { margin: 0; flex: 1 1 200px; min-width: 0; }
 .show-ab { display: inline-flex; gap: 6px; }
 .inline-slider { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; }
@@ -829,7 +823,12 @@ button.verdict-chip:hover { border-color: var(--accent); }
 .keys { margin-left: auto; }
 @media (max-width: 820px) { .keys { display: none; } }
 
-.image-label { margin-top: 8px; }
+.image-label {
+  min-height: 0;
+  margin: 0 0 8px;
+  padding: 6px 10px;
+  font-size: 14px;
+}
 .card-hint { margin: 0 0 4px; }
 
 /* settings: three collapsible groups */
@@ -877,3 +876,132 @@ button.verdict-chip:hover { border-color: var(--accent); }
   background: var(--warn);
   cursor: help;
 }
+
+/* ---------- viewer row: visit list | image (up to the settings column) ---------- */
+.viewer-row {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 12px;
+}
+.viewer-main { min-width: 0; }
+.viewer-main .player { margin-top: 8px; }
+
+/* The list is as tall as the image column and scrolls inside itself. */
+.visit-rail { position: relative; min-height: 300px; }
+.rail-inner {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.rail-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+}
+.rail-head h3 {
+  margin: 0;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.rail-list { flex: 1; min-height: 0; overflow-y: auto; padding: 4px 6px 8px; }
+
+.rail-visit > summary {
+  position: sticky;
+  top: -4px;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin: 4px 0 0;
+  padding: 6px 8px 6px 22px;
+  list-style: none;
+  cursor: pointer;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+.rail-visit > summary::-webkit-details-marker { display: none; }
+.rail-visit > summary::before {
+  content: "▸";
+  position: absolute;
+  left: 8px;
+  top: 6px;
+  color: var(--muted);
+}
+.rail-visit[open] > summary::before { content: "▾"; }
+.rail-visit > summary:hover { border-color: var(--accent); }
+.rail-vhead { display: flex; justify-content: space-between; gap: 6px; }
+.rail-vname { font-weight: 600; font-size: 14px; }
+.rail-vcount, .rail-vdates { color: var(--muted); font-size: 12px; }
+.rail-empty > summary { opacity: 0.5; }
+
+.rail-body { display: flex; flex-direction: column; gap: 3px; padding: 4px 0 2px; }
+.rail-none { margin: 4px 6px; }
+.rail-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 3px;
+  text-align: left;
+  background: transparent;
+  border: 2px solid transparent;
+  border-radius: 6px;
+}
+.rail-item:hover { background: var(--panel-2); border-color: var(--border); }
+.rail-item.is-current { border-color: var(--accent); background: #16233a; }
+.rail-item img {
+  flex: none;
+  width: 48px;
+  height: 48px;
+  image-rendering: pixelated;
+  background: #2a3346; /* no-data pixels */
+  border-radius: 3px;
+}
+.rail-text { display: flex; flex-direction: column; min-width: 0; line-height: 1.25; }
+.rail-title { font-size: 13px; }
+.rail-sub { font-size: 11.5px; color: var(--muted); }
+.rail-item .thumb-tag { top: 2px; right: 4px; }
+
+@media (max-width: 820px) {
+  .viewer-row { grid-template-columns: minmax(0, 1fr); }
+  .visit-rail { order: 2; height: 320px; }
+}
+
+/* ---------- filters: Date and Wavelength as dropdowns showing their current setting ---------- */
+.side-section .filter-drop { margin: 8px 0 0; border: 1px solid var(--border); border-radius: 6px; background: var(--panel-2); }
+.filter-drop > summary {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0;
+  padding: 6px 10px 6px 24px;
+  position: relative;
+  list-style: none;
+  cursor: pointer;
+}
+.filter-drop > summary::-webkit-details-marker { display: none; }
+.filter-drop > summary::before { content: "▸"; position: absolute; left: 10px; color: var(--muted); }
+.filter-drop[open] > summary::before { content: "▾"; }
+.filter-drop > summary output { margin-left: auto; text-align: right; }
+.filter-drop > summary:hover { color: var(--accent); }
+.filter-body { padding: 2px 10px 10px; }
+.filter-body .side-hint { margin: 8px 0 0; }
+.side-section .match-count { margin-top: 8px; }
+
+/* ---------- layers: one dropdown per group, same look as the filters ---------- */
+.layer-list { gap: 0; }
+.side-section .layer-drop { margin: 8px 0 0; border: 1px solid var(--border); border-radius: 6px; background: var(--panel-2); }
+.layer-body { display: flex; flex-direction: column; gap: 4px; }
+.layer-body .layer-group-note { margin: 0 0 2px; }

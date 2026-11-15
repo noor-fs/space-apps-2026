@@ -70,6 +70,22 @@
         <div id="filter-chips" class="filter-chips" hidden></div>
       </div>
 
+      <div class="viewer-row">
+      <!-- visits: one dropdown per visit, its stack and single images stacked vertically -->
+      <aside id="visit-rail" class="visit-rail" aria-label="Visits and single images" hidden>
+        <div class="rail-inner">
+          <div class="rail-head">
+            <h3>Visits</h3>
+            <span id="rail-count" class="muted small"></span>
+          </div>
+          <div id="rail-list" class="rail-list"></div>
+        </div>
+      </aside>
+
+      <div class="viewer-main">
+      <!-- what is on screen: visit/image, dates, wavelength; top-aligned with the visit list -->
+      <div id="image-label" class="image-label" aria-live="polite"></div>
+
       <!-- image view -->
       <div id="viewport" class="viewport" tabindex="0"
            aria-label="Image. Drag to pan, scroll or pinch to zoom.">
@@ -105,10 +121,15 @@
 
       <!-- player bar: everything that changes which picture is on screen -->
       <div id="player" class="player" hidden>
-        <div id="flipbook-controls" class="player-row">
-          <span class="player-label">Visit</span>
-          <div id="visit-strip" class="visit-strip" role="group" aria-label="Visits"></div>
-          <button id="back-to-stack" type="button" hidden>↩ Back to the visit stack</button>
+        <div id="playback-controls" class="player-row">
+          <button id="prev" type="button" title="Back (←)" aria-label="Step back">⏮</button>
+          <button id="play" type="button" class="primary" title="Play / pause (space)">▶ Play</button>
+          <button id="next" type="button" title="Forward (→)" aria-label="Step forward">⏭</button>
+          <label class="inline-slider">Speed
+            <input id="speed" type="range" min="0.5" max="8" step="0.5" value="2">
+            <span><output id="speed-out">2</output>/s</span>
+          </label>
+          <span class="keys muted small">Keys: ← → step · space play · + − zoom</span>
         </div>
         <div id="pair-controls" class="player-row" hidden>
           <span id="pair-heading" class="sr-only">Compare</span>
@@ -120,16 +141,6 @@
             <button id="show-b" type="button">Show B</button>
           </span>
         </div>
-        <div id="playback-controls" class="player-row">
-          <button id="prev" type="button" title="Back (←)" aria-label="Step back">⏮</button>
-          <button id="play" type="button" class="primary" title="Play / pause (space)">▶ Play</button>
-          <button id="next" type="button" title="Forward (→)" aria-label="Step forward">⏭</button>
-          <label class="inline-slider">Speed
-            <input id="speed" type="range" min="0.5" max="8" step="0.5" value="2">
-            <span><output id="speed-out">2</output>/s</span>
-          </label>
-          <span class="keys muted small">Keys: ← → step · space play · + − zoom</span>
-        </div>
         <div id="diff-controls" class="player-row" hidden>
           <label class="inline-slider" title="k scales A so stars that didn't change cancel out">k
             <input id="k-slider" type="range" min="0" max="3" step="0.001" value="1">
@@ -140,7 +151,8 @@
         </div>
       </div>
 
-      <div id="image-label" class="image-label" aria-live="polite"></div>
+      </div>
+      </div>
 
       <section id="info-panel" class="info-panel" aria-labelledby="info-heading" hidden>
         <div class="info-head">
@@ -148,15 +160,6 @@
           <button id="info-close" type="button" aria-label="Close">✕</button>
         </div>
         <div id="info-body"></div>
-      </section>
-
-      <section id="thumbs-panel" class="card" aria-labelledby="thumbs-heading" hidden>
-        <div class="card-head">
-          <h3 id="thumbs-heading">Single images</h3>
-          <span id="thumbs-count" class="muted"></span>
-        </div>
-        <p class="muted small card-hint">Each visit is made of these photos, one wavelength each. Click one to open it. Asteroids only show up here.</p>
-        <div id="thumbs"></div>
       </section>
 
 
@@ -172,30 +175,32 @@
     <!-- settings: three groups -->
     <aside id="controls" class="controls" aria-label="Settings" hidden>
       <details class="side-section" open>
-        <summary><h3 id="filters-heading">Filters</h3><span id="filters-summary" class="muted small"></span></summary>
-        <p class="muted small side-hint">Choose which pictures to use, by date and by wavelength.</p>
-        <div class="filter">
-          <div class="filter-head"><span>Time</span><output id="time-out" class="muted"></output></div>
-          <div id="time-range" class="dual"></div>
-          <div class="row dates">
-            <label>From <input id="date-from" type="date"></label>
-            <label>To <input id="date-to" type="date"></label>
+        <summary title="Choose which pictures to use, by date and by wavelength"><h3 id="filters-heading">Filters</h3><span id="filters-summary" class="muted small"></span></summary>
+        <details class="filter filter-drop">
+          <summary class="filter-head"><span>Date</span><output id="time-out" class="muted"></output></summary>
+          <div class="filter-body">
+            <div id="time-range" class="dual"></div>
+            <div class="row dates">
+              <label>From <input id="date-from" type="date"></label>
+              <label>To <input id="date-to" type="date"></label>
+            </div>
+            <div id="year-buttons" class="row chips"></div>
           </div>
-          <div id="year-buttons" class="row chips"></div>
-        </div>
-        <div class="filter">
-          <div class="filter-head"><span>Wavelength</span><output id="wl-out" class="muted"></output></div>
-          <div id="wl-range" class="dual"></div>
-          <div id="wl-presets" class="row chips"></div>
-          <p class="muted small side-hint">Compare photos at the same wavelength: objects look brighter or dimmer at different wavelengths. D1–D6 are the six detectors.</p>
-        </div>
+        </details>
+        <details class="filter filter-drop">
+          <summary class="filter-head"><span>Wavelength</span><output id="wl-out" class="muted"></output></summary>
+          <div class="filter-body">
+            <div id="wl-range" class="dual"></div>
+            <div id="wl-presets" class="row chips"></div>
+            <p class="muted small side-hint">Compare photos at the same wavelength: objects look brighter or dimmer at different wavelengths. D1–D6 are the six detectors.</p>
+          </div>
+        </details>
         <p id="match-count" class="match-count"></p>
         <p id="match-warn" class="note-line" hidden></p>
       </details>
 
       <details class="side-section" open>
-        <summary><h3>Layers</h3></summary>
-        <p class="muted small side-hint">Markers drawn on the image. Hover one for its name; click a star for details.</p>
+        <summary title="Markers drawn on the image. Hover one for its name; click a star for details."><h3>Layers</h3></summary>
         <div id="layer-list" class="layer-list"></div>
       </details>
 
