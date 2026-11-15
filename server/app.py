@@ -309,6 +309,15 @@ app = FastAPI(title="SPHEREx live lookup")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["GET"], allow_headers=["*"])
 
 
+@app.middleware("http")
+async def revalidate_data(request, call_next):
+    """Field files are replaced in place when the full build lands: browsers must check before reusing them."""
+    response = await call_next(request)
+    if request.url.path.startswith("/data/"):
+        response.headers["Cache-Control"] = "no-cache"
+    return response
+
+
 @app.get("/api/health")
 def health():
     with lock:

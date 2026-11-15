@@ -14,6 +14,13 @@ import { drawChart, drawTable } from "./charts.js";
 //  - overlays.json, explanations.json, credits.json and spectra/*.csv are taken per file.
 const REAL_DIR = "../data", FAKE_DIR = "../fake_data";
 const DATA_DIRS = [REAL_DIR, FAKE_DIR];
+// Live lookup: any other name or position is built on request by the server (server/app.py) and
+// served in the same layout as data/. Its keys start with "n_" (names) or "c_" (coordinates).
+const LIVE_SERVER = "https://34-121-237-4.sslip.io";
+const LIVE_DATA = `${LIVE_SERVER}/data`;
+const LIVE_POLL_MS = 10000; // the server pauses builds nobody has asked about for 5 minutes
+const isLiveKey = (key) => /^[nc]_/.test(key || "");
+const liveQueries = new Map(); // live key -> what the user typed (shown as its name, kept in the URL)
 const LARGEST_FIELD = 201; // used for coordinate search when a target has no fields.json yet
 const ZOOM_MIN = 1, ZOOM_MAX = 16;
 const DAY = 86400000;
@@ -112,7 +119,7 @@ const fieldsCache = new Map();
 function loadFields(key) {
   if (!fieldsCache.has(key)) {
     fieldsCache.set(key, (async () => {
-      for (const dir of DATA_DIRS) {
+      for (const dir of isLiveKey(key) ? [LIVE_DATA] : DATA_DIRS) {
         const r = await fetchFirst([`${dir}/${key}/fields.json`]);
         if (!r) continue;
         const j = await r.json().catch(() => null);
@@ -710,6 +717,11 @@ function showSearchMessage(text, kind = "warn") {
 }
 function hideSearchMessage() { el.searchMsg.hidden = true; }
 
+/** Name to show for a target: the five targets' names, else what the user typed for a live field. */
+function displayName(key) {
+  return targetByKey(key)?.name || liveQueries.get(key) || manifest?.name || key;
+}
+
 // ---------------------------------------------------------------- hover text and "What am I looking at?"
 function showTooltip(text, p) {
   el.tooltip.textContent = text;
@@ -963,8 +975,7 @@ async function renderFingerprint() {
  * Shown even before a target's images exist (then without the verdict).
  */
 function renderIntro() {
-  const t = targetByKey(state.target);
-  const name = t ? t.name : state.target;
+  const name = displayName(state.target);
   el.introTitle.textContent = `About ${explanations?.targets?.[state.target]?.title || name}`;
   renderTargetPanel(el.introBody, { key: state.target, manifest, explanations });
   el.intro.hidden = false;
@@ -1471,6 +1482,7 @@ function currentOpts() {
 }
 
 async function openTarget(key, opts = {}) {
+  if (live.key && live.key !== key) stopLive(true); // the user moved on from a field being built
   const token = ++loadToken;
   setPlaying(false);
   const t = targetByKey(key);
@@ -1483,7 +1495,7 @@ async function openTarget(key, opts = {}) {
   if (opts.layers) state.layers = new Set(opts.layers);
   for (const k of ["from", "to", "wl", "cmap", "color"]) if (k in opts) state[k] = opts[k];
   if (!("from" in opts)) state.from = state.to = null; // dates differ per target; keep wavelength and display choices
-  el.targetName.textContent = t ? t.name : key;
+  el.targetName.textContent = displayName(key);
   renderIntro();
   el.fieldInfo.textContent = "";
   el.label.replaceChildren();
@@ -1503,12 +1515,19 @@ async function openTarget(key, opts = {}) {
     el.brightnessView.hidden = true;
     clearCanvas(el.canvas); clearCanvas(el.flagsCanvas);
     el.overlay.innerHTML = "";
+    if (isLiveKey(key) && liveQueries.has(key)) {
+      // A shared link to a live field the server no longer has (or hasn't built yet): build it
+      showViewerMessage(`Building ${displayName(key)}…`);
+      writeUrl(opts.push);
+      if (live.key !== key) liveLookup(liveQueries.get(key));
+      return;
+    }
     showViewerMessage(`${t ? t.name : key} isn't processed yet.`);
     writeUrl(opts.push);
     return;
   }
   fields = sizes;
-  const ov = await loadOverlays(key); // one file covers all field sizes; missing -> no catalog markers
+  const ov = isLiveKey(key) ? [] : await loadOverlays(key); // live fields have no overlays.json
   if (token !== loadToken) return;
   overlays = ov;
   const fov = sizes.includes(+opts.fov) ? +opts.fov : sizes.includes(51) ? 51 : sizes[0];
@@ -1577,10 +1596,7 @@ async function search(text) {
   const named = findTargetByName(q);
   if (named) { hideSearchMessage(); return openTarget(named.key, { push: true }); }
   const c = parseCoords(q);
-  if (!c) {
-    showSearchMessage(`“${q}” isn't a target name or coordinates this site knows. Try “Barnard's Star”, “269.45 4.77” or “17h57m48s +04d46m”.`);
-    return;
-  }
+  if (!c) return liveLookup(q); // the server resolves names (Sesame, Gaia, CatWISE)
   for (const t of TARGETS) {
     const sizes = await loadFields(t.key);
     const big = sizes ? sizes[sizes.length - 1] : LARGEST_FIELD;
@@ -1594,13 +1610,103 @@ async function search(text) {
     showSearchMessage(`Opened the ${t.name} field (${fov} px). That position is at column ${col.toFixed(1)}, row ${row.toFixed(1)}.`, "info");
     return openTarget(t.key, { fov, push: true });
   }
-  showSearchMessage("This part of the sky isn't processed yet.");
+  return liveLookup(q);
+}
+
+// ---------------------------------------------------------------- live lookup
+// Ask the server to build the field, poll its status every 10 s while the user waits, open the
+// quick preview as soon as it exists, and offer the full build when it is done.
+const live = { key: null, timer: null, showedPreview: false };
+
+function stopLive(leave) {
+  clearTimeout(live.timer);
+  // Tell the server nobody here is waiting any more, so another search can run sooner
+  if (leave && live.key) fetch(`${LIVE_SERVER}/api/leave/${encodeURIComponent(live.key)}`).catch(() => {});
+  live.key = live.timer = null;
+}
+
+async function liveLookup(q) {
+  stopLive(true);
+  showSearchMessage(`Looking up “${q}”…`, "info");
+  let s;
+  try {
+    const r = await fetch(`${LIVE_SERVER}/api/lookup?q=${encodeURIComponent(q)}&size=51`);
+    const body = await r.json().catch(() => ({}));
+    if (r.status === 503) return showSearchMessage("The server is busy. Try again in a few minutes.");
+    if (!r.ok) return showSearchMessage(typeof body.detail === "string" ? body.detail : `“${q}” couldn't be looked up.`);
+    s = body;
+  } catch {
+    return showSearchMessage("Live lookup is unavailable right now. The five targets above still work.");
+  }
+  liveQueries.set(s.key, q);
+  Object.assign(live, { key: s.key, showedPreview: false });
+  if (!state.target) { // nothing open yet (a ?q= link): say what is being built
+    el.targetName.textContent = q;
+    showViewerMessage(`Building ${q}…`);
+  }
+  handleLiveStatus(s);
+}
+
+function liveStatusText(s) {
+  if (s.queue_position) return `“${liveQueries.get(s.key)}”: in line (${s.queue_position}). Another field is being built first.`;
+  const { done, total } = s.progress || {};
+  const count = total ? ` (${done} / ${total})` : "";
+  const which = s.files_ready ? "Showing the quick preview. Full build" : "Building a quick preview";
+  return `${which}: ${s.stage}${count}. A new field takes about 5–15 minutes.`;
+}
+
+function handleLiveStatus(s) {
+  if (s.key !== live.key) return;
+  const finished = s.stage === "done";
+  if (s.files_ready) fieldsCache.delete(s.key); // an earlier "not built yet" answer may be cached
+  if (s.files_ready && state.target !== s.key) {
+    live.showedPreview = !finished;
+    openTarget(s.key, { push: true });
+  } else if (s.files_ready && !manifest) {
+    // A shared link was waiting on this field ("Building …"): show it now
+    live.showedPreview = !finished;
+    openTarget(s.key);
+  }
+  if (finished) {
+    stopLive(false);
+    if (!live.showedPreview) return hideSearchMessage();
+    showSearchMessage("The full build is ready (all images). ", "info");
+    const load = document.createElement("button");
+    load.type = "button";
+    load.textContent = "Load it";
+    load.addEventListener("click", () => location.reload()); // the URL keeps the field; files are revalidated
+    el.searchMsg.append(load);
+    return;
+  }
+  if (s.error) {
+    stopLive(false);
+    return showSearchMessage(s.files_ready ? `Showing the quick preview; the full build failed: ${s.error}` : s.error);
+  }
+  showSearchMessage(liveStatusText(s), "info");
+  live.timer = setTimeout(pollLive, LIVE_POLL_MS);
+}
+
+async function pollLive() {
+  const key = live.key;
+  if (!key) return;
+  try {
+    const r = await fetch(`${LIVE_SERVER}/api/status/${encodeURIComponent(key)}`);
+    if (live.key !== key) return;
+    if (r.status === 404) { // the server restarted and forgot this build: ask again
+      stopLive(false);
+      return liveLookup(liveQueries.get(key));
+    }
+    handleLiveStatus(await r.json());
+  } catch {
+    if (live.key === key) live.timer = setTimeout(pollLive, LIVE_POLL_MS); // network hiccup: keep trying
+  }
 }
 
 // ---------------------------------------------------------------- URL state
 function writeUrl(push = false) {
   const p = new URLSearchParams();
   if (state.target) p.set("target", state.target);
+  if (liveQueries.has(state.target)) p.set("q", liveQueries.get(state.target)); // rebuilds the field if needed
   if (manifest) {
     p.set("fov", state.fov);
     if (state.mode !== "flipbook") p.set("mode", state.mode);
@@ -1632,6 +1738,9 @@ function openFromUrl() {
   const p = new URLSearchParams(location.search);
   const wl = /^(\d+(?:\.\d+)?)-(\d+(?:\.\d+)?)$/.exec(p.get("wl") || "");
   const date = (v) => (/^\d{4}-\d{2}-\d{2}$/.test(v || "") ? v : null);
+  // ?q=<name or coordinates> alone searches, so other sites can link to any position
+  if (p.get("q") && !p.get("target")) return search(p.get("q"));
+  if (p.get("q") && isLiveKey(p.get("target"))) liveQueries.set(p.get("target"), p.get("q"));
   openTarget(p.get("target") || TARGETS[0].key, {
     fov: p.get("fov"),
     mode: p.get("mode"),
