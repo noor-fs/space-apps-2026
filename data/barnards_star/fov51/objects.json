@@ -2,6 +2,11 @@
  "target_key": "barnards_star",
  "size_px": 51,
  "selection": "Gaia DR3 stars inside the field on 2026-01-01 with G <= 17, except the target and anything within 0.5 px of it",
+ "absolute_floor_px": [
+  0.092,
+  0.106
+ ],
+ "absolute_floor_from": "5 reference stars: RMS of each star's offset from Gaia, averaged over visits",
  "objects": [
   {
    "name": "Gaia DR3 4472836292758713216",
@@ -9,6 +14,9 @@
    "g_mag": 11.86,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [
+    "Gaia DR3 4472836082301521536"
+   ],
    "visits": [
     {
      "n": 1,
@@ -72,6 +80,9 @@
    "g_mag": 12.65,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [
+    "Gaia DR3 4472837770227461120"
+   ],
    "visits": [
     {
      "n": 1,
@@ -135,6 +146,7 @@
    "g_mag": 13.03,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [],
    "visits": [
     {
      "n": 1,
@@ -198,6 +210,9 @@
    "g_mag": 13.45,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [
+    "Gaia DR3 4472836254100210432"
+   ],
    "visits": [
     {
      "n": 1,
@@ -261,6 +276,9 @@
    "g_mag": 13.47,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [
+    "Gaia DR3 4472837491058324992"
+   ],
    "visits": [
     {
      "n": 1,
@@ -324,6 +342,9 @@
    "g_mag": 13.6,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [
+    "Gaia DR3 4472836254101179776"
+   ],
    "visits": [
     {
      "n": 1,
@@ -387,6 +408,9 @@
    "g_mag": 13.9,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [
+    "Gaia DR3 4472837765928741504"
+   ],
    "visits": [
     {
      "n": 1,
@@ -450,6 +474,10 @@
    "g_mag": 14.44,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [
+    "Gaia DR3 4472835846082110592",
+    "Gaia DR3 4472835846082111232"
+   ],
    "visits": [
     {
      "n": 1,
@@ -513,6 +541,9 @@
    "g_mag": 14.49,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [
+    "Gaia DR3 4472832886845548672"
+   ],
    "visits": [
     {
      "n": 1,
@@ -576,6 +607,12 @@
    "g_mag": 14.53,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [
+    "Gaia DR3 4472835846079323136",
+    "Gaia DR3 4472835846082110592",
+    "Gaia DR3 4472835846082110464",
+    "Gaia DR3 4472835841783094784"
+   ],
    "visits": [
     {
      "n": 1,
@@ -639,6 +676,7 @@
    "g_mag": 14.79,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [],
    "visits": [
     {
      "n": 1,
@@ -702,6 +740,10 @@
    "g_mag": 14.84,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [
+    "Gaia DR3 4472835910502613760",
+    "Gaia DR3 4472835914798806656"
+   ],
    "visits": [
     {
      "n": 1,
@@ -765,6 +807,9 @@
    "g_mag": 14.9,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [
+    "Gaia DR3 4472836361478194304"
+   ],
    "visits": [
     {
      "n": 1,
@@ -828,6 +873,9 @@
    "g_mag": 14.98,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [
+    "Gaia DR3 4472836013581937536"
+   ],
    "visits": [
     {
      "n": 1,
@@ -891,6 +939,9 @@
    "g_mag": 15.22,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [
+    "Gaia DR3 4472833062943295104"
+   ],
    "visits": [
     {
      "n": 1,
@@ -954,6 +1005,7 @@
    "g_mag": 15.43,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [],
    "visits": [
     {
      "n": 1,
@@ -1017,6 +1069,7 @@
    "g_mag": 15.46,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [],
    "visits": [
     {
      "n": 1,
@@ -1080,6 +1133,9 @@
    "g_mag": 15.46,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [
+    "Gaia DR3 4472836013589467392"
+   ],
    "visits": [
     {
      "n": 1,
@@ -1143,6 +1199,10 @@
    "g_mag": 15.47,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [
+    "Gaia DR3 4472837078733967232",
+    "Gaia DR3 4472837078740921344"
+   ],
    "visits": [
     {
      "n": 1,
@@ -1206,6 +1266,9 @@
    "g_mag": 15.56,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [
+    "Gaia DR3 4472832818126027008"
+   ],
    "visits": [
     {
      "n": 1,
@@ -1269,6 +1332,9 @@
    "g_mag": 15.57,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [
+    "Gaia DR3 4472836292758713216"
+   ],
    "visits": [
     {
      "n": 1,
@@ -1332,6 +1398,10 @@
    "g_mag": 15.57,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [
+    "Gaia DR3 4472835979222178176",
+    "Gaia DR3 4472835979222161920"
+   ],
    "visits": [
     {
      "n": 1,
@@ -1395,6 +1465,11 @@
    "g_mag": 15.81,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [
+    "Gaia DR3 4472837697209271680",
+    "Gaia DR3 4472837628489778688",
+    "Gaia DR3 4472837525410556800"
+   ],
    "visits": [
     {
      "n": 1,
@@ -1458,6 +1533,10 @@
    "g_mag": 15.82,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [
+    "Gaia DR3 4472837525410519680",
+    "Gaia DR3 4472837525410519808"
+   ],
    "visits": [
     {
      "n": 1,
@@ -1521,6 +1600,9 @@
    "g_mag": 15.87,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [
+    "Gaia DR3 4472836288459941504"
+   ],
    "visits": [
     {
      "n": 1,
@@ -1584,6 +1666,10 @@
    "g_mag": 15.94,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [
+    "Gaia DR3 4472835330686033920",
+    "Gaia DR3 4472835326386893568"
+   ],
    "visits": [
     {
      "n": 1,
@@ -1647,6 +1733,7 @@
    "g_mag": 16.09,
    "reference": true,
    "blended_with": [],
+   "crowded_by": [],
    "visits": [
     {
      "n": 1,
@@ -1710,6 +1797,7 @@
    "g_mag": 16.12,
    "reference": true,
    "blended_with": [],
+   "crowded_by": [],
    "visits": [
     {
      "n": 1,
@@ -1773,6 +1861,9 @@
    "g_mag": 16.16,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [
+    "Gaia DR3 4472836116661127424"
+   ],
    "visits": [
     {
      "n": 1,
@@ -1836,6 +1927,9 @@
    "g_mag": 16.21,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [
+    "Gaia DR3 4472832684986163456"
+   ],
    "visits": [
     {
      "n": 1,
@@ -1901,6 +1995,9 @@
    "blended_with": [
     "Gaia DR3 4472832753702824704"
    ],
+   "crowded_by": [
+    "Gaia DR3 4472832749406627840"
+   ],
    "visits": [
     {
      "n": 1,
@@ -1964,6 +2061,9 @@
    "g_mag": 16.3,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [
+    "Gaia DR3 4472832650626428032"
+   ],
    "visits": [
     {
      "n": 1,
@@ -2027,6 +2127,7 @@
    "g_mag": 16.31,
    "reference": true,
    "blended_with": [],
+   "crowded_by": [],
    "visits": [
     {
      "n": 1,
@@ -2090,6 +2191,10 @@
    "g_mag": 16.49,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [
+    "Gaia DR3 4472837770224681728",
+    "Gaia DR3 4472837770227463680"
+   ],
    "visits": [
     {
      "n": 1,
@@ -2153,6 +2258,11 @@
    "g_mag": 16.57,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [
+    "Gaia DR3 4472837770227461504",
+    "Gaia DR3 4472837765928733312",
+    "Gaia DR3 4472837765936093824"
+   ],
    "visits": [
     {
      "n": 1,
@@ -2216,6 +2326,11 @@
    "g_mag": 16.57,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [
+    "Gaia DR3 4472832955565130240",
+    "Gaia DR3 4472833024284607104",
+    "Gaia DR3 4472833024284597376"
+   ],
    "visits": [
     {
      "n": 1,
@@ -2279,6 +2394,10 @@
    "g_mag": 16.63,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [
+    "Gaia DR3 4472835914798805248",
+    "Gaia DR3 4472835910502642432"
+   ],
    "visits": [
     {
      "n": 1,
@@ -2342,6 +2461,7 @@
    "g_mag": 16.7,
    "reference": true,
    "blended_with": [],
+   "crowded_by": [],
    "visits": [
     {
      "n": 1,
@@ -2405,6 +2525,11 @@
    "g_mag": 16.7,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [
+    "Gaia DR3 4472835944862441856",
+    "Gaia DR3 4472835944862431360",
+    "Gaia DR3 4472835944862418816"
+   ],
    "visits": [
     {
      "n": 1,
@@ -2468,6 +2593,10 @@
    "g_mag": 16.71,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [
+    "Gaia DR3 4472833062943295616",
+    "Gaia DR3 4472833062943293952"
+   ],
    "visits": [
     {
      "n": 1,
@@ -2531,6 +2660,7 @@
    "g_mag": 16.71,
    "reference": true,
    "blended_with": [],
+   "crowded_by": [],
    "visits": [
     {
      "n": 1,
@@ -2594,6 +2724,11 @@
    "g_mag": 16.87,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [
+    "Gaia DR3 4472836013581948928",
+    "Gaia DR3 4472836013581937536",
+    "Gaia DR3 4472836013589421056"
+   ],
    "visits": [
     {
      "n": 1,
@@ -2657,6 +2792,9 @@
    "g_mag": 16.91,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [
+    "Gaia DR3 4472836082301451392"
+   ],
    "visits": [
     {
      "n": 1,
@@ -2720,6 +2858,9 @@
    "g_mag": 16.91,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [
+    "Gaia DR3 4472832886845574784"
+   ],
    "visits": [
     {
      "n": 1,
@@ -2783,6 +2924,9 @@
    "g_mag": 16.92,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [
+    "Gaia DR3 4472832989924898176"
+   ],
    "visits": [
     {
      "n": 1,
@@ -2846,6 +2990,11 @@
    "g_mag": 16.93,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [
+    "Gaia DR3 4472832478826129536",
+    "Gaia DR3 4472832478825961600",
+    "Gaia DR3 4472832474528634112"
+   ],
    "visits": [
     {
      "n": 1,
@@ -2909,6 +3058,9 @@
    "g_mag": 16.97,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [
+    "Gaia DR3 4472832646327322624"
+   ],
    "visits": [
     {
      "n": 1,
@@ -2972,6 +3124,9 @@
    "g_mag": 16.97,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [
+    "Gaia DR3 4472836327118455552"
+   ],
    "visits": [
     {
      "n": 1,

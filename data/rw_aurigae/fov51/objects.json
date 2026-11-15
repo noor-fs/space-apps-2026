@@ -2,6 +2,11 @@
  "target_key": "rw_aurigae",
  "size_px": 51,
  "selection": "Gaia DR3 stars inside the field on 2026-01-01 with G <= 17, except the target and anything within 0.5 px of it",
+ "absolute_floor_px": [
+  0.013,
+  0.019
+ ],
+ "absolute_floor_from": "7 reference stars: RMS of each star's offset from Gaia, averaged over visits",
  "objects": [
   {
    "name": "Gaia DR3 156429997483589120",
@@ -9,6 +14,7 @@
    "g_mag": 11.88,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [],
    "visits": [
     {
      "n": 1,
@@ -72,6 +78,9 @@
    "g_mag": 12.8,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [
+    "Gaia DR3 156430890833907584"
+   ],
    "visits": [
     {
      "n": 1,
@@ -135,6 +144,10 @@
    "g_mag": 14.65,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [
+    "Gaia DR3 156431264495200384",
+    "Gaia DR3 156431023977031936"
+   ],
    "visits": [
     {
      "n": 1,
@@ -198,6 +211,11 @@
    "g_mag": 14.66,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [
+    "Gaia DR3 156430886538071936",
+    "Gaia DR3 156430886538071552",
+    "Gaia DR3 156430890833907200"
+   ],
    "visits": [
     {
      "n": 1,
@@ -261,6 +279,9 @@
    "g_mag": 14.78,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [
+    "Gaia DR3 156430027546472192"
+   ],
    "visits": [
     {
      "n": 1,
@@ -324,6 +345,7 @@
    "g_mag": 14.8,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [],
    "visits": [
     {
      "n": 1,
@@ -387,6 +409,10 @@
    "g_mag": 14.85,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [
+    "Gaia DR3 156431028272833024",
+    "Gaia DR3 156431023977027840"
+   ],
    "visits": [
     {
      "n": 1,
@@ -450,6 +476,7 @@
    "g_mag": 14.87,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [],
    "visits": [
     {
      "n": 1,
@@ -513,6 +540,7 @@
    "g_mag": 15.26,
    "reference": true,
    "blended_with": [],
+   "crowded_by": [],
    "visits": [
     {
      "n": 1,
@@ -578,6 +606,9 @@
    "blended_with": [
     "Gaia DR3 156431127061992576"
    ],
+   "crowded_by": [
+    "Gaia DR3 156431127056988544"
+   ],
    "visits": [
     {
      "n": 1,
@@ -641,6 +672,9 @@
    "g_mag": 15.93,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [
+    "Gaia DR3 156430852178333952"
+   ],
    "visits": [
     {
      "n": 1,
@@ -704,6 +738,7 @@
    "g_mag": 16.01,
    "reference": true,
    "blended_with": [],
+   "crowded_by": [],
    "visits": [
     {
      "n": 1,
@@ -767,6 +802,11 @@
    "g_mag": 16.01,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [
+    "Gaia DR3 156430989619218048",
+    "Gaia DR3 156430989619209728",
+    "Gaia DR3 156430993914992640"
+   ],
    "visits": [
     {
      "n": 1,
@@ -830,6 +870,7 @@
    "g_mag": 16.03,
    "reference": true,
    "blended_with": [],
+   "crowded_by": [],
    "visits": [
     {
      "n": 1,
@@ -893,6 +934,9 @@
    "g_mag": 16.35,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [
+    "Gaia DR3 156430925195526400"
+   ],
    "visits": [
     {
      "n": 1,
@@ -956,6 +1000,9 @@
    "g_mag": 16.37,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [
+    "Gaia DR3 156430925195524224"
+   ],
    "visits": [
     {
      "n": 1,
@@ -1019,6 +1066,7 @@
    "g_mag": 16.39,
    "reference": true,
    "blended_with": [],
+   "crowded_by": [],
    "visits": [
     {
      "n": 1,
@@ -1082,6 +1130,7 @@
    "g_mag": 16.4,
    "reference": true,
    "blended_with": [],
+   "crowded_by": [],
    "visits": [
     {
      "n": 1,
@@ -1145,6 +1194,9 @@
    "g_mag": 16.46,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [
+    "Gaia DR3 156430955259463680"
+   ],
    "visits": [
     {
      "n": 1,
@@ -1208,6 +1260,9 @@
    "g_mag": 16.57,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [
+    "Gaia DR3 156429924467262208"
+   ],
    "visits": [
     {
      "n": 1,
@@ -1271,6 +1326,9 @@
    "g_mag": 16.61,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [
+    "Gaia DR3 156430611662088576"
+   ],
    "visits": [
     {
      "n": 1,
@@ -1334,6 +1392,7 @@
    "g_mag": 16.62,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [],
    "visits": [
     {
      "n": 1,
@@ -1397,6 +1456,10 @@
    "g_mag": 16.65,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [
+    "Gaia DR3 156430611662117632",
+    "Gaia DR3 156430611662114688"
+   ],
    "visits": [
     {
      "n": 1,
@@ -1460,6 +1523,9 @@
    "g_mag": 16.71,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [
+    "Gaia DR3 156336225463983488"
+   ],
    "visits": [
     {
      "n": 1,
@@ -1525,6 +1591,9 @@
    "blended_with": [
     "Gaia DR3 156336229754069504"
    ],
+   "crowded_by": [
+    "Gaia DR3 156336225461687168"
+   ],
    "visits": [
     {
      "n": 1,
@@ -1588,6 +1657,9 @@
    "g_mag": 16.75,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [
+    "Gaia DR3 156430130625707392"
+   ],
    "visits": [
     {
      "n": 1,
@@ -1652,6 +1724,10 @@
    "reference": false,
    "blended_with": [
     "Gaia DR3 156430611662100352"
+   ],
+   "crowded_by": [
+    "Gaia DR3 156430611662103168",
+    "Gaia DR3 156430611662103040"
    ],
    "visits": [
     {
@@ -1718,6 +1794,10 @@
    "blended_with": [
     "Gaia DR3 156430615957866368"
    ],
+   "crowded_by": [
+    "Gaia DR3 156430611662103168",
+    "Gaia DR3 156430611662103040"
+   ],
    "visits": [
     {
      "n": 1,
@@ -1781,6 +1861,9 @@
    "g_mag": 16.82,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [
+    "Gaia DR3 156429752668516736"
+   ],
    "visits": [
     {
      "n": 1,
@@ -1844,6 +1927,9 @@
    "g_mag": 16.83,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [
+    "Gaia DR3 156430096266501504"
+   ],
    "visits": [
     {
      "n": 1,
@@ -1907,6 +1993,7 @@
    "g_mag": 16.84,
    "reference": true,
    "blended_with": [],
+   "crowded_by": [],
    "visits": [
     {
      "n": 1,
@@ -1970,6 +2057,7 @@
    "g_mag": 16.86,
    "reference": true,
    "blended_with": [],
+   "crowded_by": [],
    "visits": [
     {
      "n": 1,
@@ -2036,6 +2124,7 @@
     "Gaia DR3 156431062632564352",
     "Gaia DR3 156431062632564096"
    ],
+   "crowded_by": [],
    "visits": [
     {
      "n": 1,

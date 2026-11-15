@@ -2,6 +2,11 @@
  "target_key": "wise_0855",
  "size_px": 51,
  "selection": "Gaia DR3 stars inside the field on 2026-01-01 with G <= 17, except the target and anything within 0.5 px of it",
+ "absolute_floor_px": [
+  0.036,
+  0.013
+ ],
+ "absolute_floor_from": "5 reference stars: RMS of each star's offset from Gaia, averaged over visits",
  "objects": [
   {
    "name": "Gaia DR3 5756955785394371328",
@@ -9,6 +14,9 @@
    "g_mag": 13.3,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [
+    "Gaia DR3 5756955781099740544"
+   ],
    "visits": [
     {
      "n": 1,
@@ -72,6 +80,7 @@
    "g_mag": 13.87,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [],
    "visits": [
     {
      "n": 1,
@@ -135,6 +144,7 @@
    "g_mag": 15.14,
    "reference": true,
    "blended_with": [],
+   "crowded_by": [],
    "visits": [
     {
      "n": 1,
@@ -198,6 +208,7 @@
    "g_mag": 15.34,
    "reference": true,
    "blended_with": [],
+   "crowded_by": [],
    "visits": [
     {
      "n": 1,
@@ -261,6 +272,7 @@
    "g_mag": 15.36,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [],
    "visits": [
     {
      "n": 1,
@@ -324,6 +336,7 @@
    "g_mag": 16.06,
    "reference": true,
    "blended_with": [],
+   "crowded_by": [],
    "visits": [
     {
      "n": 1,
@@ -387,6 +400,7 @@
    "g_mag": 16.31,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [],
    "visits": [
     {
      "n": 1,
@@ -450,6 +464,7 @@
    "g_mag": 16.35,
    "reference": true,
    "blended_with": [],
+   "crowded_by": [],
    "visits": [
     {
      "n": 1,
@@ -513,6 +528,9 @@
    "g_mag": 16.69,
    "reference": false,
    "blended_with": [],
+   "crowded_by": [
+    "Gaia DR3 5756955785394371328"
+   ],
    "visits": [
     {
      "n": 1,
@@ -576,6 +594,7 @@
    "g_mag": 16.93,
    "reference": true,
    "blended_with": [],
+   "crowded_by": [],
    "visits": [
     {
      "n": 1,
