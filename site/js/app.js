@@ -3,7 +3,7 @@ import { TARGETS, targetByKey, findTargetByName } from "./targets.js";
 import { skyToPx, inField, parseCoords, fieldArcmin } from "./sky.js";
 import { LAYERS, LAYER_GROUPS, DEFAULT_LAYERS, drawMarkers } from "./markers.js";
 import { tipText, renderInfo, renderEntry, renderTargetPanel, renderCredits, renderMethodology, renderVerdictPopup, safeUrl,
-  fieldVerdict, renderFieldPopup, renderAccuracy } from "./panel.js";
+  fieldVerdict, renderFieldPopup, renderAccuracy, renderLimits, renderWelcome } from "./panel.js";
 import { loadF32, autoRange, drawData, COLORMAP_NAMES, defaultK, difference, diffLimit, drawDifference } from "./render.js";
 import { drawChart, drawTable } from "./charts.js";
 
@@ -1052,9 +1052,9 @@ function openAbout(which, { section = null } = {}) {
     renderAccuracy(el.aboutBody, scoreboard, { explanations, liveName: manifest && !covered ? manifest.name || displayName(state.target) : null });
   }
   else if (which === "credits") renderCredits(el.aboutBody, credits);
-  else if (which === "limits") renderEntry(el.aboutBody, explanations?.about?.limits, "What this tool can't tell you");
+  else if (which === "limits") renderLimits(el.aboutBody, explanations);
   else if (which === "methodology") renderMethodology(el.aboutBody, explanations);
-  else if (which === "how") renderEntry(el.aboutBody, explanations?.about?.how_it_works, "How this works");
+  else if (which === "how") renderWelcome(el.aboutBody, explanations, scoreboard);
   else renderEntry(el.aboutBody, explanations?.about?.[which], which.replace(/_/g, " "));
   el.aboutBody.dataset.view = which;
   if (backTo && which !== backTo) {
@@ -1514,6 +1514,7 @@ function setupControls() {
   for (const b of document.querySelectorAll("[data-dialog]")) b.addEventListener("click", () => openAbout(b.dataset.dialog));
   el.verdictChip.addEventListener("click", () => openAbout("verdict"));
   el.fieldChip.addEventListener("click", () => openAbout("field"));
+  el.aboutBody.addEventListener("click", (e) => { if (e.target.closest("[data-close-dialog]")) el.aboutDialog.close(); });
   el.aboutToggle.addEventListener("click", () => setIntroOpen(el.intro.hidden));
   // Target names in the "How accurate?" table open that target.
   el.aboutBody.addEventListener("click", (e) => {
@@ -1913,8 +1914,16 @@ function openFromUrl() {
 }
 
 // ---------------------------------------------------------------- start
-fetchJSONFirst("explanations.json").then((j) => { explanations = j || {}; renderTargetInfo(); }).catch(() => {});
-fetchJSONFirst("scoreboard.json").then((s) => { scoreboard = s; }).catch(() => {});
+const explanationsReady = fetchJSONFirst("explanations.json").then((j) => { explanations = j || {}; renderTargetInfo(); }).catch(() => {});
+const scoreboardReady = fetchJSONFirst("scoreboard.json").then((s) => { scoreboard = s; }).catch(() => {});
+// Welcome popup on a first visit (remembered per browser), or whenever the URL has ?welcome.
+Promise.all([explanationsReady, scoreboardReady]).then(() => {
+  let seen = false;
+  try { seen = localStorage.getItem("spx_welcome_seen") === "1"; } catch { /* storage blocked: show it */ }
+  if (seen && !new URLSearchParams(location.search).has("welcome")) return;
+  if (!el.aboutDialog.open) openAbout("how");
+  try { localStorage.setItem("spx_welcome_seen", "1"); } catch { /* fine */ }
+});
 fetchJSONFirst("credits.json").then((j) => { credits = Array.isArray(j) ? j : []; }).catch(() => {});
 buildLayerControls();
 buildTargetButtons();

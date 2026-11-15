@@ -230,21 +230,81 @@ export function renderVerdict(container, manifest, explanations) {
 
 /** "How we measure" dialog: the method text split into titled sections. */
 export function renderMethodology(container, explanations) {
+  renderSectioned(container, explanations?.about?.methodology, "How we measure", "doc-method");
+}
+
+/** "Limits" dialog: the same titled cards, with warm titles (these are caveats). */
+export function renderLimits(container, explanations) {
+  renderSectioned(container, explanations?.about?.limits, "What this tool can't tell you", "doc-limits");
+}
+
+/** A text split into titled sections (methodSections), each shown as a card. */
+function renderSectioned(container, entry, fallbackTitle, tone) {
   container.replaceChildren();
-  const entry = explanations?.about?.methodology;
-  container.append(h("h3", { class: "entry-title" }, entry?.title || "How we measure"));
+  container.append(h("h3", { class: "entry-title" }, entry?.title || fallbackTitle));
   if (!entry?.text) {
     container.append(h("p", { class: "muted" }, "This text hasn't been written yet."));
     return;
   }
+  const wrap = h("div", { class: `doc-cards ${tone}` });
   for (const sec of methodSections(entry.text)) {
-    const div = h("section", { class: "method-section" });
-    if (sec.title) div.append(h("h4", {}, sec.title));
-    div.append(h("p", {}, sec.body.join(" ")));
-    container.append(div);
+    if (!sec.title) { wrap.append(h("p", { class: "doc-lead" }, sec.body.join(" "))); continue; }
+    wrap.append(h("section", { class: "doc-card method-section" }, h("h4", {}, sec.title), h("p", {}, sec.body.join(" "))));
   }
+  container.append(wrap);
   const src = sourcesLine(entry.sources);
   if (src) container.append(src);
+}
+
+/**
+ * Welcome popup (shown on a first visit, and from "How it works"): what the tool is for, what it
+ * does, and the accuracy numbers from the scoreboard, computed here so they never go stale.
+ */
+export function renderWelcome(container, explanations, board) {
+  container.replaceChildren();
+  const entry = explanations?.about?.how_it_works;
+  container.append(h("p", { class: "welcome-kicker" }, "SPHEREx Motion Viewer"));
+  container.append(h("h3", { class: "entry-title welcome-title" }, entry?.title || "How this works"));
+  if (entry?.text) container.append(h("p", { class: "welcome-lead" }, entry.text));
+
+  const stats = welcomeStats(board);
+  if (stats.length) {
+    container.append(h("div", { class: "welcome-stats" }, ...stats.map((s) =>
+      h("div", { class: "welcome-stat" }, h("strong", {}, s.value), h("span", {}, s.label)))));
+  }
+  if (entry?.cards?.length) {
+    container.append(h("div", { class: "welcome-cards" }, ...entry.cards.map((c, i) =>
+      h("div", { class: "welcome-card" }, h("span", { class: "welcome-step" }, String(i + 1)),
+        h("h4", {}, c.title), h("p", {}, c.text)))));
+  }
+  container.append(h("div", { class: "welcome-actions" },
+    h("button", { type: "button", class: "primary", "data-close-dialog": "" }, "Start exploring"),
+    h("a", { href: "#", class: "about-link", "data-about": "accuracy" }, "How accurate is it?"),
+    h("a", { href: "#", class: "about-link", "data-about": "methodology" }, "How we measure")));
+  const src = sourcesLine(entry?.sources);
+  if (src) container.append(src);
+}
+
+/** The headline numbers for the welcome popup, from scoreboard.json. */
+function welcomeStats(board) {
+  const targets = board?.targets || [];
+  const out = [];
+  const measurable = targets.filter((t) => t.motion && t.motion.agreement !== "not_measurable");
+  if (measurable.length) {
+    const agree = measurable.filter((t) => t.motion.agreement === "agrees").length;
+    out.push({ value: `${agree} of ${measurable.length}`, label: "measurable targets move as the catalogs predict" });
+  }
+  let agree = 0, n = 0;
+  for (const t of targets) {
+    if (!t.field_stars?.in_pooled_totals) continue;
+    const c = t.field_stars.motion_test?.agreement_counts || {};
+    agree += c.agrees || 0;
+    n += (c.agrees || 0) + (c.tension || 0) + (c.disagrees || 0);
+  }
+  if (n) out.push({ value: `${agree} of ${n}`, label: "Gaia stars the tool was never tuned on move as Gaia predicts" });
+  const p = board?.summary?.field_stars_motion;
+  if (p?.n) out.push({ value: pctText(p.within_2sigma), label: "of their measurements fall within 2 error bars (honest: 95%)" });
+  return out;
 }
 
 /** Popup the verdict chip opens: the verdict block under the target's name. */
@@ -289,13 +349,13 @@ export function renderCredits(container, credits) {
     container.append(h("p", { class: "muted" }, "Credits haven't been added yet."));
     return;
   }
-  const list = h("ul", { class: "credits" });
+  const list = h("ul", { class: "credits doc-cards" });
   for (const c of credits) {
     const url = safeUrl(c.url);
-    list.append(h("li", {},
-      h("strong", {}, c.what || ""),
+    list.append(h("li", { class: "doc-card" },
+      h("h4", {}, c.what || ""),
       h("p", {}, c.text || ""),
-      url ? h("a", { href: url, target: "_blank", rel: "noopener" }, url) : null));
+      url ? h("a", { href: url, target: "_blank", rel: "noopener", class: "small" }, url) : null));
   }
   container.append(list);
 }
