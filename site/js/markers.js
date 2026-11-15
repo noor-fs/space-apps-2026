@@ -9,21 +9,21 @@ const NS = "http://www.w3.org/2000/svg";
 export const LAYER_GROUPS = [
   { key: "target", label: "Target", note: "the object at the center" },
   { key: "field", label: "Measured vs expected", note: "SPHEREx vs Gaia" },
-  { key: "catalogs", label: "Known objects", note: "type (source)" },
+  { key: "catalogs", label: "Known objects", note: "catalog positions, not measured" },
   { key: "quality", label: "Image quality" },
 ];
 export const LAYERS = [
   { key: "measured", group: "target", label: "Measured position (SPHEREx)", swatch: "measured" },
   { key: "expected", group: "target", label: "Expected position (catalog)", swatch: "expected" },
   { key: "path", group: "target", label: "Path over visits", swatch: "path" },
-  { key: "field_stars", group: "field", label: "Field stars", swatch: "field_stars", note: "visit stacks only" },
+  { key: "field_stars", group: "field", label: "Field stars", swatch: "field_stars", note: "Gaia G < 17, visit stacks only" },
   { key: "gaia", group: "catalogs", label: "Stars (Gaia)", swatch: "gaia" },
   { key: "simbad", group: "catalogs", label: "Objects (SIMBAD)", swatch: "simbad" },
   { key: "vsx", group: "catalogs", label: "Variable stars (VSX)", swatch: "vsx" },
   { key: "asteroids", group: "catalogs", label: "Asteroids (JPL)", swatch: "asteroids", note: "single images only" },
   { key: "flags", group: "quality", label: "Quality flags", swatch: "flags", note: "single images only" },
 ];
-export const DEFAULT_LAYERS = ["measured", "expected", "path", "field_stars", "gaia", "simbad", "vsx", "asteroids"];
+export const DEFAULT_LAYERS = ["measured", "expected", "path", "field_stars", "simbad", "vsx", "asteroids"];
 
 function svg(tag, attrs, parent) {
   const e = document.createElementNS(NS, tag);

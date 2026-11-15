@@ -124,17 +124,41 @@ export function drawChart(container, opts) {
   return svg;
 }
 
-/** Simple table view of the same numbers (accessibility). */
-export function drawTable(container, headers, rows) {
+/** Simple table view of the same numbers (accessibility). With pageSize, shows that many rows per page. */
+export function drawTable(container, headers, rows, { pageSize = 0 } = {}) {
   container.replaceChildren();
   const table = document.createElement("table");
   table.className = "data-table";
   const tr = table.createTHead().insertRow();
   for (const h of headers) { const th = document.createElement("th"); th.textContent = h; tr.append(th); }
   const body = table.createTBody();
-  for (const r of rows) {
-    const row = body.insertRow();
-    for (const c of r) row.insertCell().textContent = c;
-  }
+  const size = pageSize > 0 ? pageSize : rows.length || 1;
+  const pages = Math.max(1, Math.ceil(rows.length / size));
+  let page = 0;
+  const nav = document.createElement("div");
+  nav.className = "table-pager";
+  const prev = document.createElement("button");
+  prev.type = "button";
+  prev.textContent = "← Previous";
+  const info = document.createElement("span");
+  info.className = "muted";
+  const next = document.createElement("button");
+  next.type = "button";
+  next.textContent = "Next →";
+  nav.append(prev, info, next);
+  const fill = () => {
+    body.replaceChildren();
+    for (const r of rows.slice(page * size, (page + 1) * size)) {
+      const row = body.insertRow();
+      for (const c of r) row.insertCell().textContent = c;
+    }
+    info.textContent = `Rows ${rows.length ? page * size + 1 : 0}–${Math.min((page + 1) * size, rows.length)} of ${rows.length}`;
+    prev.disabled = page === 0;
+    next.disabled = page >= pages - 1;
+  };
+  prev.addEventListener("click", () => { page = Math.max(0, page - 1); fill(); });
+  next.addEventListener("click", () => { page = Math.min(pages - 1, page + 1); fill(); });
+  fill();
+  if (pages > 1) container.append(nav); // above the table, so the page buttons are always in view
   container.append(table);
 }

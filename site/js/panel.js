@@ -437,6 +437,14 @@ export function renderInfo(body, info, explanations, manifest) {
   if (typeof o.g_mag === "number") chips.append(h("span", { class: "muted small" }, `G ${fmt(o.g_mag, 1)}`));
   body.append(chips);
 
+  // A catalog-only marker says so, unless it's the target itself (near the field center).
+  const half = (manifest?.grid?.size_px ?? 0) / 2;
+  const nearCenter = Array.isArray(info.px) && half > 0 && Math.hypot(info.px[0] - half, info.px[1] - half) <= 3;
+  if (!fs && !nearCenter && o.layer !== "asteroids") {
+    body.append(h("p", { class: "small muted" },
+      "Catalog position only: SPHEREx doesn't measure this object. We measure the target and the Gaia stars brighter than G = 17."));
+  }
+
   // ---- SPHEREx vs Gaia: the result first, in a box colored like the marker
   if (fs) {
     const visitDates = new Map((manifest?.visits || []).map((v) => [v.n, v.date_mid]));
@@ -516,8 +524,10 @@ export function fieldVerdict(entry) {
   const n = agree + tension + off;
   const base = { agree, tension, off, n };
   if (fs.in_pooled_totals === false) {
+    const floor = Math.max(...(fs.absolute_floor_px || []).filter((x) => typeof x === "number"));
+    const shift = Number.isFinite(floor) ? ` (by about ${fmt(floor)} pixel here; we allow at most 0.25)` : "";
     return { ...base, state: "glow", title: "Too bright to check",
-      sentence: "The target is so bright that its glow covers the field, so these stars aren't a fair test. They are shown, but left out of the overall totals." };
+      sentence: `The target is so bright that its glow shifts where the other stars appear to sit${shift}, so these stars aren't a fair test. They are shown, but left out of the overall totals.` };
   }
   if (n === 0) return { ...base, state: "none", title: "No stars to check", sentence: "No Gaia star in this field could be tested." };
   if (n < 3) {
@@ -588,7 +598,7 @@ export function renderFieldVerdict(container, entry) {
   container.append(h("div", { class: "verdict-head" },
     h("span", { class: "verdict-kind kind-field" }, "Field"),
     h("span", { class: `chip field-${fv.state}` }, fv.title)));
-  container.append(h("p", {}, "Every Gaia star in the field (down to magnitude G = 17) is measured the same way as the target, and we check that it moves the way Gaia predicts. The tool was never tuned on these stars, so they are an independent test. ", fv.sentence));
+  container.append(h("p", {}, "Every Gaia star in the field brighter than magnitude G = 17 is measured the same way as the target, and we check that it moves the way Gaia predicts. The tool was never tuned on these stars, so they are an independent test. ", fv.sentence));
 
   const ev = h("div", { class: "evidence" }, h("h4", {}, "Evidence"));
   if (fs) {
@@ -600,7 +610,15 @@ export function renderFieldVerdict(container, entry) {
       c.blended ? `${c.blended} merged with a neighbor` : null,
       c.too_few_visits ? `${c.too_few_visits} seen in too few visits` : null,
     ].filter(Boolean);
-    if (others.length) ev.append(h("p", { class: "small muted" }, `Not counted: ${others.join(", ")}.`));
+    // Which stars these are: the image shows many more catalog markers than are measured.
+    if (c.in_file) {
+      ev.append(h("p", { class: "small" },
+        `Measured: ${c.in_file} Gaia star${c.in_file === 1 ? "" : "s"} brighter than G = 17 in this field, ${fv.n || "none"} tested`,
+        others.length ? ` (not tested: ${others.join(", ")})` : "",
+        ". The other markers on the image are catalog positions only; SPHEREx doesn't measure them."));
+    } else if (others.length) {
+      ev.append(h("p", { class: "small muted" }, `Not counted: ${others.join(", ")}.`));
+    }
     const pulls = fs.motion_test?.pulls;
     if (pulls?.n) {
       ev.append(h("p", { class: "evidence-sub muted small" }, "Are the error bars honest? Share of these stars' measurements within their error bars:"));

@@ -42,10 +42,13 @@
           <button type="button" id="about-toggle" class="about-toggle" aria-expanded="false" aria-controls="target-intro"
                   title="What this object is, and why each verdict was given" hidden><span class="about-icon" aria-hidden="true">i</span>Details</button>
         </div>
-        <!-- only shown when a target has more than one field size -->
-        <div id="field-size" class="field-size" title="How much sky the image covers (not zoom)" hidden>
-          <span class="muted small">Field</span>
-          <div id="fov-buttons" class="seg seg-small" role="group" aria-label="Field size"></div>
+        <div class="title-side">
+          <!-- only shown when a target has more than one field size -->
+          <div id="field-size" class="field-size" title="How much sky the image covers (not zoom)" hidden>
+            <span class="muted small">Field</span>
+            <div id="fov-buttons" class="seg seg-small" role="group" aria-label="Field size"></div>
+          </div>
+          <button type="button" id="fp-jump" class="jump-btn" title="Jump to the infrared fingerprint: this object's brightness across wavelengths" hidden><svg class="fp-icon" viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><path d="M2 16 L5 12.5 L7 14 L9.5 5 L11.5 13 L13.5 9 L15.5 11 L18 3.5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" stroke-linecap="round"/></svg>Infrared fingerprint <span aria-hidden="true">↓</span></button>
         </div>
       </div>
 
@@ -163,12 +166,21 @@
       </section>
 
 
-      <details id="fingerprint" class="card fingerprint">
-        <summary><h3>Infrared fingerprint</h3> <span class="muted">brightness against wavelength, compared with reference shapes</span></summary>
-        <p id="fingerprint-note" class="muted small"></p>
-        <div id="fingerprint-legend" class="legend" role="group" aria-label="Reference spectra"></div>
+      <details id="fingerprint" class="card fingerprint" open>
+        <summary class="fp-summary">
+          <span class="fp-badge"><svg class="fp-icon" viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><path d="M2 16 L5 12.5 L7 14 L9.5 5 L11.5 13 L13.5 9 L15.5 11 L18 3.5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" stroke-linecap="round"/></svg></span>
+          <span class="fp-heading"><h3 class="fp-title">Infrared fingerprint</h3>
+            <span class="fp-subtitle">This object's brightness across wavelengths</span></span>
+        </summary>
+        <p id="fingerprint-meaning" class="fp-meaning"></p>
+        <div id="fingerprint-result" class="fp-result" role="status" hidden></div>
+        <div id="fingerprint-legend" class="fp-legend" role="group" aria-label="Visits and example spectra"></div>
+        <div id="fp-view-bar" class="fp-view-bar" hidden>
+          <button type="button" id="fp-view-toggle" class="fp-view-btn" aria-pressed="false">Show as a table</button>
+        </div>
         <div id="fingerprint-chart" class="chart-box"></div>
-        <details class="table-toggle"><summary>Show as a table</summary><div id="fingerprint-table"></div></details>
+        <div id="fingerprint-table" class="fp-table" hidden></div>
+        <p id="fingerprint-note" class="muted small"></p>
       </details>
     </section>
 
@@ -200,7 +212,8 @@
       </details>
 
       <details class="side-section" open>
-        <summary title="Markers drawn on the image. Hover one for its name; click a star for details."><h3>Layers</h3></summary>
+        <summary><h3>Layers</h3></summary>
+        <p class="muted small side-hint">Select which markers show up on the viewer. Click a marker to learn more about it.</p>
         <div id="layer-list" class="layer-list"></div>
       </details>
 

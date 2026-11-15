@@ -58,7 +58,9 @@ const el = {
   intro: $("target-intro"), introBody: $("target-intro-body"), aboutToggle: $("about-toggle"),
   fieldChip: $("field-chip"), fieldSize: $("field-size"),
   fingerprint: $("fingerprint"), fpNote: $("fingerprint-note"), fpLegend: $("fingerprint-legend"),
-  fpChart: $("fingerprint-chart"), fpTable: $("fingerprint-table"),
+  fpChart: $("fingerprint-chart"), fpTable: $("fingerprint-table"), fpResult: $("fingerprint-result"),
+  fpJump: $("fp-jump"), fpMeaning: $("fingerprint-meaning"), fpViewBar: $("fp-view-bar"),
+  fpViewToggle: $("fp-view-toggle"),
   controls: $("controls"), fovButtons: $("fov-buttons"), modeButtons: $("mode-buttons"), modeNote: $("mode-note"),
   timeRange: $("time-range"), timeOut: $("time-out"), dateFrom: $("date-from"), dateTo: $("date-to"),
   yearButtons: $("year-buttons"), wlRange: $("wl-range"), wlOut: $("wl-out"), wlPresets: $("wl-presets"),
@@ -786,7 +788,6 @@ function openInfo(info) {
 }
 function closeInfo() { el.infoPanel.hidden = true; }
 
-// ---------------------------------------------------------------- single-image thumbnails
 // ---------------------------------------------------------------- visit rail
 // Left of the image: one dropdown per visit (number + dates), holding its stack and its
 // single images stacked vertically. The image last clicked in the list gets a blue outline
@@ -859,9 +860,6 @@ function renderRail() {
   const sig = JSON.stringify([state.target, state.fov, state.from, state.to, state.wl]);
   if (sig !== railSig) {
     railSig = sig;
-    // Start with the visit on screen open, so the list isn't all closed.
-    const cur = parseRef(railRefs().current || state.a);
-    if (!railOpen.size && cur) railOpen.add(cur.n);
     el.railList.replaceChildren();
     const total = allFrames().length;
     const shown = filteredFrames().length;
@@ -940,7 +938,7 @@ function openStack(n) {
 }
 
 /** Show one single image in the main viewer (flipbook). */
-function openFrame(ref) {
+function openFrame(ref, { scrollTo = el.viewport, block = "nearest" } = {}) {
   setPlaying(false);
   state.mode = "flipbook";
   state.frame = ref;
@@ -948,7 +946,7 @@ function openFrame(ref) {
   normalizeSelection();
   render();
   scheduleUrl();
-  el.viewport.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  scrollTo.scrollIntoView({ behavior: "smooth", block });
 }
 
 // ---------------------------------------------------------------- brightness mode
@@ -1007,93 +1005,301 @@ function renderBrightness() {
 }
 
 // ---------------------------------------------------------------- infrared fingerprint
+// The target's brightness against wavelength (one dot per single image), with example spectra
+// of known kinds of object fitted to it. Method and thresholds: decisions.md "Infrared fingerprint".
+// Resolving power R = λ/Δλ per band (= detector), Crill et al. 2020, SPIE 11443, 114430I, Table 2.
+const SPHEREX_R = { 1: 41, 2: 41, 3: 41, 4: 35, 5: 110, 6: 130 };
+const FP_FLOOR = 0.05;    // extra 5% error per point: the examples are single objects, not exact models
+const FP_MIN_SPAN = 1.0;  // µm of wavelength the usable images must cover before shapes are compared
+const FP_CLEAR = 1.5;     // best fits this many times better than the next = "closest shape"
+let fpDefaultsFor = "";   // target/fov whose default curves (best two) are already set
+
+const resolvingPower = (w) => SPHEREX_R[(DETECTORS.find((d) => w >= d.lo && w <= d.hi) || DETECTORS.at(-1)).d];
+
+/** The example spectrum blurred to SPHEREx's resolution at `w` (Gaussian, FWHM = w/R); null outside it. */
+function blurredAt(points, w, R) {
+  const sigma = w / R / 2.3548;
+  if (w - 2 * sigma < points[0][0] || w + 2 * sigma > points.at(-1)[0]) return null;
+  let sw = 0, sf = 0, n = 0;
+  for (const [x, f] of points) {
+    if (Math.abs(x - w) > 3 * sigma) continue;
+    const g = Math.exp(-0.5 * ((x - w) / sigma) ** 2);
+    sw += g; sf += g * f; n++;
+  }
+  return n >= 2 ? sf / sw : null;
+}
+
+/** Scale one example to the usable images (weighted least squares); reduced chi-square ranks the fits. */
+function fitSpectrum(spec, rows) {
+  const used = [];
+  for (const x of rows) {
+    const t = blurredAt(spec.points, x.frame.wavelength_um, SPHEREX_R[x.frame.detector] || resolvingPower(x.frame.wavelength_um));
+    if (t == null) continue;
+    const y = x.frame.target_flux_mjy, e = x.frame.target_flux_err_mjy || 0;
+    used.push({ w: x.frame.wavelength_um, y, t, v: e * e + (FP_FLOOR * y) ** 2 });
+  }
+  const lo = Math.min(...used.map((u) => u.w)), hi = Math.max(...used.map((u) => u.w));
+  if (used.length < Math.max(8, 0.3 * rows.length) || !(hi - lo >= FP_MIN_SPAN)) return { spec, n: used.length, chi: null };
+  const a = used.reduce((s, u) => s + (u.y * u.t) / u.v, 0) / used.reduce((s, u) => s + (u.t * u.t) / u.v, 0);
+  const chi = used.reduce((s, u) => s + (u.y - a * u.t) ** 2 / u.v, 0) / (used.length - 1);
+  return { spec, n: used.length, chi, scale: a, lo, hi };
+}
+
+/** "IRTF Spectral Library: HD 10307 (G1 V), F_nu" -> "HD 10307 (G1 V)" */
+const exampleName = (source) => (source || "").replace(/^[^:]*:\s*/, "").replace(/,\s*F_nu\s*$/i, "");
+
+// Visits run violet (oldest) -> sky -> white (newest): ordered in time, and kept apart from the curve colors.
+const VISIT_STOPS = [[154, 123, 255], [127, 211, 255], [255, 255, 255]];
+function visitColor(i, n) {
+  const t = (n > 1 ? i / (n - 1) : 1) * (VISIT_STOPS.length - 1);
+  const k = Math.min(Math.floor(t), VISIT_STOPS.length - 2), f = t - k;
+  const [a, b] = [VISIT_STOPS[k], VISIT_STOPS[k + 1]];
+  return `rgb(${a.map((x, j) => Math.round(x + (b[j] - x) * f)).join(", ")})`;
+}
+
+let fpView = "chart"; // "chart" or "table": the same numbers, shown one way at a time
+const fpVisitsOff = new Set(); // visits unticked in the fingerprint (reset per target)
+
+function fpSetView(view) {
+  fpView = view;
+  el.fpChart.hidden = view !== "chart";
+  el.fpTable.hidden = view !== "table";
+  el.fpViewToggle.textContent = view === "chart" ? "Show as a table" : "Show as a chart";
+  el.fpViewToggle.setAttribute("aria-pressed", String(view === "table"));
+}
+
+/** The result box: a headline, then label/value rows, then a small caveat. */
+function fpResultBox(title, facts = [], caveat = "") {
+  const h = document.createElement("p");
+  h.className = "fp-result-title";
+  h.append(...title);
+  el.fpResult.append(h);
+  if (facts.length) {
+    const dl = document.createElement("dl");
+    dl.className = "fp-facts";
+    for (const [k, v] of facts) {
+      const dt = document.createElement("dt");
+      dt.textContent = k;
+      const dd = document.createElement("dd");
+      dd.textContent = v;
+      dl.append(dt, dd);
+    }
+    el.fpResult.append(dl);
+  }
+  if (caveat) {
+    const p = document.createElement("p");
+    p.className = "fp-caveat";
+    p.textContent = caveat;
+    el.fpResult.append(p);
+  }
+  el.fpResult.hidden = false;
+}
+
 async function renderFingerprint() {
   if (!el.fingerprint.open || !manifest) return;
   const token = loadToken;
   const spectra = (await Promise.all(SPECTRA.map(loadSpectrum)));
   if (token !== loadToken || !manifest) return;
-
-  // legend / toggles
+  el.fpChart.replaceChildren();
+  el.fpTable.replaceChildren();
   el.fpLegend.replaceChildren();
-  const targetKey = document.createElement("span");
-  targetKey.className = "legend-item";
-  targetKey.innerHTML = `<svg width="14" height="14" aria-hidden="true"><circle cx="7" cy="7" r="4.5" fill="${TARGET_POINT_COLOR}"/></svg>`;
-  targetKey.append(" This target (one dot per single image)");
-  el.fpLegend.append(targetKey);
-  SPECTRA.forEach((spec, i) => {
-    const loaded = spectra[i];
+  el.fpResult.replaceChildren();
+  el.fpResult.hidden = true;
+  el.fpNote.textContent = "";
+  el.fpViewBar.hidden = true;
+
+  const name = displayName(state.target);
+  el.fpMeaning.textContent = `How bright ${name} is at each infrared wavelength SPHEREx measured, from 0.75 to 5 µm: `
+    + "one dot per single image. The shape these dots make is the object's fingerprint, because stars, brown dwarfs and "
+    + "galaxies each have their own shape. The colored lines are example spectra of known objects, fitted to the dots; "
+    + "the one that follows them most closely hints at what kind of object this is.";
+
+  const key = `${state.target}/${state.fov}`;
+  if (fpDefaultsFor !== key) fpVisitsOff.clear();
+  const measured = framesPassingTime().filter((x) => x.frame.target_flux_mjy != null);
+  if (!measured.length) {
+    const sat = framesPassingTime().some((x) => x.frame.saturated);
+    fpResultBox([sat ? "No fingerprint: the target is saturated (too bright to measure) in every image." : "No brightness measurements in the selected dates."]);
+    return;
+  }
+  // Only the ticked visits: they set the dots, the fit and the table.
+  const rows = measured.filter((x) => !fpVisitsOff.has(x.visit.n));
+  const usable = rows.filter((x) => !x.frame.saturated);
+
+  // Fit every example; rank the ones that could be compared.
+  const loaded = spectra.filter(Boolean);
+  const fits = loaded.map((sp) => fitSpectrum(sp, usable));
+  const ranked = fits.filter((f) => f.chi != null).sort((p, q) => p.chi - q.chi);
+  const wls = usable.map((x) => x.frame.wavelength_um);
+  const span = usable.length ? Math.max(...wls) - Math.min(...wls) : 0;
+
+  if (fpDefaultsFor !== key) {
+    fpDefaultsFor = key;
+    enabledSpectra.clear();
+    for (const f of ranked.slice(0, 2)) enabledSpectra.add(f.spec.file);
+  }
+
+  if (!rows.length) {
+    fpResultBox(["No visits selected"], [], "Tick at least one visit below to see its dots.");
+  } else if (!ranked.length) {
+    const why = usable.length < 8
+      ? (usable.length === rows.length
+        ? `Only ${rows.length} image${rows.length === 1 ? " has" : "s have"} a brightness measurement.`
+        : `Only ${usable.length} of ${rows.length} measured images are unsaturated.`)
+      : span < FP_MIN_SPAN
+        ? `The ${usable.length} unsaturated images cover only ${fmtUm(Math.min(...wls))}–${fmtUm(Math.max(...wls))} µm.`
+        : "The example spectra don't overlap enough of the unsaturated images.";
+    fpResultBox(["Can't compare shapes here"],
+      [["Why", why], ["Needed", `Unsaturated images spread over at least ${FP_MIN_SPAN} µm of wavelength.`]],
+      "The dots are still this target's measurements.");
+  } else {
+    const [best, next] = ranked;
+    const b = document.createElement("strong");
+    b.textContent = best.spec.label;
+    const clear = !next || next.chi / best.chi >= FP_CLEAR;
+    const facts = [];
+    const ex = exampleName(best.spec.source);
+    if (ex) facts.push(["Example used", ex]);
+    if (next) facts.push([clear ? "Next closest" : "Almost as close", next.spec.label]);
+    facts.push(["Compared over", next && (Math.abs(best.lo - next.lo) > 0.1 || Math.abs(best.hi - next.hi) > 0.1)
+      ? `${fmtUm(best.lo)}–${fmtUm(best.hi)} µm (${best.spec.label}) and ${fmtUm(next.lo)}–${fmtUm(next.hi)} µm (${next.spec.label}). Each example covers a different range.`
+      : `${fmtUm(best.lo)}–${fmtUm(best.hi)} µm`]);
+    fpResultBox(clear ? ["Closest shape: ", b] : ["Close call: ", b, ` or ${next.spec.label}`], facts,
+      "A shape match is a hint, not a classification: each line is one example object, not every object of its kind.");
+  }
+
+  // Legend: one checkbox card per visit, then the examples in a 3 x 2 grid, ranked.
+  const vs = visits();
+  const vIndex = new Map(vs.map((v, i) => [v.n, i]));
+  const visitHead = document.createElement("span");
+  visitHead.className = "fp-key-label";
+  visitHead.textContent = "Visits";
+  const visitGrid = document.createElement("div");
+  visitGrid.className = "fp-examples fp-visits";
+  for (const v of vs.filter((v) => measured.some((x) => x.visit.n === v.n))) {
+    const n = measured.filter((x) => x.visit.n === v.n).length;
     const label = document.createElement("label");
-    label.className = "legend-item check";
+    label.className = "fp-example";
     const box = document.createElement("input");
     box.type = "checkbox";
-    box.checked = !!loaded && enabledSpectra.has(spec.file);
-    box.disabled = !loaded;
+    box.checked = !fpVisitsOff.has(v.n);
     box.addEventListener("change", () => {
-      if (box.checked) enabledSpectra.add(spec.file); else enabledSpectra.delete(spec.file);
+      if (box.checked) fpVisitsOff.delete(v.n); else fpVisitsOff.add(v.n);
+      renderFingerprint();
+    });
+    const dot = document.createElement("span");
+    dot.className = "fp-dot";
+    dot.style.background = visitColor(vIndex.get(v.n), vs.length);
+    const text = document.createElement("span");
+    text.className = "fp-example-text";
+    const head = document.createElement("span");
+    head.className = "fp-visit-head";
+    const nm = document.createElement("span");
+    nm.textContent = `Visit ${v.n}`;
+    const count = document.createElement("small");
+    count.className = "muted";
+    count.textContent = `${n} image${n === 1 ? "" : "s"}`;
+    head.append(nm, count);
+    const sub = document.createElement("small");
+    sub.className = "muted";
+    sub.textContent = `${fmtDate(v.date_start)} – ${fmtDate(v.date_end)}`;
+    text.append(head, sub);
+    label.append(box, dot, text);
+    visitGrid.append(label);
+  }
+  const visitKey = document.createElement("div");
+  visitKey.className = "fp-key fp-key-examples";
+  visitKey.append(visitHead, visitGrid);
+  if (measured.some((x) => x.frame.saturated)) {
+    const k = document.createElement("span");
+    k.className = "legend-item muted";
+    k.innerHTML = `<svg width="12" height="12" aria-hidden="true"><circle cx="6" cy="6" r="4" fill="none" stroke="${TARGET_POINT_COLOR}" stroke-width="1.5"/></svg>`;
+    k.append("A ring is a saturated image: shown, but not used in the fit.");
+    visitKey.append(k);
+  }
+  el.fpLegend.append(visitKey);
+
+  const exHead = document.createElement("span");
+  exHead.className = "fp-key-label";
+  exHead.textContent = "Example spectra";
+  const grid = document.createElement("div");
+  grid.className = "fp-examples";
+  const order = [...ranked, ...fits.filter((f) => f.chi == null)];
+  for (const spec of SPECTRA) if (!loaded.some((sp) => sp.file === spec.file)) order.push({ spec, missing: true });
+  for (const f of order) {
+    const label = document.createElement("label");
+    label.className = "fp-example";
+    const box = document.createElement("input");
+    box.type = "checkbox";
+    box.disabled = f.missing || f.chi == null;
+    box.checked = !box.disabled && enabledSpectra.has(f.spec.file);
+    box.addEventListener("change", () => {
+      if (box.checked) enabledSpectra.add(f.spec.file); else enabledSpectra.delete(f.spec.file);
       renderFingerprint();
     });
     const sw = document.createElement("span");
     sw.className = "line-swatch";
-    sw.style.background = spec.color;
+    sw.style.background = f.spec.color;
     const text = document.createElement("span");
-    text.textContent = !loaded ? `${spec.label} (file not posted yet)` : loaded.fake ? `${spec.label} (fake test curve)` : spec.label;
-    if (loaded?.source) label.title = loaded.source;
+    text.className = "fp-example-text";
+    const nm = document.createElement("span");
+    nm.textContent = f.missing ? `${f.spec.label} (file not posted yet)` : f.spec.fake ? `${f.spec.label} (fake test curve)` : f.spec.label;
+    const rank = document.createElement("small");
+    rank.className = "muted";
+    rank.textContent = f.missing ? "" : f.chi == null ? "not compared" : `#${ranked.indexOf(f) + 1} · ${fmtUm(f.lo)}–${fmtUm(f.hi)} µm`;
+    text.append(nm, rank);
+    label.title = f.chi == null && !f.missing
+      ? "Not compared: this example doesn't overlap enough unsaturated images."
+      : `${exampleName(f.spec.source) || f.spec.label}. Compared over the wavelengths shown.`;
     label.append(box, sw, text);
-    el.fpLegend.append(label);
-  });
+    grid.append(label);
+  }
+  const exKey = document.createElement("div");
+  exKey.className = "fp-key fp-key-examples";
+  exKey.append(exHead, grid);
+  el.fpLegend.append(exKey);
 
-  const rows = framesPassingTime().filter((x) => x.frame.target_flux_mjy != null);
-  el.fpChart.replaceChildren();
-  el.fpTable.replaceChildren();
-  if (!rows.length) {
-    const sat = framesPassingTime().some((x) => x.frame.saturated);
-    el.fpNote.textContent = sat
-      ? "No brightness measurements: the target is saturated (too bright to measure), so there is no fingerprint to draw."
-      : "No brightness measurements in the selected time range.";
-    return;
-  }
-  // Divide everything by the target's value nearest 2.2 µm, as the reference files already are.
-  // Prefer a non-saturated image, but only if it is about as close to 2.2 µm (within 0.15 µm more);
-  // a precise value far from 2.2 µm would misalign the dots with the reference curves more.
-  const dist = (x) => Math.abs(x.frame.wavelength_um - 2.2);
-  const nearest = (list) => list.reduce((best, x) => (dist(x) < dist(best) ? x : best));
-  const closest = nearest(rows);
-  const clean = rows.filter((x) => !x.frame.saturated && dist(x) <= dist(closest) + 0.15);
-  const ref = clean.length ? nearest(clean) : closest;
-  const norm = ref.frame.target_flux_mjy;
-  const anySat = rows.some((x) => x.frame.saturated);
-  if (anySat) {
-    const k = document.createElement("span");
-    k.className = "legend-item";
-    k.innerHTML = `<svg width="14" height="14" aria-hidden="true"><circle cx="7" cy="7" r="4" fill="none" stroke="${TARGET_POINT_COLOR}" stroke-width="2"/></svg>`;
-    k.append(" Saturated image (less precise)");
-    targetKey.after(k);
-  }
-  el.fpNote.textContent = `Each dot is one single image (time filter applies). All values are divided by the image nearest 2.2 µm (${fmtUm(ref.frame.wavelength_um)} µm, ${norm.toFixed(3)} mJy${ref.frame.saturated ? ", saturated, so the whole curve is less precise" : ""}), as the reference curves are.${anySat ? " Hollow dots are saturated images." : ""} Reference curves stop where their source stops.`;
+  // Chart: dots in mJy; lines blurred to SPHEREx's resolution and scaled by their fit.
   const pts = rows.map((x) => ({
     x: x.frame.wavelength_um,
-    y: x.frame.target_flux_mjy / norm,
-    err: x.frame.target_flux_err_mjy != null ? x.frame.target_flux_err_mjy / Math.abs(norm) : null,
-    color: TARGET_POINT_COLOR,
+    y: x.frame.target_flux_mjy,
+    err: x.frame.target_flux_err_mjy,
+    color: visitColor(vIndex.get(x.visit.n), vs.length), // saturated: a ring in the visit's color
     hollow: !!x.frame.saturated,
-    tip: `${fmtUm(x.frame.wavelength_um)} µm · ${(x.frame.target_flux_mjy / norm).toFixed(3)} (relative) · ${x.frame.target_flux_mjy.toFixed(3)} mJy${x.frame.saturated ? " · saturated, less precise" : ""} · visit ${x.visit.n}, image ${x.frame.i} · click to open`,
-    onClick: () => openFrame(x.ref),
+    tip: `${fmtUm(x.frame.wavelength_um)} µm · ${x.frame.target_flux_mjy.toFixed(3)} mJy · D${x.frame.detector} · visit ${x.visit.n}, image ${x.frame.i}${x.frame.saturated ? " · saturated, not used in the fit" : ""} · click to open`,
+    onClick: () => openFrame(x.ref, { scrollTo: el.modeBar, block: "start" }),
   }));
-  const lines = spectra.filter((sp) => sp && enabledSpectra.has(sp.file))
-    .map((sp) => ({ label: sp.label, color: sp.color, points: sp.points.filter(([w]) => w >= WL_MIN && w <= WL_MAX) }));
-  const yVals = [...pts.flatMap((p) => [p.y + (p.err || 0), p.y - (p.err || 0)]), ...lines.flatMap((l) => l.points.map((q) => q[1]))];
+  const lines = ranked.filter((f) => enabledSpectra.has(f.spec.file)).map((f) => {
+    const out = [];
+    for (let w = Math.max(WL_MIN, f.lo - 0.05); w <= Math.min(WL_MAX, f.hi + 0.05); w += 0.01) {
+      const t = blurredAt(f.spec.points, w, resolvingPower(w));
+      if (t != null) out.push([w, f.scale * t]);
+    }
+    return { label: f.spec.label, color: f.spec.color, points: out };
+  });
+  el.fpViewBar.hidden = false;
+  fpSetView(fpView);
+  if (!rows.length) { el.fpChart.replaceChildren(); el.fpTable.replaceChildren(); return; }
+  // The y-axis follows the dots; a line may run off the top.
+  const yVals = pts.flatMap((p) => [p.y + (p.err || 0), p.y - (p.err || 0)]);
   const yMax = Math.max(...yVals) * 1.08;
   const yMin = Math.min(0, Math.min(...yVals) * 1.08);
-  drawChart(el.fpChart, {
-    ariaLabel: "Target brightness relative to 2.2 µm against wavelength, with reference spectra",
-    x: { type: "linear", min: WL_MIN, max: WL_MAX, label: "Wavelength (µm)" },
-    y: { min: yMin, max: yMax, label: "Brightness relative to 2.2 µm" },
-    lines, points: pts,
-  });
-  drawTable(el.fpTable, ["Wavelength (µm)", "Relative to 2.2 µm", "Brightness (mJy)", "Visit, image", "Saturated"],
+  if (fpView === "chart") {
+    drawChart(el.fpChart, {
+      ariaLabel: `${name}: brightness against wavelength, with fitted example spectra`,
+      x: { type: "linear", min: WL_MIN, max: WL_MAX, label: "Wavelength (µm)" },
+      y: { min: yMin, max: yMax, label: "Brightness (mJy)" },
+      lines, points: pts,
+    });
+  }
+  drawTable(el.fpTable, ["Wavelength (µm)", "Brightness (mJy)", "Error (mJy)", "Detector", "Visit, image", "Saturated"],
     [...rows].sort((p, q) => p.frame.wavelength_um - q.frame.wavelength_um)
-      .map((x) => [fmtUm(x.frame.wavelength_um), (x.frame.target_flux_mjy / norm).toFixed(3), x.frame.target_flux_mjy.toFixed(3), `${x.visit.n}, ${x.frame.i}`,
-        x.frame.saturated ? "yes" : "no"]));
+      .map((x) => [fmtUm(x.frame.wavelength_um), x.frame.target_flux_mjy.toFixed(3),
+        x.frame.target_flux_err_mjy != null ? x.frame.target_flux_err_mjy.toFixed(3) : "", `D${x.frame.detector}`,
+        `${x.visit.n}, ${x.frame.i}`, x.frame.saturated ? "yes" : "no"]),
+    { pageSize: 10 });
+  el.fpNote.textContent = "Lines are blurred to SPHEREx's resolution and scaled to fit the unsaturated images, and drawn only "
+    + "where they were compared. Click a dot to open its image. The date filter applies.";
 }
 
 // ---------------------------------------------------------------- panels
@@ -1103,7 +1309,7 @@ async function renderFingerprint() {
  */
 function renderIntro() {
   renderTargetPanel(el.introBody, { key: state.target, manifest, explanations, fieldEntry });
-  el.aboutToggle.hidden = !state.target;
+  el.aboutToggle.hidden = el.fpJump.hidden = !state.target;
 }
 
 function setIntroOpen(open) {
@@ -1600,6 +1806,14 @@ function setupControls() {
   el.fieldChip.addEventListener("click", () => openAbout("field"));
   el.aboutBody.addEventListener("click", (e) => { if (e.target.closest("[data-close-dialog]")) el.aboutDialog.close(); });
   el.aboutToggle.addEventListener("click", () => setIntroOpen(el.intro.hidden));
+  el.fpJump.addEventListener("click", () => {
+    el.fingerprint.open = true;
+    el.fingerprint.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+  el.fpViewToggle.addEventListener("click", () => {
+    fpSetView(fpView === "chart" ? "table" : "chart");
+    renderFingerprint();
+  });
   // Target names in the "How accurate?" table open that target.
   el.aboutBody.addEventListener("click", (e) => {
     const a = e.target.closest("[data-open-target]");
@@ -1629,7 +1843,16 @@ function setupControls() {
     e.preventDefault();
     openAbout(a.dataset.about, { section: a.dataset.section || null });
   });
-  el.fingerprint.addEventListener("toggle", renderFingerprint);
+  const fpSummary = el.fingerprint.querySelector("summary");
+  let fpHeaderTop = null;
+  fpSummary.addEventListener("click", () => { fpHeaderTop = fpSummary.getBoundingClientRect().top; });
+  el.fingerprint.addEventListener("toggle", () => {
+    if (fpHeaderTop != null) {
+      window.scrollBy(0, fpSummary.getBoundingClientRect().top - fpHeaderTop);
+      fpHeaderTop = null;
+    }
+    renderFingerprint();
+  });
 
   let resizeTimer = null;
   new ResizeObserver(() => {
