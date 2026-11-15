@@ -23,7 +23,9 @@ export const LAYERS = [
   { key: "asteroids", group: "catalogs", label: "Asteroids (JPL)", swatch: "asteroids", note: "single images only" },
   { key: "flags", group: "quality", label: "Quality flags", swatch: "flags", note: "single images only" },
 ];
-export const DEFAULT_LAYERS = ["measured", "expected", "path", "field_stars", "gaia", "simbad", "vsx", "asteroids"];
+// Only the target's own markers start on; everything else is one click away under "More layers".
+export const DEFAULT_LAYERS = ["measured", "expected", "path"];
+export const MAIN_LAYERS = ["measured", "expected", "path"];
 
 function svg(tag, attrs, parent) {
   const e = document.createElementNS(NS, tag);

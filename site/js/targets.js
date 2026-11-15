@@ -1,9 +1,9 @@
 // The five targets and their field centers (RA/Dec on 2026-01-01), from the plan.
 export const TARGETS = [
-  { key: "epsilon_indi_b", name: "Epsilon Indi B", ra: 331.096653, dec: -56.800663,
-    aliases: ["eps indi b", "ε indi b", "epsilon indi"] },
   { key: "barnards_star", name: "Barnard's Star", ra: 269.446268, dec: 4.768204,
     aliases: ["barnard", "gj 699", "v2500 oph"] },
+  { key: "epsilon_indi_b", name: "Epsilon Indi B", ra: 331.096653, dec: -56.800663,
+    aliases: ["eps indi b", "ε indi b", "epsilon indi"] },
   { key: "r_draconis", name: "R Draconis", ra: 248.167233, dec: 66.755024,
     aliases: ["r dra"] },
   { key: "rw_aurigae", name: "RW Aurigae", ra: 76.956560, dec: 30.401248,

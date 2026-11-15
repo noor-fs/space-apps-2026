@@ -1,7 +1,7 @@
 // SPHEREx Motion Viewer: reads only static files from data/ (real) and fake_data/ (test), see below.
 import { TARGETS, targetByKey, findTargetByName } from "./targets.js";
 import { skyToPx, inField, parseCoords, fieldArcmin } from "./sky.js";
-import { LAYERS, LAYER_GROUPS, DEFAULT_LAYERS, drawMarkers } from "./markers.js";
+import { LAYERS, LAYER_GROUPS, DEFAULT_LAYERS, MAIN_LAYERS, drawMarkers } from "./markers.js";
 import { tipText, renderInfo, renderEntry, renderTargetPanel, renderCredits, renderMethodology, renderVerdictPopup, safeUrl } from "./panel.js";
 import { loadF32, autoRange, drawData, COLORMAP_NAMES, defaultK, difference, diffLimit, drawDifference } from "./render.js";
 import { drawChart, drawTable } from "./charts.js";
@@ -23,6 +23,7 @@ const isLiveKey = (key) => /^[nc]_/.test(key || "");
 const liveQueries = new Map(); // live key -> what the user typed (shown as its name, kept in the URL)
 const LARGEST_FIELD = 201; // used for coordinate search when a target has no fields.json yet
 const ZOOM_MIN = 1, ZOOM_MAX = 16;
+const START_ZOOM = 3; // first view is zoomed on the target; the reset button shows the whole field
 const DAY = 86400000;
 const WL_MIN = 0.75, WL_MAX = 5.0;
 const DETECTORS = [
@@ -84,7 +85,7 @@ const state = {
   frame: null,       // "v2_4" when a single image is open in flipbook
   a: null, b: null,  // blink / difference picks: "v1" (stack) or "v1_4" (single image)
   showB: false,
-  zoom: 1, color: false, cmap: "grayscale",
+  zoom: START_ZOOM, color: false, cmap: "grayscale",
   brightness: 0, contrast: 0, // contrast is log2 of the multiplier
   k: null,           // null = automatic k
   playing: false, speed: 2,
@@ -96,6 +97,7 @@ let fields = null, manifest = null, overlays = [], explanations = {}, credits = 
 // Field stars of the open field (objects.json) and the scoreboard's per-star agreement, by name.
 let fieldStars = [], fieldScores = new Map();
 let markerInfo = new Map();
+let accuracyEntry = null; // scoreboard headline, shown by the Accuracy link
 const view = { cx: 0, cy: 0 }; // image point (pixel units, 0..S) at the viewport center
 let loadToken = 0, drawSeq = 0, timer = null;
 let diffAuto = { key: "", k: 1 };
@@ -1015,6 +1017,57 @@ function renderTargetInfo() {
   }
 }
 
+/** "Result" card: measured motion against the catalog's, from the manifest. */
+function renderResult() {
+  const box = $("result-body"), card = $("result-card");
+  if (!box || !card) return;
+  const m = manifest?.measured_motion_mas_yr, c = manifest?.catalog_motion_mas_yr;
+  const num = (v) => (typeof v === "number" && Number.isFinite(v) ? `${v > 0 ? "+" : v < 0 ? "−" : ""}${Math.abs(Math.round(v))}` : "–");
+  if (!m && !c) { card.hidden = true; return; }
+  card.hidden = false;
+  const rows = [["", "East–west", "North–south"]];
+  if (m) rows.push(["We measured", `${num(m.ra)} ± ${Math.round(m.ra_err)}`, `${num(m.dec)} ± ${Math.round(m.dec_err)}`]);
+  if (c) rows.push([c.source ? `${c.source} says` : "Catalog says", num(c.ra), num(c.dec)]);
+  box.replaceChildren();
+  const grid = document.createElement("div");
+  grid.className = "result-grid";
+  rows.forEach((r, i) => r.forEach((text, j) => {
+    const s = document.createElement("span");
+    if (i === 0 || j === 0) s.className = i === 0 ? "muted" : "";
+    s.textContent = text;
+    grid.append(s);
+  }));
+  const note = document.createElement("p");
+  note.className = "muted small";
+  note.textContent = m ? "Speed across the sky, in thousandths of an arcsecond per year."
+    : "No motion could be measured for this target. See the verdict above.";
+  box.append(grid, note);
+}
+
+/** "Can you trust it?" card, from data/scoreboard.json. Stays hidden if the file is missing. */
+async function renderTrust() {
+  const card = $("trust-card");
+  if (!card) return;
+  try {
+    const s = await fetchJSON(`${REAL_DIR}/scoreboard.json`);
+    if (Array.isArray(s.headline)) accuracyEntry = { title: "How accurate is this?", text: s.headline.join("\n\n") };
+    const stars = s.targets.flatMap((t) => (t.target_key in (s.summary?.fields_left_out_of_totals || {}) ? [] : (t.field_stars?.objects || []).filter((o) => o.role === "scored")));
+    const agree = stars.filter((o) => o.agreement === "agrees").length;
+    const uncrowded = stars.filter((o) => !o.crowded);
+    const within2 = s.summary?.field_stars_motion?.within_2sigma;
+    if (!stars.length) return;
+    $("trust-big").textContent = `${agree} / ${stars.length}`;
+    const items = [];
+    if (typeof within2 === "number") items.push(`${Math.round(within2 * 100)}% of their measurements fall within 2 error bars.`);
+    if (uncrowded.length && uncrowded.every((o) => o.agreement === "agrees")) items.push(`All ${uncrowded.length} stars with no close neighbor pass.`);
+    const failing = stars.filter((o) => o.agreement === "disagrees");
+    if (failing.length && failing.every((o) => o.crowded)) items.push(`The ${failing.length} that disagree all sit next to another star.`);
+    const ul = $("trust-list");
+    ul.replaceChildren(...items.map((t) => Object.assign(document.createElement("li"), { textContent: t })));
+    card.hidden = false;
+  } catch { /* no scoreboard: no card */ }
+}
+
 // which: "verdict" (the current target's), "how", "limits", "credits", "methodology" or any other
 // explanations.about key. section: scroll to that heading.
 function openAbout(which, { section = null } = {}) {
@@ -1022,6 +1075,7 @@ function openAbout(which, { section = null } = {}) {
   const fromVerdict = el.aboutDialog.open && el.aboutBody.dataset.view === "verdict";
   if (which === "verdict") renderVerdictPopup(el.aboutBody, manifest, explanations);
   else if (which === "credits") renderCredits(el.aboutBody, credits);
+  else if (which === "accuracy") renderEntry(el.aboutBody, accuracyEntry, "How accurate is this?");
   else if (which === "limits") renderEntry(el.aboutBody, explanations?.about?.limits, "What this tool can't tell you");
   else if (which === "methodology") renderMethodology(el.aboutBody, explanations);
   else if (which === "how") renderEntry(el.aboutBody, explanations?.about?.how_it_works, "How this works");
@@ -1078,8 +1132,16 @@ const SUB_LEGENDS = {
 
 function buildLayerControls() {
   el.layerList.replaceChildren();
+  const more = document.createElement("details");
+  more.className = "more-layers";
+  const moreSummary = document.createElement("summary");
+  moreSummary.textContent = "More layers";
+  const moreBody = document.createElement("div");
+  more.append(moreSummary, moreBody);
+  if (LAYERS.some((L) => !MAIN_LAYERS.includes(L.key) && state.layers.has(L.key))) more.open = true;
   let group = null;
   for (const L of LAYERS) {
+    const parent = MAIN_LAYERS.includes(L.key) ? el.layerList : moreBody;
     if (L.group !== group) {
       group = L.group;
       const G = LAYER_GROUPS.find((x) => x.key === group);
@@ -1092,7 +1154,7 @@ function buildLayerControls() {
         n.textContent = ` · ${G.note}`;
         head.append(n);
       }
-      el.layerList.append(head);
+      if (parent !== el.layerList) parent.append(head);
     }
     const label = document.createElement("label");
     label.className = "check layer";
@@ -1120,7 +1182,7 @@ function buildLayerControls() {
       text.append(n);
     }
     label.append(box, sw, text);
-    el.layerList.append(label);
+    parent.append(label);
     if (SUB_LEGENDS[L.key]) {
       const legend = document.createElement("div");
       legend.className = "sub-legend muted";
@@ -1131,9 +1193,10 @@ function buildLayerControls() {
         row.append(text);
         legend.append(row);
       }
-      el.layerList.append(legend);
+      parent.append(legend);
     }
   }
+  el.layerList.append(more);
 }
 
 // ---------------------------------------------------------------- filters UI
@@ -1441,6 +1504,8 @@ function syncUI() {
   el.displayNote.hidden = !el.displayNote.textContent;
 
   for (const box of el.layerList.querySelectorAll("input[data-layer]")) box.checked = state.layers.has(box.dataset.layer);
+  const moreLayers = el.layerList.querySelector(".more-layers");
+  if (moreLayers && LAYERS.some((L) => !MAIN_LAYERS.includes(L.key) && state.layers.has(L.key))) moreLayers.open = true;
   for (const c of el.layerList.querySelectorAll("[data-count-for]")) {
     const key = c.dataset.countFor;
     c.textContent = ["gaia", "simbad", "vsx", "asteroids"].includes(key) ? ` (${overlays.filter((o) => o.layer === key).length})`
@@ -1696,6 +1761,9 @@ async function openFov(fov, opts, token) {
   renderFingerprint();
   writeUrl(opts.push);
   if (state.mode === "blink") setPlaying(true);
+  else if (opts.autoplay && state.mode === "flipbook" && visits().length > 1
+    && !window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) setPlaying(true);
+  renderResult();
 }
 
 // ---------------------------------------------------------------- search
@@ -1824,7 +1892,7 @@ function writeUrl(push = false) {
       if (state.frame) p.set("frame", state.frame);
     }
     if ((state.mode === "blink" || state.mode === "difference") && state.a && state.b) { p.set("a", state.a); p.set("b", state.b); }
-    if (state.zoom !== 1) p.set("zoom", +state.zoom.toFixed(2));
+    if (state.zoom !== START_ZOOM) p.set("zoom", +state.zoom.toFixed(2));
     if (state.color) p.set("color", "rgb");
     if (state.cmap !== "grayscale") p.set("cmap", state.cmap);
     p.set("layers", LAYERS.map((L) => L.key).filter((k) => state.layers.has(k)).join(","));
@@ -1857,7 +1925,8 @@ function openFromUrl() {
     frame: p.get("frame"),
     a: p.get("a"),
     b: p.get("b"),
-    zoom: p.get("zoom") ?? 1,
+    zoom: p.get("zoom") ?? START_ZOOM,
+    autoplay: !location.search, // a plain visit starts playing; a shared link opens exactly as saved
     color: p.get("color") === "rgb",
     cmap: COLORMAP_NAMES.includes(p.get("cmap")) ? p.get("cmap") : "grayscale",
     layers: p.has("layers") ? p.get("layers").split(",").filter((k) => LAYERS.some((L) => L.key === k)) : DEFAULT_LAYERS,
@@ -1873,6 +1942,7 @@ fetchJSONFirst("explanations.json").then((j) => { explanations = j || {}; render
 fetchJSONFirst("credits.json").then((j) => { credits = Array.isArray(j) ? j : []; }).catch(() => {});
 buildLayerControls();
 buildTargetButtons();
+renderTrust();
 setupFilters();
 setupPanZoom();
 setupControls();
