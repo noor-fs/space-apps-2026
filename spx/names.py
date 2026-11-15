@@ -13,10 +13,9 @@ import astropy.units as u
 import numpy as np
 from astropy.coordinates import Distance, SkyCoord
 from astropy.time import Time
-from astroquery.gaia import Gaia
 from erfa import ErfaWarning
 
-from spx.archive import tap_query
+from spx.archive import gaia_query, tap_query
 from spx.field import CENTER_DATE
 
 SEARCH_RADIUS_DEG = 5 / 60
@@ -91,7 +90,7 @@ def _gaia_sources(around):
     query = f"""SELECT source_id, ra, dec, pmra, pmdec, parallax FROM gaiadr3.gaia_source
         WHERE pmra IS NOT NULL AND 1 = CONTAINS(POINT(ra, dec),
         CIRCLE({around.ra.deg}, {around.dec.deg}, {SEARCH_RADIUS_DEG}))"""
-    table = Gaia.launch_job(query).get_results()
+    table = gaia_query(query)
     return [CatalogSource("Gaia DR3", str(r["source_id"]), float(r["ra"]), float(r["dec"]),
                           float(r["pmra"]), float(r["pmdec"]), float(r["parallax"]),
                           Time(2016.0, format="jyear"))

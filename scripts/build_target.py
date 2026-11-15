@@ -11,6 +11,7 @@ list and the downloaded cutouts only (a name not resolved before is still looked
 """
 import argparse
 import json
+import os
 import sys
 import time
 import warnings
@@ -37,8 +38,9 @@ from spx.psf import measure_visits  # noqa: E402
 from spx.verdict import brightness_test, measure_motion, verdict  # noqa: E402
 from spx.visits import build_visits, visit_ranges  # noqa: E402
 
-DATA_DIR = Path("data")
-RESULTS_DIR = Path("results")
+# The live-lookup server builds into a staging folder, then swaps it in whole
+DATA_DIR = Path(os.environ.get("SPX_DATA_DIR", "data"))
+RESULTS_DIR = Path(os.environ.get("SPX_RESULTS_DIR", "results"))
 
 
 def main():
@@ -84,7 +86,15 @@ def frame_list(field, offline):
     """(frames table, where it came from). Online queries are saved for offline runs."""
     path = field_dir(field) / "frames.ecsv"
     if not offline:
-        frames = find_frames(field)
+        try:
+            frames = find_frames(field)
+        except ConnectionError as error:
+            if not path.exists():
+                raise
+            # IRSA's TAP and SIA both go down for hours at a time; a saved list still describes the field
+            saved = time.strftime("%Y-%m-%d %H:%M", time.localtime(path.stat().st_mtime))
+            print(f"SPHEREx archive unavailable ({error}); using the frame list saved {saved}")
+            return Table.read(path), "cached list (archive down)"
         path.parent.mkdir(parents=True, exist_ok=True)
         frames.write(path, overwrite=True)
         return frames, "archive"
