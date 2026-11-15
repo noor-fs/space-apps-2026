@@ -2,3 +2,5 @@ cache/
 __pycache__/
 .venv/
 server_work/
+catalogs/layers/
+catalogs/service_log.json

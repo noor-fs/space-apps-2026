@@ -108,6 +108,7 @@ def _spread(times, n):
 def from_manifests(keys=None, max_times=None):
     import build_overlays
     for key in (keys or TARGETS):
+        build_overlays.require_catalog_layers(key)   # fail now, not after hours of JPL requests
         files = sorted(glob.glob(os.path.join(DATA, key, "fov*", "manifest.json")))
         if not files:
             print(f"{key}: no manifest yet - asteroid layer left unchanged/absent"); continue
@@ -180,6 +181,7 @@ def windowed_entries(times, center_ra, center_dec):
 def from_manifests_windowed(keys=None):
     import build_overlays
     for key in (keys or TARGETS):
+        build_overlays.require_catalog_layers(key)   # fail now, not after hours of JPL requests
         files = sorted(glob.glob(os.path.join(DATA, key, "fov*", "manifest.json")))
         if not files:
             print(f"{key}: no manifest yet"); continue

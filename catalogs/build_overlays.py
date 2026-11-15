@@ -9,7 +9,16 @@ def load(key, layer):
     p = os.path.join(LAYERS, key, f"{layer}.json")
     return json.load(open(p, encoding="utf-8")) if os.path.exists(p) else []
 
+def require_catalog_layers(key):
+    """Stop before overlays.json can be rebuilt from asteroids alone (layers/ is not committed; see README)."""
+    missing = [l for l in ("gaia", "simbad", "vsx") if not os.path.exists(os.path.join(LAYERS, key, f"{l}.json"))]
+    if missing:
+        raise SystemExit(f"{key}: layers/{key}/ is missing {', '.join(m + '.json' for m in missing)}. "
+                         "Building now would drop those catalogs from data/{0}/overlays.json. "
+                         "Run steps 1-4 of catalogs/README.md first (gaia_layer.py, simbad_map.py, simbad_layer.py, vsx_layer.py).".format(key))
+
 def build(key):
+    require_catalog_layers(key)
     merged = []
     for layer in LAYER_ORDER:
         merged += load(key, layer)
