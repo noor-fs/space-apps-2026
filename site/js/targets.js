@@ -13,13 +13,11 @@ export const TARGETS = [
     aliases: ["wise 0855-0714", "wise j0855-0714", "wise j085510.83-071442.5"] },
 ];
 
-// Fake targets made only for testing the site. Reachable by button, name or ?target=.
-// They are left out of coordinate search so they never hide a real target.
-export const TEST_TARGETS = [
-  // Fake-only targets start with "fake_" (team rule in PROJECT_STRUCTURE.md).
-  { key: "fake_saturated", name: "Fake: saturated star", ra: 269.446268, dec: 4.768204,
-    aliases: ["saturated", "test saturated"] },
-];
+// Fake targets made only for testing the site (key starts with "fake_", team rule in
+// PROJECT_STRUCTURE.md). Reachable by name or ?target=, never shown as a button, and left out
+// of coordinate search so they never hide a real target. None at the moment: the fake
+// saturated star was removed (its files were never on the public site).
+export const TEST_TARGETS = [];
 
 export const ALL_TARGETS = [...TARGETS, ...TEST_TARGETS];
 

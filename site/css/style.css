@@ -60,9 +60,13 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
   background: var(--panel);
 }
 .brand { font-size: 17px; margin: 0; white-space: nowrap; }
+.target-group { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .targets { display: flex; flex-wrap: wrap; gap: 6px; }
 .targets button.unprocessed { color: var(--muted); border-style: dashed; }
-.targets button.test { font-size: 13px; border-style: dotted; }
+/* below widescreen: title, search and the about pills on the first row, suggested targets under them */
+@media (max-width: 1599px) {
+  .target-group { order: 10; flex-basis: 100%; }
+}
 .search { display: flex; gap: 6px; margin-left: auto; flex: 1 1 260px; max-width: 420px; }
 .search input {
   flex: 1;
@@ -685,11 +689,11 @@ button.verdict-chip:hover { border-color: var(--accent); }
 @media (max-width: 600px) {
   .topbar { gap: 8px; padding: 8px 12px; }
   .brand { font-size: 15px; }
-  .targets { flex-wrap: nowrap; overflow-x: auto; width: 100%; padding-bottom: 2px; }
+  .targets { flex-wrap: nowrap; overflow-x: auto; flex: 1; min-width: 0; padding-bottom: 2px; }
   .targets button { flex: none; padding: 5px 9px; font-size: 14px; }
   .search { flex-basis: 100%; max-width: none; }
   .about-links { width: 100%; }
-  .about-links button { flex: 1; padding: 4px 6px; }
+  .about-links button { flex: 1 1 auto; min-width: 0; padding: 4px 6px; font-size: 12px; white-space: nowrap; }
   .title-main h2 { font-size: 19px; }
   .tabs button { padding: 7px 2px; font-size: 14px; }
 }

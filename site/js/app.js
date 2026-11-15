@@ -1,5 +1,5 @@
 // SPHEREx Motion Viewer: reads only static files from data/ (real) and fake_data/ (test), see below.
-import { TARGETS, TEST_TARGETS, targetByKey, findTargetByName } from "./targets.js";
+import { TARGETS, targetByKey, findTargetByName } from "./targets.js";
 import { skyToPx, inField, parseCoords, fieldArcmin } from "./sky.js";
 import { LAYERS, LAYER_GROUPS, DEFAULT_LAYERS, drawMarkers } from "./markers.js";
 import { tipText, renderInfo, renderEntry, renderTargetPanel, renderCredits, renderMethodology, renderVerdictPopup, safeUrl } from "./panel.js";
@@ -1299,12 +1299,11 @@ function filtersChanged() {
 // ---------------------------------------------------------------- controls UI
 function buildTargetButtons() {
   el.targets.replaceChildren();
-  const add = (t, extraClass) => {
+  const add = (t) => {
     const b = document.createElement("button");
     b.type = "button";
     b.textContent = t.name;
     b.dataset.key = t.key;
-    if (extraClass) b.classList.add(extraClass);
     b.addEventListener("click", () => { hideSearchMessage(); openTarget(t.key, { push: true }); });
     el.targets.append(b);
     loadFields(t.key).then((sizes) => {
@@ -1312,7 +1311,6 @@ function buildTargetButtons() {
     });
   };
   TARGETS.forEach((t) => add(t));
-  TEST_TARGETS.forEach((t) => add(t, "test"));
 }
 
 function buildFieldControls() {
