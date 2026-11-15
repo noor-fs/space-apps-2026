@@ -1,0 +1,553 @@
+{
+ "generated_utc": "2026-11-15T08:41:45Z",
+ "headline": [
+  "Motion: 4 of 4 measurable targets move as the catalogs predict. Not measurable: R Draconis (saturated).",
+  "Other stars: of 6 Gaia stars the tool was not tuned on, 5 agree with Gaia, 1 shows mild tension and 0 disagree (1 field so far; 9 of 9 Gaia stars down to G = 17 recovered).",
+  "Error bars: 56% of their positions fall within 1 error bar and 92% within 2 (honest error bars give 68% and 95%), so our error bars are slightly too small (real scatter is about 1.1x the error bar).",
+  "Measured targets sit within 0.61 arcsec of their catalog positions (at most 0.1 of a pixel), a constant shift that can't create motion."
+ ],
+ "method": {
+  "motion": "Measured vs catalog motion per axis, z = difference / error; combined chi-square with 2 degrees of freedom. Agrees if p >= 0.05, tension if 0.0027 <= p < 0.05, disagrees if p < 0.0027 (3 sigma).",
+  "error_bars": "Pull = (measured - expected position) / error bar. Honest error bars put 68% of pulls within 1 and 95% within 2.",
+  "field_stars": "The same tests on Gaia stars in the field, excluding stars used to set the error bars, stars blended with a neighbour, and saturated visits. Per star: chi-square of its pulls over all its visits.",
+  "not_scored": "Field-star brightness, objects in no catalog, and motion of saturated targets."
+ },
+ "summary": {
+  "targets_scored": 5,
+  "field_stars": {
+   "n": 48,
+   "within_1sigma": 0.562,
+   "within_2sigma": 0.917,
+   "within_3sigma": 1.0,
+   "mean_pull": 0.376,
+   "rms_pull": 1.145
+  },
+  "field_star_error_bars": "slightly too small (real scatter is about 1.1x the error bar)",
+  "disagreeing_objects": []
+ },
+ "targets": [
+  {
+   "target_key": "epsilon_indi_b",
+   "name": "Epsilon Indi B",
+   "field_size_px": 51,
+   "verdict": "moves_as_expected",
+   "motion": {
+    "measured_mas_yr": {
+     "ra": 3895,
+     "ra_err": 102,
+     "dec": -2512,
+     "dec_err": 76
+    },
+    "catalog_mas_yr": {
+     "ra": 3982,
+     "ra_err": null,
+     "dec": -2467,
+     "dec_err": null,
+     "source": "Gaia DR3"
+    },
+    "catalog_error_included": false,
+    "z": {
+     "ra": -0.85,
+     "dec": -0.59
+    },
+    "chi2_2dof": 1.08,
+    "p_value": 0.583,
+    "agreement": "agrees",
+    "speed_measured_mas_yr": 4635,
+    "speed_catalog_mas_yr": 4684,
+    "speed_difference_percent": -1.1,
+    "baseline_years": 1.39,
+    "shift_over_baseline_px": 1.06
+   },
+   "target_position": {
+    "n_images": 461,
+    "n_images_measured": 347,
+    "n_images_measured_saturated": 0,
+    "image_pulls": {
+     "n": 694,
+     "within_1sigma": 0.264,
+     "within_2sigma": 0.595,
+     "within_3sigma": 0.889,
+     "mean_pull": 0.655,
+     "rms_pull": 2.026
+    },
+    "random_part": {
+     "n": 694,
+     "within_1sigma": 0.777,
+     "within_2sigma": 0.976,
+     "within_3sigma": 0.996,
+     "mean_pull": 0.001,
+     "rms_pull": 0.861
+    },
+    "visit_pulls": {
+     "n": 8,
+     "within_1sigma": 0.0,
+     "within_2sigma": 0.25,
+     "within_3sigma": 0.25,
+     "mean_pull": 2.367,
+     "rms_pull": 5.277
+    },
+    "visit_pulls_offset_removed": {
+     "n": 8,
+     "within_1sigma": 0.75,
+     "within_2sigma": 1.0,
+     "within_3sigma": 1.0,
+     "mean_pull": 0.0,
+     "rms_pull": 0.885
+    },
+    "constant_offset": {
+     "px": [
+      -0.035,
+      0.093
+     ],
+     "arcsec": 0.61,
+     "fraction_of_pixel": 0.099
+    },
+    "error_bars": "slightly too large (conservative)"
+   },
+   "field_stars": {
+    "counts": {
+     "in_file": 9,
+     "scored": 6,
+     "reference": 3,
+     "blended": 0,
+     "no_usable_visit": 0
+    },
+    "recovered_by_g": {
+     "G < 14": {
+      "recovered": 2,
+      "total": 2
+     },
+     "G 14-16": {
+      "recovered": 4,
+      "total": 4
+     },
+     "G 16-17": {
+      "recovered": 3,
+      "total": 3
+     }
+    },
+    "pulls_scored": {
+     "n": 48,
+     "within_1sigma": 0.562,
+     "within_2sigma": 0.917,
+     "within_3sigma": 1.0,
+     "mean_pull": 0.376,
+     "rms_pull": 1.145
+    },
+    "pulls_reference": {
+     "n": 24,
+     "within_1sigma": 0.542,
+     "within_2sigma": 0.958,
+     "within_3sigma": 0.958,
+     "mean_pull": -0.58,
+     "rms_pull": 1.212
+    },
+    "error_bars": "slightly too small (real scatter is about 1.1x the error bar)",
+    "agreement_counts": {
+     "agrees": 5,
+     "tension": 1,
+     "disagrees": 0
+    },
+    "disagreeing": [],
+    "objects": [
+     {
+      "name": "Gaia DR3 6412596458823395328",
+      "agreement": "agrees",
+      "chi2": 8.71,
+      "n_visits": 4,
+      "dof": 8,
+      "p_value": 0.3673,
+      "g_mag": 12.95,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 6412593435166417536",
+      "agreement": "agrees",
+      "chi2": 5.37,
+      "n_visits": 4,
+      "dof": 8,
+      "p_value": 0.7172,
+      "g_mag": 13.93,
+      "role": "reference"
+     },
+     {
+      "name": "Gaia DR3 6412596390103981824",
+      "agreement": "agrees",
+      "chi2": 6.76,
+      "n_visits": 4,
+      "dof": 8,
+      "p_value": 0.5622,
+      "g_mag": 15.34,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 6412594672117008128",
+      "agreement": "agrees",
+      "chi2": 13.78,
+      "n_visits": 4,
+      "dof": 8,
+      "p_value": 0.0875,
+      "g_mag": 15.73,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 6412596183945494144",
+      "agreement": "agrees",
+      "chi2": 5.72,
+      "n_visits": 4,
+      "dof": 8,
+      "p_value": 0.6783,
+      "g_mag": 15.77,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 6412595973491218944",
+      "agreement": "agrees",
+      "chi2": 11.92,
+      "n_visits": 4,
+      "dof": 8,
+      "p_value": 0.1548,
+      "g_mag": 15.81,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 6412594706476744832",
+      "agreement": "tension",
+      "chi2": 16.06,
+      "n_visits": 4,
+      "dof": 8,
+      "p_value": 0.0416,
+      "g_mag": 16.05,
+      "role": "scored"
+     },
+     {
+      "name": "Gaia DR3 6412594397239098752",
+      "agreement": "agrees",
+      "chi2": 8.23,
+      "n_visits": 4,
+      "dof": 8,
+      "p_value": 0.4113,
+      "g_mag": 16.2,
+      "role": "reference"
+     },
+     {
+      "name": "Gaia DR3 6412594362879363328",
+      "agreement": "tension",
+      "chi2": 21.63,
+      "n_visits": 4,
+      "dof": 8,
+      "p_value": 0.0057,
+      "g_mag": 16.41,
+      "role": "reference"
+     }
+    ]
+   }
+  },
+  {
+   "target_key": "barnards_star",
+   "name": "Barnard's Star",
+   "field_size_px": 51,
+   "verdict": "moves_as_expected",
+   "motion": {
+    "measured_mas_yr": {
+     "ra": -1369,
+     "ra_err": 248,
+     "dec": 10322,
+     "dec_err": 211
+    },
+    "catalog_mas_yr": {
+     "ra": -802,
+     "ra_err": null,
+     "dec": 10362,
+     "dec_err": null,
+     "source": "Gaia DR3"
+    },
+    "catalog_error_included": false,
+    "z": {
+     "ra": -2.29,
+     "dec": -0.19
+    },
+    "chi2_2dof": 5.26,
+    "p_value": 0.072,
+    "agreement": "agrees",
+    "speed_measured_mas_yr": 10412,
+    "speed_catalog_mas_yr": 10393,
+    "speed_difference_percent": 0.2,
+    "baseline_years": 0.98,
+    "shift_over_baseline_px": 1.66
+   },
+   "target_position": {
+    "n_images": 359,
+    "n_images_measured": 106,
+    "n_images_measured_saturated": 106,
+    "image_pulls": {
+     "n": 212,
+     "within_1sigma": 0.623,
+     "within_2sigma": 0.915,
+     "within_3sigma": 0.972,
+     "mean_pull": -0.173,
+     "rms_pull": 1.345
+    },
+    "random_part": {
+     "n": 212,
+     "within_1sigma": 0.811,
+     "within_2sigma": 0.925,
+     "within_3sigma": 0.976,
+     "mean_pull": 0.0,
+     "rms_pull": 1.13
+    },
+    "visit_pulls": {
+     "n": 6,
+     "within_1sigma": 0.0,
+     "within_2sigma": 0.167,
+     "within_3sigma": 0.333,
+     "mean_pull": -0.636,
+     "rms_pull": 3.435
+    },
+    "visit_pulls_offset_removed": {
+     "n": 6,
+     "within_1sigma": 0.0,
+     "within_2sigma": 0.333,
+     "within_3sigma": 0.5,
+     "mean_pull": -0.024,
+     "rms_pull": 3.322
+    },
+    "constant_offset": {
+     "px": [
+      -0.019,
+      -0.002
+     ],
+     "arcsec": 0.12,
+     "fraction_of_pixel": 0.019
+    },
+    "error_bars": "slightly too small (real scatter is about 1.1x the error bar)"
+   },
+   "field_stars": null
+  },
+  {
+   "target_key": "rw_aurigae",
+   "name": "RW Aurigae",
+   "field_size_px": 51,
+   "verdict": "brightness_changes",
+   "motion": {
+    "measured_mas_yr": {
+     "ra": 492,
+     "ra_err": 336,
+     "dec": 33,
+     "dec_err": 51
+    },
+    "catalog_mas_yr": {
+     "ra": 5,
+     "ra_err": null,
+     "dec": -25,
+     "dec_err": null,
+     "source": "Gaia DR3"
+    },
+    "catalog_error_included": false,
+    "z": {
+     "ra": 1.45,
+     "dec": 1.14
+    },
+    "chi2_2dof": 3.39,
+    "p_value": 0.183,
+    "agreement": "agrees",
+    "speed_measured_mas_yr": 493,
+    "speed_catalog_mas_yr": 25,
+    "speed_difference_percent": null,
+    "baseline_years": 1.0,
+    "shift_over_baseline_px": 0.0
+   },
+   "target_position": {
+    "n_images": 335,
+    "n_images_measured": 305,
+    "n_images_measured_saturated": 287,
+    "image_pulls": {
+     "n": 610,
+     "within_1sigma": 0.433,
+     "within_2sigma": 0.656,
+     "within_3sigma": 0.777,
+     "mean_pull": 1.454,
+     "rms_pull": 2.472
+    },
+    "random_part": {
+     "n": 610,
+     "within_1sigma": 0.526,
+     "within_2sigma": 0.834,
+     "within_3sigma": 0.933,
+     "mean_pull": -0.0,
+     "rms_pull": 1.581
+    },
+    "visit_pulls": {
+     "n": 6,
+     "within_1sigma": 0.167,
+     "within_2sigma": 0.167,
+     "within_3sigma": 0.5,
+     "mean_pull": 3.619,
+     "rms_pull": 4.083
+    },
+    "visit_pulls_offset_removed": {
+     "n": 6,
+     "within_1sigma": 0.333,
+     "within_2sigma": 0.667,
+     "within_3sigma": 1.0,
+     "mean_pull": 0.0,
+     "rms_pull": 1.664
+    },
+    "constant_offset": {
+     "px": [
+      0.091,
+      0.017
+     ],
+     "arcsec": 0.57,
+     "fraction_of_pixel": 0.092
+    },
+    "error_bars": "slightly too small (real scatter is about 1.6x the error bar)"
+   },
+   "field_stars": null
+  },
+  {
+   "target_key": "wise_0855",
+   "name": "WISE 0855",
+   "field_size_px": 51,
+   "verdict": "moves_as_expected",
+   "motion": {
+    "measured_mas_yr": {
+     "ra": -8350,
+     "ra_err": 1174,
+     "dec": 1024,
+     "dec_err": 570
+    },
+    "catalog_mas_yr": {
+     "ra": -8124,
+     "ra_err": null,
+     "dec": 673,
+     "dec_err": null,
+     "source": "Kirkpatrick et al. 2021 (Spitzer)"
+    },
+    "catalog_error_included": false,
+    "z": {
+     "ra": -0.19,
+     "dec": 0.62
+    },
+    "chi2_2dof": 0.42,
+    "p_value": 0.812,
+    "agreement": "agrees",
+    "speed_measured_mas_yr": 8413,
+    "speed_catalog_mas_yr": 8152,
+    "speed_difference_percent": 3.2,
+    "baseline_years": 0.99,
+    "shift_over_baseline_px": 1.31
+   },
+   "target_position": {
+    "n_images": 258,
+    "n_images_measured": 2,
+    "n_images_measured_saturated": 0,
+    "image_pulls": {
+     "n": 4,
+     "within_1sigma": 0.5,
+     "within_2sigma": 1.0,
+     "within_3sigma": 1.0,
+     "mean_pull": 0.196,
+     "rms_pull": 1.059
+    },
+    "random_part": {
+     "n": 4,
+     "within_1sigma": 1.0,
+     "within_2sigma": 1.0,
+     "within_3sigma": 1.0,
+     "mean_pull": 0.048,
+     "rms_pull": 0.541
+    },
+    "visit_pulls": {
+     "n": 6,
+     "within_1sigma": 0.667,
+     "within_2sigma": 0.833,
+     "within_3sigma": 1.0,
+     "mean_pull": -0.125,
+     "rms_pull": 1.202
+    },
+    "visit_pulls_offset_removed": {
+     "n": 6,
+     "within_1sigma": 0.667,
+     "within_2sigma": 1.0,
+     "within_3sigma": 1.0,
+     "mean_pull": 0.082,
+     "rms_pull": 0.95
+    },
+    "constant_offset": {
+     "px": [
+      0.075,
+      -0.045
+     ],
+     "arcsec": 0.54,
+     "fraction_of_pixel": 0.087
+    },
+    "error_bars": null
+   },
+   "field_stars": null
+  },
+  {
+   "target_key": "r_draconis",
+   "name": "R Draconis",
+   "field_size_px": 51,
+   "verdict": "saturated",
+   "motion": {
+    "agreement": "not_measurable",
+    "reason": "saturated",
+    "catalog_mas_yr": {
+     "ra": -21,
+     "dec": 6,
+     "source": "Gaia DR3"
+    }
+   },
+   "target_position": {
+    "n_images": 2493,
+    "n_images_measured": 3,
+    "n_images_measured_saturated": 3,
+    "image_pulls": {
+     "n": 6,
+     "within_1sigma": 0.167,
+     "within_2sigma": 0.333,
+     "within_3sigma": 0.667,
+     "mean_pull": -0.56,
+     "rms_pull": 3.57
+    },
+    "random_part": {
+     "n": 4,
+     "within_1sigma": 0.0,
+     "within_2sigma": 0.0,
+     "within_3sigma": 0.0,
+     "mean_pull": 0.0,
+     "rms_pull": 3.252
+    },
+    "visit_pulls": {
+     "n": 4,
+     "within_1sigma": 0.0,
+     "within_2sigma": 0.5,
+     "within_3sigma": 0.75,
+     "mean_pull": -0.546,
+     "rms_pull": 2.766
+    },
+    "visit_pulls_offset_removed": {
+     "n": 4,
+     "within_1sigma": 0.5,
+     "within_2sigma": 1.0,
+     "within_3sigma": 1.0,
+     "mean_pull": -0.146,
+     "rms_pull": 0.973
+    },
+    "constant_offset": {
+     "px": [
+      -0.126,
+      0.077
+     ],
+     "arcsec": 0.91,
+     "fraction_of_pixel": 0.148
+    },
+    "error_bars": null
+   },
+   "field_stars": null
+  }
+ ]
+}
