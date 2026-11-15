@@ -14,6 +14,7 @@ RUN pip install --no-cache-dir -r requirements.txt -r server_requirements.txt
 COPY --chown=user spx ./spx
 COPY --chown=user scripts ./scripts
 COPY --chown=user server ./server
+COPY --chown=user scoring ./scoring
 
 EXPOSE 7860
 CMD ["python", "-m", "uvicorn", "server.app:app", "--host", "0.0.0.0", "--port", "7860"]

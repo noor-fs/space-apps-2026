@@ -5,11 +5,12 @@
 set -e
 space="$1"
 [ -n "$space" ] || { echo "usage: sh server/make_space.sh <space folder>"; exit 1; }
-rm -rf "$space/spx" "$space/scripts" "$space/server"
-mkdir -p "$space/scripts" "$space/server"
+rm -rf "$space/spx" "$space/scripts" "$space/server" "$space/scoring"
+mkdir -p "$space/scripts" "$space/server" "$space/scoring"
 cp -r spx "$space/spx"
 cp scripts/build_target.py "$space/scripts/"
 cp server/app.py "$space/server/"
+cp scoring/build_scoreboard.py "$space/scoring/"
 cp server/Dockerfile "$space/Dockerfile"
 cp requirements.txt "$space/requirements.txt"
 cp server/requirements.txt "$space/server_requirements.txt"

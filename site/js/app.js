@@ -183,6 +183,13 @@ const loadFieldScores = (key) => fetchJSONFirst("scoreboard.json")
   .then((s) => new Map(((s?.targets || []).find((t) => t.target_key === key)?.field_stars?.objects || []).map((o) => [o.name, o])))
   .catch(() => new Map());
 
+/** The same per-star agreement for a server-built field, from its own score.json (same checks,
+ *  run by the server after each build). Not cached: the full build replaces the preview's file. */
+const loadLiveFieldScores = (key) => fetch(`${LIVE_DATA}/${key}/score.json`)
+  .then((r) => (r.ok ? r.json() : null))
+  .then((s) => new Map((s?.target?.field_stars?.objects || []).map((o) => [o.name, o])))
+  .catch(() => new Map());
+
 /** One CSV line -> [wavelength, flux, source]. The source may be quoted and contain commas. */
 function parseSpectrumLine(line) {
   const a = line.indexOf(","), b = line.indexOf(",", a + 1);
@@ -1643,7 +1650,7 @@ async function openFov(fov, opts, token) {
   const base = `${targetBase.get(state.target) || REAL_DIR}/${state.target}/fov${fov}`;
   const [objs, scores] = await Promise.all([
     fetchJSON(`${base}/objects.json`).then((d) => (Array.isArray(d?.objects) ? d.objects : [])).catch(() => []),
-    isLiveKey(state.target) ? new Map() : loadFieldScores(state.target),
+    isLiveKey(state.target) ? loadLiveFieldScores(state.target) : loadFieldScores(state.target),
   ]);
   if (token !== loadToken) return;
   fieldStars = objs;

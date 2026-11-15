@@ -7,12 +7,15 @@ Endpoints
     GET /api/lookup?q=<name or coordinates>&size=51   start (or find) a build; returns its status
     GET /api/status/<key>                             status of one field
     GET /data/<key>/...                               the field's files, same layout as data/<key>/
+                                                      (plus score.json, see score_field)
 
 Each field is built twice: a quick preview from a limited number of frames spread over every
 visit and detector, then the full build. The site can show the preview while the full build runs;
 the files switch over only when the full build is complete. Builds run one at a time, each in its
 own process, so a build that runs out of memory can't take the server down with it.
 """
+import importlib.util
+import json
 import os
 import re
 import shutil
@@ -31,6 +34,11 @@ REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
 
 from spx.field import parse_coordinates  # noqa: E402
+
+# Noor's scoring (scoring/build_scoreboard.py), loaded from its file and used unchanged.
+_spec = importlib.util.spec_from_file_location("build_scoreboard", REPO / "scoring" / "build_scoreboard.py")
+scoreboard = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(scoreboard)
 
 WORK = Path(os.environ.get("SPX_WORK_DIR", REPO / "server_work")).resolve()
 DATA = WORK / "data"
@@ -211,6 +219,7 @@ def run_build(job):
     built = stage_root / "data" / job.key
     paused, job.pause_requested = job.pause_requested, False
     if process.returncode == 0 and (built / "fields.json").exists():
+        score_field(built.parent, job.key, job.phase)
         swap_in(built, DATA / job.key)
         shutil.rmtree(stage_root, ignore_errors=True)
         complete = job.phase == "full" or (job.frames_found is not None and job.frames_found <= (budget or 0))
@@ -241,6 +250,25 @@ def run_build(job):
         job.state, job.stage, job.error = "preview", "full build failed", message
     else:
         job.state, job.stage, job.error = "failed", "failed", message
+
+
+def score_field(data_dir, key, phase):
+    """Score a finished field with Noor's checks and save <key>/score.json next to its files.
+
+    The entry is the same as one of scoreboard.json's targets[] (target motion vs catalog, target
+    error bars, every Gaia field star). Scoring only reads the field's JSON files, so it takes
+    well under a second. A scoring error never fails the build: the field just has no score.json.
+    """
+    try:
+        scoreboard.DATA = Path(data_dir)  # score_target reads DATA/<key>/; one build runs at a time
+        entry, _ = scoreboard.score_target(key)
+        if entry is None:
+            return
+        score = {"generated_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                 "build": phase, "scope": "this field only", "target": entry}
+        (Path(data_dir) / key / "score.json").write_text(json.dumps(score, indent=1) + "\n", encoding="utf-8")
+    except Exception as error:  # noqa: BLE001
+        print(f"scoring {key} failed: {error!r}", flush=True)
 
 
 def read_progress(job, line, budget):
@@ -299,10 +327,12 @@ def evict_old_fields(keep):
 
 
 def restore_jobs():
-    """After a restart, fields already on disk are served as finished."""
+    """After a restart, fields already on disk are served as finished (and scored, if built before scoring was added)."""
     for folder in DATA.glob("*"):
         if (folder / "fields.json").exists():
             jobs[folder.name] = Job(folder.name, folder.name, [], SIZES[0], state="done", stage="done", phase="full")
+            if not (folder / "score.json").exists():
+                score_field(DATA, folder.name, "full")
 
 
 app = FastAPI(title="SPHEREx live lookup")
